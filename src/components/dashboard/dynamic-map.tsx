@@ -1,16 +1,11 @@
-'use client';
 
-import { memo } from 'react';
 import type { Incident } from '@/lib/types';
-import MapWrapper from './map-wrapper';
 
-interface DynamicMapProps {
-  incidents: Incident[];
-  onMarkerClick: (incident: Incident) => void;
-}
+// This file is no longer used and can be deleted.
+// The logic has been moved to incident-map.tsx for stability.
 
-const DynamicMap = ({ incidents, onMarkerClick }: DynamicMapProps) => {
-  return <MapWrapper incidents={incidents} onMarkerClick={onMarkerClick} />;
+const DynamicMap = ({ incidents, onMarkerClick }: { incidents: Incident[], onMarkerClick: (incident: Incident) => void}) => {
+  return null;
 };
 
-export default memo(DynamicMap);
+export default DynamicMap;

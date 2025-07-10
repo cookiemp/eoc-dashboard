@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { Incident } from '@/lib/types';
 
-const DynamicMap = dynamic(() => import('@/components/dashboard/dynamic-map'), {
+const MapWrapper = dynamic(() => import('@/components/dashboard/map-wrapper'), {
   loading: () => <Skeleton className="w-full h-[400px] rounded-lg" />,
   ssr: false,
 });
@@ -46,7 +46,7 @@ const IncidentMap = ({ incidents }: IncidentMapProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="h-[400px]">
-          <DynamicMap incidents={incidents} onMarkerClick={handleMarkerClick} />
+          <MapWrapper incidents={incidents} onMarkerClick={handleMarkerClick} />
         </CardContent>
       </Card>
 
