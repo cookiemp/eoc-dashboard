@@ -6,7 +6,7 @@ import L from 'leaflet';
 
 interface MapWrapperProps {
   incidents: IncidentWithId[];
-  onMarkerClick: (incident: IncidentWithId) => void;
+  onMarkerClick: (incident: IncidentWithId, map: L.Map) => void;
 }
 
 const createIncidentIcon = (color: string) => {
@@ -75,12 +75,17 @@ const MapWrapper = ({ incidents, onMarkerClick }: MapWrapperProps) => {
         </div>
       `;
         
-      const marker = L.marker(position, { icon })
-        .addTo(map)
-        .bindTooltip(tooltipContent)
-        .on('click', () => {
-           onMarkerClick(incident);
-        });
+      const marker = L.marker(position, { icon }).addTo(map);
+
+      // Bind tooltip for hover effect, but don't make it sticky on click
+      marker.bindTooltip(tooltipContent, { sticky: false });
+
+      // Handle click event separately to call our custom handler
+      marker.on('click', () => {
+        // Close any open tooltips before calling the handler to avoid overlap
+        marker.closeTooltip();
+        onMarkerClick(incident, map);
+      });
       
       markersRef.current.push(marker);
     });

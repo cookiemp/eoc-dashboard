@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Globe } from 'lucide-react';
 import type { IncidentWithId } from '@/services/incident-service';
 import IncidentDossierDialog from './incident-dossier-dialog';
+import type L from 'leaflet';
 
 const MapWithNoSSR = dynamic(() => import('@/components/dashboard/map-wrapper'), {
   ssr: false,
@@ -20,8 +21,10 @@ interface IncidentMapProps {
 const IncidentMap = ({ incidents }: IncidentMapProps) => {
   const [selectedIncident, setSelectedIncident] = useState<IncidentWithId | null>(null);
 
-  const handleMarkerClick = useCallback((incident: IncidentWithId) => {
+  const handleMarkerClick = useCallback((incident: IncidentWithId, map: L.Map) => {
     setSelectedIncident(incident);
+    // Pan the map to the marker's location
+    map.panTo([incident.latitude, incident.longitude]);
   }, []);
 
   const handleDialogClose = useCallback(() => {
