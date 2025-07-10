@@ -70,25 +70,25 @@ const getWeatherFlow = ai.defineFlow(
     outputSchema: GetWeatherForCitiesOutputSchema,
   },
   async (input) => {
-    const weatherResponses = await Promise.all(
-      input.cities.map((city) =>
-        ai.generate({
-          prompt: `What is the current weather in ${city}?`,
-          tools: [getCurrentWeather],
-          model: 'googleai/gemini-2.5-flash',
-        })
-      )
+    const weatherPromises = input.cities.map((city) =>
+      ai.generate({
+        prompt: `What is the current weather in ${city}?`,
+        tools: [getCurrentWeather],
+        model: 'googleai/gemini-pro',
+      })
     );
 
-    const weatherData = await Promise.all(weatherResponses.map(async (res) => {
-        // FIX: The correct property is toolResponse, not toolRequest.
-        const toolResponse = res.toolResponse;
-        if (toolResponse) {
-            return toolResponse as z.infer<typeof WeatherSchema>;
-        }
-        // Fallback or error handling if the tool wasn't called
-        return null;
-    }));
+    const weatherResponses = await Promise.all(weatherPromises);
+
+    const weatherData = weatherResponses.map((res) => {
+      // FIX: The correct property is toolResponse.output
+      const toolResponse = res.toolResponse;
+      if (toolResponse) {
+          return toolResponse.output as z.infer<typeof WeatherSchema>;
+      }
+      // Fallback or error handling if the tool wasn't called
+      return null;
+    });
 
     return { weather: weatherData.filter(Boolean) as z.infer<typeof WeatherSchema>[] };
   }
