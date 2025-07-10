@@ -37,6 +37,19 @@ const GetWeatherForCitiesOutputSchema = z.object({
 });
 export type GetWeatherForCitiesOutput = z.infer<typeof GetWeatherForCitiesOutputSchema>;
 
+// This is the direct function that gets the weather.
+// We can call this directly without needing the LLM.
+async function fetchWeatherForCity(city: string): Promise<z.infer<typeof WeatherSchema>> {
+  // In a real application, this would call a weather API.
+  // For now, we'll use our mock data.
+  const cityData = mockWeatherData[city] || { temperature: 20, condition: 'Partly Cloudy' };
+  return {
+    city: city,
+    ...cityData,
+  };
+}
+
+
 const getCurrentWeather = ai.defineTool(
   {
     name: 'getCurrentWeather',
@@ -46,15 +59,7 @@ const getCurrentWeather = ai.defineTool(
     }),
     outputSchema: WeatherSchema,
   },
-  async (input) => {
-    // In a real application, this would call a weather API.
-    // For now, we'll use our mock data.
-    const cityData = mockWeatherData[input.city] || { temperature: 20, condition: 'Partly Cloudy' };
-    return {
-      city: input.city,
-      ...cityData,
-    };
-  }
+  async (input) => fetchWeatherForCity(input.city)
 );
 
 export async function getWeatherForCities(
@@ -70,24 +75,14 @@ const getWeatherFlow = ai.defineFlow(
     outputSchema: GetWeatherForCitiesOutputSchema,
   },
   async (input) => {
+    // Instead of making N calls to the LLM, we make N calls to our direct function.
+    // This is much more efficient and avoids rate limiting.
     const weatherPromises = input.cities.map((city) =>
-      ai.generate({
-        prompt: `What is the current weather in ${city}?`,
-        tools: [getCurrentWeather],
-      })
+      fetchWeatherForCity(city)
     );
 
-    const weatherResponses = await Promise.all(weatherPromises);
+    const weatherData = await Promise.all(weatherPromises);
 
-    const weatherData = weatherResponses.map((res) => {
-      const toolResponse = res.toolResponse;
-      if (toolResponse) {
-          return toolResponse.output as z.infer<typeof WeatherSchema>;
-      }
-      // Fallback or error handling if the tool wasn't called
-      return null;
-    });
-
-    return { weather: weatherData.filter(Boolean) as z.infer<typeof WeatherSchema>[] };
+    return { weather: weatherData };
   }
 );
