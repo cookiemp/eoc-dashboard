@@ -30,7 +30,7 @@ export async function GET() {
     const articles: NewsArticle[] = (data.data || []).map((item: any) => {
       const fields = item.fields;
       
-      // More robust snippet creation
+      // More robust snippet creation based on documentation review
       let snippet = 'No Snippet Available';
       if (fields.body) {
          // Take the first 200 characters and remove any HTML tags for a clean preview
@@ -41,7 +41,8 @@ export async function GET() {
       }
 
       return {
-        id: item.id || Math.random().toString(), // Add a fallback for ID
+        // According to docs, `id` and `href` are top-level, others are in `fields`.
+        id: item.id || Math.random().toString(),
         title: fields.title || 'No Title',
         source: fields.source?.[0]?.shortname || 'ReliefWeb',
         snippet: snippet,
