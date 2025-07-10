@@ -6,15 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Globe } from 'lucide-react';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { Incident } from '@/lib/types';
+import { Button } from '../ui/button';
 
 const MapWithNoSSR = dynamic(() => import('@/components/dashboard/map-wrapper'), {
   ssr: false,
@@ -51,19 +50,16 @@ const IncidentMap = ({ incidents }: IncidentMapProps) => {
         </CardContent>
       </Card>
 
-      <AlertDialog open={!!selectedIncident} onOpenChange={(open) => !open && handleDialogClose()}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{selectedIncident?.title}</AlertDialogTitle>
-            <AlertDialogDescription>
+      <Dialog open={!!selectedIncident} onOpenChange={(open) => !open && handleDialogClose()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedIncident?.title}</DialogTitle>
+            <DialogDescription>
               {selectedIncident?.description || "No further details available for this incident."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={handleDialogClose}>Close</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
