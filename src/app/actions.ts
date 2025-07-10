@@ -1,7 +1,8 @@
 'use server';
 
-import { summarizeIncidentData, type SummarizeIncidentDataInput } from '@/ai/flows/summarize-incident-data';
+import { summarizeIncidentData, type SummarizeIncidentDataOutput } from '@/ai/flows/summarize-incident-data';
 import { extractIncidentsFromNews } from '@/ai/flows/extract-incidents-from-news-flow';
+import { getNewsArticles as getNewsArticlesFlow, type GetNewsArticlesInput, type GetNewsArticlesOutput } from '@/ai/flows/get-news-articles-flow';
 import { addIncidents, getIncidents, IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
@@ -38,15 +39,20 @@ async function writeSummaryCache(data: SummaryCache): Promise<void> {
   }
 }
 
-export async function getSummary(input: SummarizeIncidentDataInput) {
+export async function getSummary(input: { articles: NewsArticle[] }) {
   const today = new Date().toISOString().split('T')[0];
   
   try {
     const cache = await readSummaryCache();
 
-    // If a valid summary for today exists, return it immediately.
+    // Prevent re-summarizing if we already have one for today
     if (cache.summary && cache.date === today) {
       return cache.summary;
+    }
+
+    // Don't generate a summary if there are no articles
+    if (!input.articles || input.articles.length === 0) {
+      return { summary: "No articles available to summarize." };
     }
 
     // Otherwise, generate a new summary.
@@ -70,6 +76,11 @@ export async function getSummary(input: SummarizeIncidentDataInput) {
  */
 export async function processNewsIntoIncidents(input: { articles: NewsArticle[] }): Promise<void> {
   try {
+    // Only proceed if there are articles to process
+    if (!input.articles || input.articles.length === 0) {
+      return;
+    }
+
     const { incidents: extractedIncidents } = await extractIncidentsFromNews(input);
 
     if (extractedIncidents && extractedIncidents.length > 0) {
@@ -92,5 +103,17 @@ export async function getLatestIncidents(): Promise<IncidentWithId[]> {
   } catch (error) {
     console.error('Error fetching latest incidents:', error);
     return [];
+  }
+}
+
+/**
+ * Fetches news articles using the Genkit flow.
+ */
+export async function getNewsArticles(input: GetNewsArticlesInput): Promise<GetNewsArticlesOutput> {
+  try {
+    return await getNewsArticlesFlow(input);
+  } catch (error) {
+    console.error(`Error fetching '${input.category}' news:`, error);
+    return { articles: [] }; // Return empty array on error
   }
 }

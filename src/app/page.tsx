@@ -6,37 +6,49 @@ import IncidentMap from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
 import WeatherAlerts from "@/components/dashboard/weather-alerts";
 import NewsFeed from "@/components/dashboard/news-feed";
-import { getLatestIncidents, processNewsIntoIncidents } from "@/app/actions";
-import { humanitarianNews, generalNews } from "@/lib/mock-data";
-import type { Incident } from '@/lib/types';
-import { Newspaper } from 'lucide-react';
+import { getLatestIncidents, processNewsIntoIncidents, getNewsArticles } from "@/app/actions";
+import type { IncidentWithId } from '@/services/incident-service';
+import type { NewsArticle } from '@/lib/types';
+import { Newspaper, BookHeart } from 'lucide-react';
 
 export default function Home() {
-  const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [loadingIncidents, setLoadingIncidents] = useState(true);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [incidents, setIncidents] = useState<IncidentWithId[]>([]);
+  const [humanitarianNews, setHumanitarianNews] = useState<NewsArticle[]>([]);
+  const [generalNews, setGeneralNews] = useState<NewsArticle[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAndProcessData = async () => {
-      setLoadingIncidents(true);
-      setIsProcessing(true);
+      setLoading(true);
       try {
-        // Step 1: Process the latest news to extract and store incidents.
-        // This action now encapsulates the AI extraction and storage logic.
-        await processNewsIntoIncidents({ articles: humanitarianNews });
+        // Step 1: Fetch news articles from our new AI flow.
+        const [hNews, gNews] = await Promise.all([
+          getNewsArticles({ category: 'humanitarian' }),
+          getNewsArticles({ category: 'general' })
+        ]);
+
+        const humanitarianArticles = hNews.articles || [];
+        setHumanitarianNews(humanitarianArticles);
+        setGeneralNews(gNews.articles || []);
         
-        // Step 2: Fetch the latest list of incidents from the persistent store.
+        // Step 2: Process the new humanitarian news to extract and store incidents.
+        await processNewsIntoIncidents({ articles: humanitarianArticles });
+        
+        // Step 3: Fetch the latest list of incidents from the persistent store.
         const latestIncidents = await getLatestIncidents();
         
         if (latestIncidents) {
           setIncidents(latestIncidents);
         }
+
       } catch (error) {
-        console.error("Error processing or fetching incidents:", error);
-        setIncidents([]); // Set to empty on error
+        console.error("Error fetching or processing data:", error);
+        // Set to empty on error to avoid crashing the UI
+        setIncidents([]);
+        setHumanitarianNews([]);
+        setGeneralNews([]);
       } finally {
-        setLoadingIncidents(false);
-        setIsProcessing(false);
+        setLoading(false);
       }
     };
 
@@ -51,7 +63,7 @@ export default function Home() {
           <div className="lg:col-span-4">
             <IncidentMap incidents={incidents} />
           </div>
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-4">
              <AiSummary articles={humanitarianNews} />
           </div>
           <div className="lg:col-span-2">
@@ -59,16 +71,18 @@ export default function Home() {
           </div>
           <div className="lg:col-span-2">
             <NewsFeed 
-              icon={<Newspaper className="h-5 w-5 text-primary" />} 
+              icon={<BookHeart className="h-5 w-5 text-primary" />} 
               title="Humanitarian News" 
-              items={humanitarianNews} 
+              items={humanitarianNews}
+              isLoading={loading}
             />
           </div>
           <div className="lg:col-span-2">
             <NewsFeed 
               icon={<Newspaper className="h-5 w-5 text-primary" />} 
-              title="Ethiopia News" 
-              items={generalNews} 
+              title="General Ethiopia News" 
+              items={generalNews}
+              isLoading={loading}
             />
           </div>
         </div>

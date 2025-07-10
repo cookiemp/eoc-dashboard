@@ -1,0 +1,47 @@
+[
+  {
+    "color": "#22c55e",
+    "description": "International aid agencies have started distributing food aid to affected populations in the Tigray region.",
+    "latitude": 13.5,
+    "longitude": 39.45,
+    "title": "Food Aid Distribution in Tigray",
+    "id": "1752150935097-4oyul3p",
+    "addedAt": "2025-07-10T12:35:35.097Z"
+  },
+  {
+    "color": "#3b82f6",
+    "description": "Urgent action is needed as persistent drought conditions worsen the water shortage crisis in the Somali Region.",
+    "latitude": 9.35,
+    "longitude": 42.8,
+    "title": "Water Shortage in Somali Region",
+    "id": "1752150935097-xba5ywd",
+    "addedAt": "2025-07-10T12:35:35.097Z"
+  },
+  {
+    "color": "#22c55e",
+    "description": "Essential medical supplies were delivered to a displacement camp in the Amhara Region.",
+    "latitude": 11.59,
+    "longitude": 37.38,
+    "title": "Medical Supplies for Amhara Displacement Camp",
+    "id": "1752150935097-yyc1s9d",
+    "addedAt": "2025-07-10T12:35:35.097Z"
+  },
+  {
+    "color": "#ef4444",
+    "description": "Malnutrition rates among children are rising alarmingly in the Afar Region, prompting an urgent appeal for nutrition support.",
+    "latitude": 11.78,
+    "longitude": 41,
+    "title": "Rising Malnutrition in Afar",
+    "id": "1752150935097-on0cihl",
+    "addedAt": "2025-07-10T12:35:35.097Z"
+  },
+  {
+    "color": "#3b82f6",
+    "description": "Heavy rains have led to widespread flooding in the Gambela Region, forcing thousands of families to flee their homes.",
+    "latitude": 8.25,
+    "longitude": 34.58,
+    "title": "Flooding Displaces Thousands in Gambela",
+    "id": "1752150935097-xi58los",
+    "addedAt": "2025-07-10T12:35:35.097Z"
+  }
+]
