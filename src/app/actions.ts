@@ -146,7 +146,11 @@ export async function generateIncidentDossier(input: GenerateIncidentDossierInpu
  */
 export async function getWeatherForCitiesAction(input: { cities: string[] }): Promise<GetWeatherForCitiesOutput> {
   try {
-    return await getWeatherForCities(input);
+    const apiKey = process.env.OPENWEATHERMAP_API_KEY;
+    if (!apiKey) {
+      throw new Error('OpenWeatherMap API key is not configured.');
+    }
+    return await getWeatherForCities({ ...input, apiKey });
   } catch (error) {
     console.error('Error in getWeatherForCities action:', error);
     return { weather: [] };
