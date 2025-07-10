@@ -89,9 +89,10 @@ export const getWeatherForCities = ai.defineFlow(
     outputSchema: GetWeatherForCitiesOutputSchema,
   },
   async (input) => {
-    const weatherPromises = input.cities.map((city) => fetchWeatherForCity(city));
-
-    const weatherResults = await Promise.all(weatherPromises);
+    // Use Promise.all to wait for all weather fetches to complete.
+    const weatherResults = await Promise.all(
+      input.cities.map((city) => fetchWeatherForCity(city))
+    );
     
     // Filter out any null results from failed API calls
     const validWeatherData = weatherResults.filter(
