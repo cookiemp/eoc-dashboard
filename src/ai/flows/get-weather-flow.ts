@@ -29,7 +29,6 @@ const WeatherSchema = z.object({
 
 const GetWeatherForCitiesInputSchema = z.object({
   cities: z.array(z.string()).describe('A list of city names.'),
-  apiKey: z.string().describe('The OpenWeatherMap API key.'),
 });
 export type GetWeatherForCitiesInput = z.infer<typeof GetWeatherForCitiesInputSchema>;
 
@@ -41,10 +40,11 @@ export type GetWeatherForCitiesOutput = z.infer<typeof GetWeatherForCitiesOutput
 /**
  * Fetches the current weather for a single city using the OpenWeatherMap API.
  * @param city The name of the city.
- * @param apiKey The OpenWeatherMap API key.
  * @returns A promise that resolves to a WeatherAlert object or null if an error occurs.
  */
-async function fetchWeatherForCity(city: string, apiKey: string): Promise<WeatherAlert | null> {
+async function fetchWeatherForCity(city: string): Promise<WeatherAlert | null> {
+  const apiKey = process.env.OPENWEATHERMAP_API_KEY;
+
   if (!apiKey) {
     console.error('OpenWeatherMap API key is not provided.');
     return null;
@@ -89,9 +89,7 @@ export const getWeatherForCities = ai.defineFlow(
     outputSchema: GetWeatherForCitiesOutputSchema,
   },
   async (input) => {
-    const weatherPromises = input.cities.map((city) =>
-      fetchWeatherForCity(city, input.apiKey)
-    );
+    const weatherPromises = input.cities.map((city) => fetchWeatherForCity(city));
 
     const weatherResults = await Promise.all(weatherPromises);
     
