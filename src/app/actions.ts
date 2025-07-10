@@ -1,6 +1,7 @@
 'use server';
 
 import { summarizeIncidentData, type SummarizeIncidentDataInput } from '@/ai/flows/summarize-incident-data';
+import { getHealthAlerts } from '@/ai/flows/get-health-alerts-flow';
 import { revalidatePath } from 'next/cache';
 import fs from 'fs/promises';
 import path from 'path';
@@ -59,5 +60,16 @@ export async function getSummary(input: SummarizeIncidentDataInput) {
     console.error('Error in getSummary action:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
     return { error: `Failed to generate summary: ${errorMessage}` };
+  }
+}
+
+export async function fetchHealthAlerts() {
+  try {
+    const alerts = await getHealthAlerts();
+    return alerts;
+  } catch (error) {
+    console.error('Error fetching health alerts:', error);
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    return { error: `Failed to fetch health alerts: ${errorMessage}` };
   }
 }
