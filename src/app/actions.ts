@@ -119,7 +119,8 @@ export async function getNewsArticles(input: GetNewsArticlesInput): Promise<GetN
     return await getNewsArticlesFlow(input);
   } catch (error) {
     console.error(`Error fetching '${input.category}' news:`, error);
-    return { articles: [] }; // Return empty array on error
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    return { articles: [], error: `Failed to fetch news feed: ${errorMessage}` };
   }
 }
 
@@ -145,11 +146,12 @@ export async function generateIncidentDossier(input: GenerateIncidentDossierInpu
  * An action that fetches the weather by providing the required API key.
  */
 export async function getWeatherForCitiesAction(input: { cities: string[] }): Promise<GetWeatherForCitiesOutput> {
+  const apiKey = process.env.OPENWEATHERMAP_API_KEY;
+  if (!apiKey) {
+    // This case will be handled by the UI, which will show the API key error message.
+    return { weather: [] };
+  }
   try {
-    const apiKey = process.env.OPENWEATHERMAP_API_KEY;
-    if (!apiKey) {
-      throw new Error('OpenWeatherMap API key is not configured.');
-    }
     return await getWeatherForCities({ ...input, apiKey });
   } catch (error) {
     console.error('Error in getWeatherForCities action:', error);

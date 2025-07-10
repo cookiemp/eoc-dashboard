@@ -27,6 +27,7 @@ export type GetNewsArticlesInput = z.infer<typeof GetNewsArticlesInputSchema>;
 
 const GetNewsArticlesOutputSchema = z.object({
   articles: z.array(NewsArticleSchema),
+  error: z.string().optional(),
 });
 export type GetNewsArticlesOutput = z.infer<typeof GetNewsArticlesOutputSchema>;
 
@@ -54,23 +55,17 @@ const getNewsArticlesFlow = ai.defineFlow(
     const parser = new Parser();
     const feedUrl = 'https://reliefweb.int/rss.xml?country=76'; // ReliefWeb RSS feed for Ethiopia
 
-    try {
-      const feed = await parser.parseURL(feedUrl);
-      
-      const articles: NewsArticle[] = feed.items.slice(0, 10).map((item) => ({
-        id: item.guid || item.link || item.title!,
-        title: item.title || 'No Title',
-        source: 'ReliefWeb',
-        snippet: item.contentSnippet || item.content || 'No Snippet',
-        url: item.link || '',
-      }));
+    // Let errors propagate up to the action to be handled there.
+    const feed = await parser.parseURL(feedUrl);
+    
+    const articles: NewsArticle[] = feed.items.slice(0, 10).map((item) => ({
+      id: item.guid || item.link || item.title!,
+      title: item.title || 'No Title',
+      source: 'ReliefWeb',
+      snippet: item.contentSnippet || item.content || 'No Snippet',
+      url: item.link || '',
+    }));
 
-      return { articles };
-
-    } catch (error) {
-      console.error('Failed to fetch or parse RSS feed:', error);
-      // On error, return an empty array to avoid breaking the UI
-      return { articles: [] };
-    }
+    return { articles };
   }
 );

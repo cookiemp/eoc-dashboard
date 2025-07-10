@@ -19,21 +19,27 @@ export default function Home() {
   const [weatherData, setWeatherData] = useState<WeatherAlert[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingWeather, setLoadingWeather] = useState(true);
+  const [newsError, setNewsError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAndProcessData = async () => {
       setLoading(true);
+      setNewsError(null);
       try {
         const [hNews, gNews] = await Promise.all([
           getNewsArticles({ category: 'humanitarian' }),
           getNewsArticles({ category: 'general' })
         ]);
 
-        const humanitarianArticles = hNews.articles || [];
-        setHumanitarianNews(humanitarianArticles);
-        setGeneralNews(gNews.articles || []);
+        if (hNews.error) {
+          setNewsError(hNews.error);
+          setHumanitarianNews([]);
+        } else {
+          setHumanitarianNews(hNews.articles || []);
+          await processNewsIntoIncidents({ articles: hNews.articles || [] });
+        }
         
-        await processNewsIntoIncidents({ articles: humanitarianArticles });
+        setGeneralNews(gNews.articles || []);
         
         const latestIncidents = await getLatestIncidents();
         
@@ -43,6 +49,7 @@ export default function Home() {
 
       } catch (error) {
         console.error("Error fetching or processing news data:", error);
+        setNewsError("An unexpected error occurred while fetching news.");
         setIncidents([]);
         setHumanitarianNews([]);
         setGeneralNews([]);
@@ -92,6 +99,7 @@ export default function Home() {
               title="Humanitarian News" 
               items={humanitarianNews}
               isLoading={loading}
+              error={newsError}
             />
           </div>
           <div className="lg:col-span-2">
