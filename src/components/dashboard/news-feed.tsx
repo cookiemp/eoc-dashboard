@@ -13,7 +13,10 @@ const NewsFeed = ({ title, items }: NewsFeedProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Newspaper className="h-5 w-5" />
+          {title}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-72">
