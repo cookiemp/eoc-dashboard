@@ -28,6 +28,7 @@ const WeatherSchema = z.object({
 
 const GetWeatherForCitiesInputSchema = z.object({
   cities: z.array(z.string()).describe('A list of city names.'),
+  apiKey: z.string().describe('The OpenWeatherMap API key.'),
 });
 export type GetWeatherForCitiesInput = z.infer<typeof GetWeatherForCitiesInputSchema>;
 
@@ -39,12 +40,12 @@ export type GetWeatherForCitiesOutput = z.infer<typeof GetWeatherForCitiesOutput
 /**
  * Fetches the current weather for a single city using the OpenWeatherMap API.
  * @param city The name of the city.
+ * @param apiKey The OpenWeatherMap API key.
  * @returns A promise that resolves to a WeatherAlert object.
  */
-async function fetchWeatherForCity(city: string): Promise<WeatherAlert> {
-  const apiKey = process.env.OPENWEATHERMAP_API_KEY;
+async function fetchWeatherForCity(city: string, apiKey: string): Promise<WeatherAlert> {
   if (!apiKey) {
-    throw new Error('OpenWeatherMap API key is not configured in .env file.');
+    throw new Error('OpenWeatherMap API key is not provided.');
   }
 
   const coords = cityCoordinates[city];
@@ -57,6 +58,8 @@ async function fetchWeatherForCity(city: string): Promise<WeatherAlert> {
   try {
     const response = await fetch(url);
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Failed to fetch weather for ${city}. Status: ${response.status}`, errorText);
       throw new Error(`Failed to fetch weather for ${city}. Status: ${response.status}`);
     }
     const data = await response.json();
@@ -86,7 +89,7 @@ export async function getWeatherForCities(
 ): Promise<GetWeatherForCitiesOutput> {
   
   const weatherPromises = input.cities.map((city) =>
-    fetchWeatherForCity(city)
+    fetchWeatherForCity(city, input.apiKey)
   );
 
   const weatherData = await Promise.all(weatherPromises);
