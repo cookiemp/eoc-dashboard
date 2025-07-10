@@ -4,7 +4,7 @@ import AiSummary from "@/components/dashboard/ai-summary";
 import WeatherAlerts from "@/components/dashboard/weather-alerts";
 import NewsFeed from "@/components/dashboard/news-feed";
 import HealthAlerts from "@/components/dashboard/health-alerts";
-import { humanitarianNews, generalNews } from "@/lib/mock-data";
+import { humanitarianNews, generalNews, incidents } from "@/lib/mock-data";
 
 export default function Home() {
   return (
@@ -13,7 +13,7 @@ export default function Home() {
       <main className="flex-1 p-4 sm:p-6 md:p-8">
         <div className="grid gap-6 md:gap-8 grid-cols-1 lg:grid-cols-4">
           <div className="lg:col-span-4">
-            <IncidentMap />
+            <IncidentMap incidents={incidents} />
           </div>
           <div className="lg:col-span-2">
             <AiSummary articles={humanitarianNews} />

@@ -26,8 +26,8 @@ export const healthAlerts: HealthAlert[] = [
 ];
 
 export const incidents: Incident[] = [
-  { id: 1, title: 'Flood Warning', top: '48%', left: '52%', color: 'blue' },
-  { id: 2, title: 'Health Emergency', top: '65%', left: '80%', color: 'red' },
-  { id: 3, title: 'Conflict Zone', top: '25%', left: '60%', color: 'yellow' },
-  { id: 4, title: 'Displacement Camp', top: '70%', left: '45%', color: 'green' },
+  { id: 1, title: 'Flood Warning', description: 'Heavy rainfall has led to severe flooding in the Afar region. Major rivers have overflowed their banks, displacing thousands of families and disrupting agricultural activities. Emergency response teams are on site.', top: '48%', left: '52%', color: 'blue' },
+  { id: 2, title: 'Health Emergency', description: 'A significant health emergency has been declared in the Somali region due to a fast-spreading disease. Mobile clinics have been dispatched, but more medical supplies and personnel are urgently needed.', top: '65%', left: '80%', color: 'red' },
+  { id: 3, title: 'Conflict Zone', description: 'Reports of localized conflict in the northern Tigray region have been confirmed. Humanitarian access is currently restricted, raising concerns for the safety and well-being of the civilian population.', top: '25%', left: '60%', color: 'yellow' },
+  { id: 4, title: 'Displacement Camp', description: 'A new displacement camp has been established in the Oromia region to shelter families fleeing from drought-affected areas. The camp is in need of clean water, food, and sanitation facilities.', top: '70%', left: '45%', color: 'green' },
 ];

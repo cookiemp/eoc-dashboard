@@ -1,10 +1,15 @@
 'use client';
 
-import { incidents } from '@/lib/mock-data';
+import type { Incident } from '@/lib/types';
 import MapWrapper from './map-wrapper';
 
-const DynamicMap = () => {
-  return <MapWrapper incidents={incidents} />;
+interface DynamicMapProps {
+  incidents: Incident[];
+  onMarkerClick: (incident: Incident) => void;
+}
+
+const DynamicMap = ({ incidents, onMarkerClick }: DynamicMapProps) => {
+  return <MapWrapper incidents={incidents} onMarkerClick={onMarkerClick} />;
 };
 
 export default DynamicMap;

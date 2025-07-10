@@ -4,14 +4,9 @@ import { useEffect, useRef } from 'react';
 import type { Incident } from '@/lib/types';
 import L from 'leaflet';
 
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: '/marker-icon-2x.png',
-  iconUrl: '/marker-icon.png',
-  shadowUrl: '/marker-shadow.png',
-});
-
 interface MapWrapperProps {
   incidents: Incident[];
+  onMarkerClick: (incident: Incident) => void;
 }
 
 const createIncidentIcon = (color: string) => {
@@ -40,7 +35,7 @@ const createIncidentIcon = (color: string) => {
   });
 };
 
-const MapWrapper = ({ incidents }: MapWrapperProps) => {
+const MapWrapper = ({ incidents, onMarkerClick }: MapWrapperProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
 
@@ -63,7 +58,10 @@ const MapWrapper = ({ incidents }: MapWrapperProps) => {
         
         const icon = createIncidentIcon(incident.color);
         
-        L.marker(position, { icon }).addTo(map).bindTooltip(incident.title);
+        L.marker(position, { icon })
+         .addTo(map)
+         .bindTooltip(incident.title)
+         .on('click', () => onMarkerClick(incident));
       });
     }
 
@@ -73,7 +71,7 @@ const MapWrapper = ({ incidents }: MapWrapperProps) => {
         mapInstance.current = null;
       }
     };
-  }, [incidents]);
+  }, [incidents, onMarkerClick]);
 
   return <div ref={mapRef} style={{ height: '100%', width: '100%' }} />;
 };
