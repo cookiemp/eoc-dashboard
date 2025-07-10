@@ -10,8 +10,8 @@ export async function GET() {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
       },
-      // Revalidate every hour
-      next: { revalidate: 3600 }, 
+      // Do not cache the result of this fetch.
+      cache: 'no-store',
     });
 
     if (!response.ok) {
