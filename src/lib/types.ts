@@ -1,9 +1,3 @@
-export type WeatherAlert = {
-  city: string;
-  temperature: number;
-  condition: 'Sunny' | 'Rainy' | 'Stormy' | 'Windy';
-};
-
 export type NewsArticle = {
   id: string;
   title: string;

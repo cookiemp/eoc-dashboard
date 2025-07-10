@@ -6,38 +6,33 @@ import IncidentMap from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
 import WeatherAlerts from "@/components/dashboard/weather-alerts";
 import NewsFeed from "@/components/dashboard/news-feed";
-import { humanitarianNews, generalNews, incidents as initialIncidents } from "@/lib/mock-data";
+import { getIncidents } from '@/ai/flows/get-incidents-flow';
+import { humanitarianNews, generalNews } from "@/lib/mock-data";
 import type { Incident } from '@/lib/types';
-import { Card, CardContent } from '@/components/ui/card';
-import { Newspaper, ShieldAlert } from 'lucide-react';
+import { Newspaper } from 'lucide-react';
 
 export default function Home() {
-  const [incidents, setIncidents] = useState<Incident[]>(initialIncidents);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [loadingIncidents, setLoadingIncidents] = useState(true);
 
   useEffect(() => {
-    // Simulate a new incident appearing after 5 seconds
-    const timer = setTimeout(() => {
-      const newIncident: Incident = {
-        id: 5,
-        title: 'New: Food Security Alert',
-        description: 'A new report indicates potential food security issues in the southern regions due to delayed rains. Monitoring is in effect.',
-        latitude: 7.0,
-        longitude: 38.0,
-        color: '#8b5cf6', // A distinct purple color
-      };
-      
-      // Add the new incident to the list, ensuring no duplicates by ID
-      setIncidents(prevIncidents => {
-        if (prevIncidents.find(inc => inc.id === newIncident.id)) {
-          return prevIncidents;
+    const fetchIncidents = async () => {
+      setLoadingIncidents(true);
+      try {
+        const result = await getIncidents();
+        if (result.incidents) {
+          setIncidents(result.incidents);
         }
-        return [...prevIncidents, newIncident];
-      });
+      } catch (error) {
+        console.error("Error fetching incidents:", error);
+        // Optionally set some default incidents on error
+        setIncidents([]);
+      } finally {
+        setLoadingIncidents(false);
+      }
+    };
 
-    }, 5000);
-
-    // Cleanup the timer if the component unmounts
-    return () => clearTimeout(timer);
+    fetchIncidents();
   }, []);
 
   return (
