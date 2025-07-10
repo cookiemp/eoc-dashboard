@@ -16,7 +16,7 @@ const NewsArticleSchema = z.object({
   title: z.string().describe('A realistic, concise, and engaging headline for the news article.'),
   source: z.string().describe('A plausible news source or organization (e.g., "ReliefWeb", "Ethiopian News Agency").'),
   snippet: z.string().describe('A one or two-sentence summary of the article content.'),
-  url: z.string().url().describe('A plausible, well-formed URL for the news article.'),
+  url: z.string().describe('A plausible, well-formed URL for the news article.'),
 });
 
 const GetNewsArticlesInputSchema = z.object({
