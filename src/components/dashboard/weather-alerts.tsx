@@ -1,8 +1,10 @@
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { weatherAlerts } from '@/lib/mock-data';
-import { Sun, CloudRain, CloudLightning, Wind, Thermometer } from 'lucide-react';
+import { Sun, CloudRain, CloudLightning, Wind } from 'lucide-react';
 
-const conditionIcons = {
+const conditionIcons: { [key: string]: React.ReactNode } = {
   Sunny: <Sun className="h-6 w-6 text-yellow-500" />,
   Rainy: <CloudRain className="h-6 w-6 text-blue-500" />,
   Stormy: <CloudLightning className="h-6 w-6 text-gray-600" />,
@@ -16,18 +18,16 @@ const WeatherAlerts = () => {
         <CardTitle>Weather Alerts</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-4">
           {weatherAlerts.map((alert) => (
-            <div key={alert.city} className="flex items-center gap-4 p-3 bg-secondary rounded-lg">
-              <div className="p-2 bg-background rounded-md shadow-inner">
+            <div key={alert.city} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
+              <div className="flex items-center gap-4">
                 {conditionIcons[alert.condition]}
-              </div>
-              <div className="flex-1">
                 <p className="font-semibold">{alert.city}</p>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Thermometer className="h-4 w-4" />
-                  <span>{alert.temperature}°C</span>
-                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-semibold">{alert.temperature}°C</p>
+                <p className="text-sm text-muted-foreground">{alert.condition}</p>
               </div>
             </div>
           ))}
