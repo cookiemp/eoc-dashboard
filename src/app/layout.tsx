@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Ethiopia EOC Dashboard',
+  title: 'ERCS EOC Dashboard',
   description: 'Emergency Operations Center Dashboard for Ethiopia',
 };
 
