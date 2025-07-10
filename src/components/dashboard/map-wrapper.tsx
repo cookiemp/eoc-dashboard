@@ -14,12 +14,37 @@ interface MapWrapperProps {
   incidents: Incident[];
 }
 
+const createIncidentIcon = (color: string) => {
+  return L.divIcon({
+    html: `
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="28"
+        height="28"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="${color}"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="lucide lucide-map-pin"
+      >
+        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+        <circle cx="12" cy="10" r="3" fill="${color}" />
+      </svg>
+    `,
+    className: 'leaflet-marker-icon', // Use a class to remove default styling
+    iconSize: [28, 28],
+    iconAnchor: [14, 28],
+    popupAnchor: [0, -28],
+  });
+};
+
 const MapWrapper = ({ incidents }: MapWrapperProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
 
   useEffect(() => {
-    // Only initialize the map if the ref is available and a map instance doesn't already exist
     if (mapRef.current && !mapInstance.current) {
       const center: [number, number] = [9.145, 40.4897]; // Centered on Ethiopia
       
@@ -35,18 +60,20 @@ const MapWrapper = ({ incidents }: MapWrapperProps) => {
             parseFloat(incident.top.replace('%', '')) * (14.5 - 5.5) / 100 + 5.5,
             parseFloat(incident.left.replace('%', '')) * (48 - 33) / 100 + 33
         ];
-        L.marker(position).addTo(map).bindPopup(incident.title);
+        
+        const icon = createIncidentIcon(incident.color);
+        
+        L.marker(position, { icon }).addTo(map).bindPopup(incident.title);
       });
     }
 
-    // Cleanup function to run when the component unmounts
     return () => {
       if (mapInstance.current) {
         mapInstance.current.remove();
         mapInstance.current = null;
       }
     };
-  }, [incidents]); // Rerun effect if incidents change
+  }, [incidents]);
 
   return <div ref={mapRef} style={{ height: '100%', width: '100%' }} />;
 };
