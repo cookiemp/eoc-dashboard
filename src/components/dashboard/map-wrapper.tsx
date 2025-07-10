@@ -1,16 +1,17 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import type { Incident } from '@/lib/types';
+import type { IncidentWithId } from '@/services/incident-service';
 import L from 'leaflet';
 
 interface MapWrapperProps {
-  incidents: Incident[];
+  incidents: IncidentWithId[];
+  onMarkerClick: (incident: IncidentWithId) => void;
 }
 
 const createIncidentIcon = (color: string) => {
   const iconHtml = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="${color}" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="drop-shadow-lg">
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="${color}" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="drop-shadow-lg cursor-pointer">
       <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/>
       <circle cx="12" cy="10" r="3" fill="white"/>
     </svg>
@@ -24,7 +25,7 @@ const createIncidentIcon = (color: string) => {
   });
 };
 
-const MapWrapper = ({ incidents }: MapWrapperProps) => {
+const MapWrapper = ({ incidents, onMarkerClick }: MapWrapperProps) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
@@ -61,7 +62,7 @@ const MapWrapper = ({ incidents }: MapWrapperProps) => {
     markersRef.current = [];
 
     // Add new markers
-    incidents.forEach((incident: Incident) => {
+    incidents.forEach((incident: IncidentWithId) => {
       const position: [number, number] = [incident.latitude, incident.longitude];
         
       const icon = createIncidentIcon(incident.color);
@@ -70,17 +71,20 @@ const MapWrapper = ({ incidents }: MapWrapperProps) => {
         <div class="font-sans max-w-xs whitespace-normal">
           <strong class="text-base">${incident.title}</strong>
           <br>
-          <p class="text-sm mt-1">${incident.description || 'No details available.'}</p>
+          <p class="text-sm mt-1">Click for details</p>
         </div>
       `;
         
       const marker = L.marker(position, { icon })
         .addTo(map)
-        .bindTooltip(tooltipContent);
+        .bindTooltip(tooltipContent)
+        .on('click', () => {
+           onMarkerClick(incident);
+        });
       
       markersRef.current.push(marker);
     });
-  }, [incidents]);
+  }, [incidents, onMarkerClick]);
 
   return <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />;
 };

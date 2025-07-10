@@ -3,6 +3,7 @@
 import { summarizeIncidentData, type SummarizeIncidentDataOutput } from '@/ai/flows/summarize-incident-data';
 import { extractIncidentsFromNews } from '@/ai/flows/extract-incidents-from-news-flow';
 import { getNewsArticles as getNewsArticlesFlow, type GetNewsArticlesInput, type GetNewsArticlesOutput } from '@/ai/flows/get-news-articles-flow';
+import { generateIncidentDossier as generateIncidentDossierFlow, type GenerateIncidentDossierInput, type GenerateIncidentDossierOutput } from '@/ai/flows/generate-incident-dossier-flow';
 import { addIncidents, getIncidents, IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
@@ -115,5 +116,21 @@ export async function getNewsArticles(input: GetNewsArticlesInput): Promise<GetN
   } catch (error) {
     console.error(`Error fetching '${input.category}' news:`, error);
     return { articles: [] }; // Return empty array on error
+  }
+}
+
+
+/**
+ * Generates a detailed incident dossier using the Genkit flow.
+ */
+export async function generateIncidentDossier(input: GenerateIncidentDossierInput): Promise<GenerateIncidentDossierOutput> {
+  try {
+    return await generateIncidentDossierFlow(input);
+  } catch (error) {
+    console.error('Error generating incident dossier:', error);
+    // Return a structured error object so the frontend can handle it gracefully.
+    return { 
+      error: `Failed to generate dossier: ${error instanceof Error ? error.message : 'An unknown error occurred.'}` 
+    };
   }
 }
