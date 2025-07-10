@@ -70,7 +70,7 @@ async function fetchWeatherForCity(city: string): Promise<WeatherAlert | null> {
     return {
       city: data.name,
       temperature: data.main.temp,
-      condition: data.weather[0]?.main.toLowerCase() || 'N/A', // Use main condition and ensure lowercase
+      condition: data.weather[0]?.description?.toLowerCase() || 'N/A', // Use description for more detail
     };
   } catch (error) {
     console.error(`Error fetching weather for ${city}:`, error);

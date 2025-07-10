@@ -1,25 +1,24 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sun, CloudRain, CloudLightning, Wind, Cloud, Loader2, AlertCircle } from 'lucide-react';
+import { Sun, CloudRain, CloudLightning, Wind, Cloud, Loader2, AlertCircle, Cloudy } from 'lucide-react';
 import type { WeatherAlert } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 
 const conditionIcons: { [key: string]: React.ReactNode } = {
   'clear sky': <Sun className="h-6 w-6 text-yellow-500" />,
   'few clouds': <Cloud className="h-6 w-6 text-gray-400" />,
-  'scattered clouds': <Cloud className="h-6 w-6 text-gray-400" />,
-  'broken clouds': <Cloud className="h-6 w-6 text-gray-400" />,
-  'overcast clouds': <Cloud className="h-6 w-6 text-gray-500" />,
+  'scattered clouds': <Cloudy className="h-6 w-6 text-gray-500" />,
+  'broken clouds': <Cloud className="h-6 w-6 text-gray-500" />,
+  'overcast clouds': <Cloud className="h-6 w-6 text-gray-600" />,
   'shower rain': <CloudRain className="h-6 w-6 text-blue-400" />,
-  rain: <CloudRain className="h-6 w-6 text-blue-500" />,
-  thunderstorm: <CloudLightning className="h-6 w-6 text-gray-600" />,
-  snow: <CloudRain className="h-6 w-6 text-blue-200" />, // Placeholder
-  mist: <Wind className="h-6 w-6 text-gray-400" />,
-  clouds: <Cloud className="h-6 w-6 text-gray-400" />,
-  sunny: <Sun className="h-6 w-6 text-yellow-500" />,
-  windy: <Wind className="h-6 w-6 text-gray-400" />,
-  stormy: <CloudLightning className="h-6 w-6 text-gray-600" />,
+  'rain': <CloudRain className="h-6 w-6 text-blue-500" />,
+  'light rain': <CloudRain className="h-6 w-6 text-blue-300" />,
+  'moderate rain': <CloudRain className="h-6 w-6 text-blue-500" />,
+  'thunderstorm': <CloudLightning className="h-6 w-6 text-purple-600" />,
+  'snow': <CloudRain className="h-6 w-6 text-blue-200" />, // Using CloudRain as a substitute for snow icon
+  'mist': <Wind className="h-6 w-6 text-gray-400" />,
+  'haze': <Wind className="h-6 w-6 text-gray-400" />,
 };
 
 const citiesToFetch = ['Addis Ababa', 'Dire Dawa', 'Gondar', 'Mekelle', 'Hawassa'];
