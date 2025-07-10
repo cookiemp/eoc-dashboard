@@ -6,11 +6,13 @@ import IncidentMap from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
 import WeatherAlerts from "@/components/dashboard/weather-alerts";
 import NewsFeed from "@/components/dashboard/news-feed";
-import { getLatestIncidents, processNewsIntoIncidents, getWeatherForCitiesAction, getNewsFeed } from "@/app/actions";
+import { getLatestIncidents, processNewsIntoIncidents, getWeatherForCitiesAction } from "@/app/actions";
 import type { IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
 import { Newspaper, BookHeart } from 'lucide-react';
 import type { WeatherAlert } from '@/lib/types';
+import Parser from 'rss-parser';
+
 
 export default function Home() {
   const [incidents, setIncidents] = useState<IncidentWithId[]>([]);
@@ -25,28 +27,47 @@ export default function Home() {
     const fetchAndProcessData = async () => {
       setLoading(true);
       setNewsError(null);
-      try {
-        const newsResult = await getNewsFeed();
+      
+      const parser = new Parser();
 
-        if (newsResult.error) {
-          setNewsError(newsResult.error);
-          setHumanitarianNews([]);
-        } else {
-          setHumanitarianNews(newsResult.articles || []);
-          // Process the news into incidents after fetching
-          await processNewsIntoIncidents({ articles: newsResult.articles || [] });
+      try {
+        // Fetch from our own API route proxy
+        const response = await fetch('/api/news');
+
+        if (!response.ok) {
+          // If the server responded with an error, read the JSON error message
+          const errorData = await response.json();
+          throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
         }
+
+        const xmlString = await response.text();
+        if (!xmlString) {
+          throw new Error('Received empty response from news feed.');
+        }
+
+        const feed = await parser.parseString(xmlString);
+        
+        const articles: NewsArticle[] = (feed.items || []).slice(0, 10).map((item) => ({
+            id: item.guid || item.link || item.title!,
+            title: item.title || 'No Title',
+            source: 'ReliefWeb',
+            snippet: item.contentSnippet || item.content || 'No Snippet',
+            url: item.link || '',
+        }));
+
+        setHumanitarianNews(articles);
+        await processNewsIntoIncidents({ articles });
         
         // Fetch incidents separately after processing
         const latestIncidents = await getLatestIncidents();
-        
         if (latestIncidents) {
           setIncidents(latestIncidents);
         }
 
       } catch (error) {
         console.error("Error fetching or processing news data:", error);
-        setNewsError("An unexpected error occurred while fetching news.");
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred while fetching news.";
+        setNewsError(`Failed to fetch news feed: ${errorMessage}`);
         setIncidents([]);
         setHumanitarianNews([]);
       } finally {
