@@ -26,8 +26,8 @@ export const healthAlerts: HealthAlert[] = [
 ];
 
 export const incidents: Incident[] = [
-  { id: 1, title: 'Flood Warning', top: '48%', left: '52%', color: 'bg-blue-500' },
-  { id: 2, title: 'Health Emergency', top: '65%', left: '80%', color: 'bg-red-500' },
-  { id: 3, title: 'Conflict Zone', top: '25%', left: '60%', color: 'bg-yellow-500' },
-  { id: 4, title: 'Displacement Camp', top: '70%', left: '45%', color: 'bg-green-500' },
+  { id: 1, title: 'Flood Warning', top: '48%', left: '52%', color: 'blue' },
+  { id: 2, title: 'Health Emergency', top: '65%', left: '80%', color: 'red' },
+  { id: 3, title: 'Conflict Zone', top: '25%', left: '60%', color: 'yellow' },
+  { id: 4, title: 'Displacement Camp', top: '70%', left: '45%', color: 'green' },
 ];

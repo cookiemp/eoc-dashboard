@@ -86,3 +86,13 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.leaflet-container {
+    height: 100%;
+    width: 100%;
+}
+
+.leaflet-marker-icon {
+  background: none;
+  border: none;
+}
