@@ -10,6 +10,7 @@
 
 import { z } from 'zod';
 import type { WeatherAlert } from '@/lib/types';
+import { ai } from '@/ai/genkit';
 
 // Define city coordinates
 const cityCoordinates: { [city: string]: { lat: number; lon: number } } = {
@@ -41,58 +42,64 @@ export type GetWeatherForCitiesOutput = z.infer<typeof GetWeatherForCitiesOutput
  * Fetches the current weather for a single city using the OpenWeatherMap API.
  * @param city The name of the city.
  * @param apiKey The OpenWeatherMap API key.
- * @returns A promise that resolves to a WeatherAlert object.
+ * @returns A promise that resolves to a WeatherAlert object or null if an error occurs.
  */
-async function fetchWeatherForCity(city: string, apiKey: string): Promise<WeatherAlert> {
+async function fetchWeatherForCity(city: string, apiKey: string): Promise<WeatherAlert | null> {
   if (!apiKey) {
-    throw new Error('OpenWeatherMap API key is not provided.');
+    console.error('OpenWeatherMap API key is not provided.');
+    return null;
   }
 
   const coords = cityCoordinates[city];
   if (!coords) {
-    throw new Error(`Coordinates for city not found: ${city}`);
+    console.error(`Coordinates for city not found: ${city}`);
+    return null;
   }
 
   const url = `https://api.openweathermap.org/data/2.5/weather?lat=${coords.lat}&lon=${coords.lon}&appid=${apiKey}&units=metric`;
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { cache: 'no-store' }); // Disable caching for real-time data
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`Failed to fetch weather for ${city}. Status: ${response.status}`, errorText);
-      throw new Error(`Failed to fetch weather for ${city}. Status: ${response.status}`);
+      return null;
     }
     const data = await response.json();
 
     return {
       city: data.name,
       temperature: data.main.temp,
-      condition: data.weather[0]?.description || 'N/A',
+      condition: data.weather[0]?.main.toLowerCase() || 'N/A', // Use main condition and ensure lowercase
     };
   } catch (error) {
     console.error(`Error fetching weather for ${city}:`, error);
-    // Return a default/error state
-    return {
-      city: city,
-      temperature: NaN,
-      condition: 'Error',
-    };
+    return null;
   }
 }
 
 /**
  * The main exported function that retrieves weather for a list of cities.
- * This function does not use an AI model, it directly calls a real API.
+ * This is a Genkit flow that directly calls a real API.
  */
-export async function getWeatherForCities(
-  input: GetWeatherForCitiesInput
-): Promise<GetWeatherForCitiesOutput> {
-  
-  const weatherPromises = input.cities.map((city) =>
-    fetchWeatherForCity(city, input.apiKey)
-  );
+export const getWeatherForCities = ai.defineFlow(
+  {
+    name: 'getWeatherForCitiesFlow',
+    inputSchema: GetWeatherForCitiesInputSchema,
+    outputSchema: GetWeatherForCitiesOutputSchema,
+  },
+  async (input) => {
+    const weatherPromises = input.cities.map((city) =>
+      fetchWeatherForCity(city, input.apiKey)
+    );
 
-  const weatherData = await Promise.all(weatherPromises);
+    const weatherResults = await Promise.all(weatherPromises);
+    
+    // Filter out any null results from failed API calls
+    const validWeatherData = weatherResults.filter(
+      (data): data is WeatherAlert => data !== null
+    );
 
-  return { weather: weatherData };
-}
+    return { weather: validWeatherData };
+  }
+);

@@ -2,9 +2,12 @@
 
 import { summarizeIncidentData, type SummarizeIncidentDataOutput } from '@/ai/flows/summarize-incident-data';
 import { extractIncidentsFromNews } from '@/ai/flows/extract-incidents-from-news-flow';
-import { getNewsArticles as getNewsArticlesFlow, type GetNewsArticlesInput, type GetNewsArticlesOutput } from '@/ai/flows/get-news-articles-flow';
-import { generateIncidentDossier as generateIncidentDossierFlow, type GenerateIncidentDossierInput, type GenerateIncidentDossierOutput } from '@/ai/flows/generate-incident-dossier-flow';
-import { getWeatherForCities as getWeatherForCitiesFlow, GetWeatherForCitiesOutput } from '@/ai/flows/get-weather-flow';
+import { getNewsArticles as getNewsArticlesFlow } from '@/ai/flows/get-news-articles-flow';
+import type { GetNewsArticlesInput, GetNewsArticlesOutput } from '@/ai/flows/get-news-articles-flow';
+import { generateIncidentDossier as generateIncidentDossierFlow } from '@/ai/flows/generate-incident-dossier-flow';
+import type { GenerateIncidentDossierInput, GenerateIncidentDossierOutput } from '@/ai/flows/generate-incident-dossier-flow';
+import { getWeatherForCities } from '@/ai/flows/get-weather-flow';
+import type { GetWeatherForCitiesOutput } from '@/ai/flows/get-weather-flow';
 import { addIncidents, getIncidents, IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
@@ -141,29 +144,18 @@ export async function generateIncidentDossier(input: GenerateIncidentDossierInpu
 /**
  * An action that fetches the weather by providing the required API key.
  */
-export async function getWeatherForCities(input: { cities: string[] }): Promise<GetWeatherForCitiesOutput> {
+export async function getWeatherForCitiesAction(input: { cities: string[] }): Promise<GetWeatherForCitiesOutput> {
   const apiKey = process.env.OPENWEATHERMAP_API_KEY;
 
   if (!apiKey) {
     console.error('OpenWeatherMap API key is not configured in .env file.');
-    // Return an error state for all cities if the key is missing.
-    const weather = input.cities.map(city => ({
-      city,
-      temperature: NaN,
-      condition: 'Error: API key missing',
-    }));
-    return { weather };
+    return { weather: [] };
   }
 
   try {
-    return await getWeatherForCitiesFlow({ ...input, apiKey });
+    return await getWeatherForCities({ ...input, apiKey });
   } catch (error) {
     console.error('Error in getWeatherForCities action:', error);
-    const weather = input.cities.map(city => ({
-      city,
-      temperature: NaN,
-      condition: 'Error',
-    }));
-    return { weather };
+    return { weather: [] };
   }
 }

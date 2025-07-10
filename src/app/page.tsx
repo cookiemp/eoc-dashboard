@@ -6,7 +6,7 @@ import IncidentMap from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
 import WeatherAlerts from "@/components/dashboard/weather-alerts";
 import NewsFeed from "@/components/dashboard/news-feed";
-import { getLatestIncidents, processNewsIntoIncidents, getNewsArticles, getWeatherForCities as getWeatherForCitiesAction } from "@/app/actions";
+import { getLatestIncidents, processNewsIntoIncidents, getNewsArticles, getWeatherForCitiesAction } from "@/app/actions";
 import type { IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
 import { Newspaper, BookHeart } from 'lucide-react';
