@@ -1,6 +1,6 @@
 'use server';
 
-import { summarizeIncidentData, type SummarizeIncidentDataOutput } from '@/ai/flows/summarize-incident-data';
+import { summarizeIncidentData } from '@/ai/flows/summarize-incident-data';
 import { extractIncidentsFromNews } from '@/ai/flows/extract-incidents-from-news-flow';
 import { generateIncidentDossier as generateIncidentDossierFlow } from '@/ai/flows/generate-incident-dossier-flow';
 import type { GenerateIncidentDossierInput, GenerateIncidentDossierOutput } from '@/ai/flows/generate-incident-dossier-flow';
@@ -140,5 +140,48 @@ export async function getWeatherForCitiesAction(input: { cities: string[] }): Pr
   } catch (error) {
     console.error('Error in getWeatherForCities action:', error);
     return { weather: [] };
+  }
+}
+
+/**
+ * Fetches news from the GNews API.
+ * This is a reliable, server-side fetch.
+ */
+export async function getGNewsArticles(): Promise<{ articles?: NewsArticle[], error?: string }> {
+  const apiKey = process.env.GNEWS_API_KEY;
+  if (!apiKey) {
+    return { error: 'GNews API key is not configured.' };
+  }
+
+  const query = encodeURIComponent('"humanitarian aid" OR "crisis response" in Ethiopia');
+  const url = `https://gnews.io/api/v4/search?q=${query}&lang=en&country=et&max=10&apikey=${apiKey}`;
+
+  try {
+    const response = await fetch(url, {
+      next: { revalidate: 3600 }, // Cache for 1 hour
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('GNews API Error:', errorData);
+      return { error: `GNews API responded with status ${response.status}: ${errorData?.errors?.join(', ')}` };
+    }
+
+    const data = await response.json();
+
+    const articles: NewsArticle[] = (data.articles || []).map((item: any) => ({
+      id: item.url, // GNews doesn't have a stable ID, so URL is the best unique identifier.
+      title: item.title || 'No Title Available',
+      source: item.source?.name || 'Unknown Source',
+      snippet: item.description || 'No snippet available.',
+      url: item.url,
+    }));
+    
+    return { articles };
+
+  } catch (error) {
+    console.error('Failed to fetch from GNews API:', error);
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    return { error: `Failed to connect to GNews API: ${errorMessage}` };
   }
 }
