@@ -1,14 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { Skeleton } from '@/components/ui/skeleton';
 import { generateIncidentDossier } from '@/app/actions';
 import type { GenerateIncidentDossierOutput } from '@/ai/flows/generate-incident-dossier-flow';
 import type { IncidentWithId } from '@/services/incident-service';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Image as ImageIcon } from 'lucide-react';
+import { FileText } from 'lucide-react';
 
 interface IncidentDossierDialogProps {
   incident: IncidentWithId;
@@ -83,10 +82,6 @@ const IncidentDossierDialog = ({ incident, open, onClose }: IncidentDossierDialo
                 <Skeleton className="h-5 w-48 mb-2" />
                 <Skeleton className="h-16 w-full" />
               </div>
-              <div>
-                <Skeleton className="h-5 w-32 mb-2" />
-                <Skeleton className="h-64 w-full" />
-              </div>
             </div>
           ) : dossier ? (
             <>
@@ -98,21 +93,6 @@ const IncidentDossierDialog = ({ incident, open, onClose }: IncidentDossierDialo
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {dossier.executiveSummary}
                 </p>
-              </div>
-              <div>
-                 <h3 className="flex items-center gap-2 font-semibold mb-2 text-foreground">
-                   <ImageIcon className="h-5 w-5 text-primary" />
-                   AI-Generated Photo
-                 </h3>
-                <div className="relative aspect-video w-full overflow-hidden rounded-lg border">
-                  <Image
-                    src={dossier.photoDataUri}
-                    alt={`AI-generated image for ${incident.title}`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                </div>
               </div>
             </>
           ) : null}

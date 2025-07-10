@@ -130,7 +130,8 @@ export async function generateIncidentDossier(input: GenerateIncidentDossierInpu
     console.error('Error generating incident dossier:', error);
     // Return a structured error object so the frontend can handle it gracefully.
     return { 
-      error: `Failed to generate dossier: ${error instanceof Error ? error.message : 'An unknown error occurred.'}` 
+      error: `Failed to generate dossier: ${error instanceof Error ? error.message : 'An unknown error occurred.'}`,
+      executiveSummary: '',
     };
   }
 }
