@@ -19,7 +19,6 @@ const MapWithNoSSR = dynamic(() => import('@/components/dashboard/map-wrapper'),
   loading: () => <Skeleton className="w-full h-[400px] rounded-lg" />,
 });
 
-
 interface IncidentMapProps {
   incidents: Incident[];
 }
