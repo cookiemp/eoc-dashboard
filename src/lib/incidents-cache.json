@@ -1,92 +1,92 @@
 [
   {
-    "color": "#3b82f6",
-    "description": "The World Food Programme has increased food aid distribution in drought-affected Tigray to reach an additional 500,000 people, addressing high food security concerns following recent climatic shocks.",
-    "latitude": 13.495,
-    "longitude": 39.475,
-    "title": "WFP Scales Up Food Aid in Tigray",
-    "id": "1752152368610-mltf8pq",
-    "addedAt": "2025-07-10T12:59:28.610Z"
-  },
-  {
     "color": "#22c55e",
-    "description": "Programs have been initiated in the Amhara region, in collaboration with humanitarian partners, to facilitate the voluntary return and safe reintegration of internally displaced persons.",
-    "latitude": 11.59,
-    "longitude": 37.38,
-    "title": "IDP Returns Facilitated in Amhara",
-    "id": "1752152368610-sak8vmt",
-    "addedAt": "2025-07-10T12:59:28.610Z"
-  },
-  {
-    "color": "#ef4444",
-    "description": "The WHO and Ministry of Health are intensifying cholera prevention and response campaigns in Ethiopia's Somali region due to a rise in reported cases, focusing on improved water sanitation and hygiene.",
-    "latitude": 9.35,
-    "longitude": 42.8,
-    "title": "Cholera Campaigns Intensify in Somali Region",
-    "id": "1752152368610-yabudgw",
-    "addedAt": "2025-07-10T12:59:28.610Z"
-  },
-  {
-    "color": "#3b82f6",
-    "description": "Heavy seasonal rains have caused significant flooding in parts of the Afar and Oromia regions, displacing over 20,000 people and damaging infrastructure. Humanitarian assessments are ongoing.",
-    "latitude": 9,
-    "longitude": 40,
-    "title": "Seasonal Flooding Displaces 20,000 in Afar and Oromia",
-    "id": "1752152368610-4mmzlmh",
-    "addedAt": "2025-07-10T12:59:28.610Z"
+    "description": "Emergency food aid distribution has commenced in the drought-affected Borena Zone, targeting over 500,000 vulnerable individuals.",
+    "latitude": 5.3444,
+    "longitude": 39.6375,
+    "title": "Food Aid in Borena Zone",
+    "id": "1752152523336-5yturjq",
+    "addedAt": "2025-07-10T13:02:03.336Z"
   },
   {
     "color": "#f59e0b",
-    "description": "A new report indicates deteriorating food security in southern Ethiopia due to persistent drought and localized conflict, requiring urgent humanitarian interventions.",
-    "latitude": 5.33,
-    "longitude": 39.87,
-    "title": "Worsening Food Insecurity in Southern Ethiopia",
-    "id": "1752152368610-py4wxrq",
-    "addedAt": "2025-07-10T12:59:28.610Z"
-  },
-  {
-    "color": "#22c55e",
-    "description": "Lifesaving food assistance has been distributed to over 50,000 people in remote parts of Tigray, but significant food insecurity persists across the region.",
+    "description": "Over 2 million people in Tigray are facing severe food insecurity, exacerbated by limited aid access and recent conflict, requiring urgent international support.",
     "latitude": 13.4969,
     "longitude": 39.4767,
-    "title": "Food Insecurity in Tigray",
-    "id": "1752152279590-6x56gnf",
-    "addedAt": "2025-07-10T12:57:59.590Z"
-  },
-  {
-    "color": "#f59e0b",
-    "description": "Recent escalations in conflict have led to a new wave of displacement in Ethiopia's Amhara region, with thousands fleeing their homes and needing emergency shelter.",
-    "latitude": 11.5937,
-    "longitude": 37.3917,
-    "title": "Displacement in Amhara Region",
-    "id": "1752152279590-3d1d4yr",
-    "addedAt": "2025-07-10T12:57:59.590Z"
-  },
-  {
-    "color": "#ef4444",
-    "description": "A cholera outbreak in several woredas of the Somali Region has been successfully contained due to rapid response and vaccination campaigns, though continued hygiene practices are urged to prevent resurgence.",
-    "latitude": 9.3551,
-    "longitude": 42.8027,
-    "title": "Cholera Outbreak in Somali Region",
-    "id": "1752152279590-875gur2",
-    "addedAt": "2025-07-10T12:57:59.590Z"
+    "title": "Critical Food Shortages in Tigray",
+    "id": "1752152523335-tsr1z4p",
+    "addedAt": "2025-07-10T13:02:03.335Z"
   },
   {
     "color": "#3b82f6",
-    "description": "Heavy rainfall has triggered flash floods in parts of the Afar Region, forcing hundreds of families to evacuate their homes and seek temporary shelter, with aid operations underway.",
+    "description": "Heavy seasonal rains have caused widespread flash floods in Afar and Somali regions, displacing tens of thousands and damaging infrastructure.",
     "latitude": 11.7828,
-    "longitude": 41.0069,
-    "title": "Flash Floods in Afar Region",
-    "id": "1752152279590-p79jwdn",
-    "addedAt": "2025-07-10T12:57:59.590Z"
+    "longitude": 41.0067,
+    "title": "Flash Floods Displace Thousands",
+    "id": "1752152523335-xdzpq2l",
+    "addedAt": "2025-07-10T13:02:03.335Z"
   },
   {
     "color": "#ef4444",
-    "description": "A new UNICEF report highlights a concerning increase in severe acute malnutrition among children in drought-stricken areas of Oromia, with the agency scaling up nutrition programs.",
-    "latitude": 8.5442,
-    "longitude": 39.26,
-    "title": "Child Malnutrition in Oromia",
-    "id": "1752152279590-uw9wpiu",
-    "addedAt": "2025-07-10T12:57:59.590Z"
+    "description": "A surge in cholera cases has been confirmed in parts of Oromia and SNNPR, leading to an urgent vaccination campaign and improved water sanitation efforts.",
+    "latitude": 8.5447,
+    "longitude": 39.2711,
+    "title": "Cholera Outbreak in Oromia and SNNPR",
+    "id": "1752152523335-ekhwqq8",
+    "addedAt": "2025-07-10T13:02:03.335Z"
+  },
+  {
+    "color": "#22c55e",
+    "description": "UNICEF has launched an emergency education program for internally displaced children in Amhara, providing safe learning spaces and essential school supplies.",
+    "latitude": 11.5954,
+    "longitude": 37.3878,
+    "title": "Emergency Education for Amhara IDPs",
+    "id": "1752152523335-z9okf2e",
+    "addedAt": "2025-07-10T13:02:03.335Z"
+  },
+  {
+    "color": "#3b82f6",
+    "description": "Over 20 million people in Ethiopia are facing severe food insecurity, exacerbated by prolonged drought and ongoing regional conflicts, necessitating urgent international funding.",
+    "latitude": 9.0054,
+    "longitude": 38.7636,
+    "title": "Ethiopia Food Crisis",
+    "id": "1752152468879-5lrxhd4",
+    "addedAt": "2025-07-10T13:01:08.879Z"
+  },
+  {
+    "color": "#3b82f6",
+    "description": "Heavy rainfall in Ethiopia's Somali region has led to significant flooding, displacing more than 50,000 individuals and destroying homes and livelihoods.",
+    "latitude": 8.28,
+    "longitude": 42.8,
+    "title": "Flash Floods in Somali Region",
+    "id": "1752152468879-8w1qxr4",
+    "addedAt": "2025-07-10T13:01:08.879Z"
+  },
+  {
+    "color": "#ef4444",
+    "description": "A measles vaccination campaign has been launched by the Ministry of Health targeting children under five in several highly affected regions of Ethiopia to curb a recent outbreak.",
+    "latitude": 9.0054,
+    "longitude": 38.7636,
+    "title": "Measles Outbreak & Vaccination Campaign",
+    "id": "1752152468879-ayaet5x",
+    "addedAt": "2025-07-10T13:01:08.879Z"
+  },
+  {
+    "color": "#3b82f6",
+    "description": "Access to clean water remains a critical challenge for millions in Ethiopia's Tigray and Afar regions, raising health concerns and prompting emergency water trucking.",
+    "latitude": 13.496,
+    "longitude": 39.475,
+    "title": "Water Scarcity in Northern Ethiopia",
+    "id": "1752152468879-yw8ssol",
+    "addedAt": "2025-07-10T13:01:08.879Z"
+  },
+  {
+    "color": "#22c55e",
+    "description": "A convoy successfully delivered vital food assistance to over 50,000 people in previously inaccessible parts of Tigray to alleviate severe food shortages.",
+    "latitude": 13.5,
+    "longitude": 39.5,
+    "title": "Emergency Food Aid in Tigray",
+    "id": "1752152466410-nt0zlll",
+    "addedAt": "2025-07-10T13:01:06.410Z"
   }
 ]

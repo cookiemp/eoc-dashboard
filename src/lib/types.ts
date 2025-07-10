@@ -22,3 +22,9 @@ export type Incident = {
   longitude: number;
   color: string;
 };
+
+export type WeatherAlert = {
+  city: string;
+  temperature: number;
+  condition: string;
+};

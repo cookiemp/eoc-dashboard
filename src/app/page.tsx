@@ -10,18 +10,21 @@ import { getLatestIncidents, processNewsIntoIncidents, getNewsArticles } from "@
 import type { IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
 import { Newspaper, BookHeart } from 'lucide-react';
+import { getWeatherForCities } from '@/ai/flows/get-weather-flow';
+import type { WeatherAlert } from '@/lib/types';
 
 export default function Home() {
   const [incidents, setIncidents] = useState<IncidentWithId[]>([]);
   const [humanitarianNews, setHumanitarianNews] = useState<NewsArticle[]>([]);
   const [generalNews, setGeneralNews] = useState<NewsArticle[]>([]);
+  const [weatherData, setWeatherData] = useState<WeatherAlert[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingWeather, setLoadingWeather] = useState(true);
 
   useEffect(() => {
     const fetchAndProcessData = async () => {
       setLoading(true);
       try {
-        // Step 1: Fetch news articles from our new AI flow.
         const [hNews, gNews] = await Promise.all([
           getNewsArticles({ category: 'humanitarian' }),
           getNewsArticles({ category: 'general' })
@@ -31,10 +34,8 @@ export default function Home() {
         setHumanitarianNews(humanitarianArticles);
         setGeneralNews(gNews.articles || []);
         
-        // Step 2: Process the new humanitarian news to extract and store incidents.
         await processNewsIntoIncidents({ articles: humanitarianArticles });
         
-        // Step 3: Fetch the latest list of incidents from the persistent store.
         const latestIncidents = await getLatestIncidents();
         
         if (latestIncidents) {
@@ -42,8 +43,7 @@ export default function Home() {
         }
 
       } catch (error) {
-        console.error("Error fetching or processing data:", error);
-        // Set to empty on error to avoid crashing the UI
+        console.error("Error fetching or processing news data:", error);
         setIncidents([]);
         setHumanitarianNews([]);
         setGeneralNews([]);
@@ -51,8 +51,26 @@ export default function Home() {
         setLoading(false);
       }
     };
+    
+    const fetchWeatherData = async () => {
+      setLoadingWeather(true);
+      try {
+        const citiesToFetch = ['Addis Ababa', 'Dire Dawa', 'Gondar', 'Mekelle', 'Hawassa'];
+        const weatherResult = await getWeatherForCities({ cities: citiesToFetch });
+        if (weatherResult.weather) {
+          setWeatherData(weatherResult.weather);
+        }
+      } catch (error) {
+        console.error("Error fetching weather data:", error);
+        setWeatherData([]);
+      } finally {
+        setLoadingWeather(false);
+      }
+    };
+
 
     fetchAndProcessData();
+    fetchWeatherData();
   }, []);
 
   return (
@@ -67,7 +85,7 @@ export default function Home() {
              <AiSummary articles={humanitarianNews} />
           </div>
           <div className="lg:col-span-2">
-            <WeatherAlerts />
+            <WeatherAlerts weatherData={weatherData} isLoading={loadingWeather} />
           </div>
           <div className="lg:col-span-2">
             <NewsFeed 

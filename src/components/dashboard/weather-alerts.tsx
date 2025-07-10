@@ -1,46 +1,31 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sun, CloudRain, CloudLightning, Wind, Cloud, Loader2 } from 'lucide-react';
-import { getWeatherForCities } from '@/ai/flows/get-weather-flow';
 import type { WeatherAlert } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 
 const conditionIcons: { [key: string]: React.ReactNode } = {
-  Sunny: <Sun className="h-6 w-6 text-yellow-500" />,
-  Rainy: <CloudRain className="h-6 w-6 text-blue-500" />,
-  Stormy: <CloudLightning className="h-6 w-6 text-gray-600" />,
-  Windy: <Wind className="h-6 w-6 text-gray-500" />,
-  Cloudy: <Cloud className="h-6 w-6 text-gray-400" />,
-  'Partly Cloudy': <Cloud className="h-6 w-6 text-gray-400" />,
+  'clear sky': <Sun className="h-6 w-6 text-yellow-500" />,
+  'few clouds': <Cloud className="h-6 w-6 text-gray-400" />,
+  'scattered clouds': <Cloud className="h-6 w-6 text-gray-400" />,
+  'broken clouds': <Cloud className="h-6 w-6 text-gray-400" />,
+  'overcast clouds': <Cloud className="h-6 w-6 text-gray-500" />,
+  'shower rain': <CloudRain className="h-6 w-6 text-blue-400" />,
+  rain: <CloudRain className="h-6 w-6 text-blue-500" />,
+  thunderstorm: <CloudLightning className="h-6 w-6 text-gray-600" />,
+  snow: <CloudRain className="h-6 w-6 text-blue-200" />, // Placeholder
+  mist: <Wind className="h-6 w-6 text-gray-400" />,
 };
 
 const citiesToFetch = ['Addis Ababa', 'Dire Dawa', 'Gondar', 'Mekelle', 'Hawassa'];
 
-const WeatherAlerts = () => {
-  const [weatherData, setWeatherData] = useState<WeatherAlert[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+interface WeatherAlertsProps {
+  weatherData: WeatherAlert[];
+  isLoading: boolean;
+}
 
-  useEffect(() => {
-    const fetchWeather = async () => {
-      setIsLoading(true);
-      try {
-        const result = await getWeatherForCities({ cities: citiesToFetch });
-        // The flow now returns an object with a 'weather' property
-        if (result.weather) {
-          setWeatherData(result.weather);
-        }
-      } catch (error) {
-        console.error('Error fetching weather data:', error);
-        // Optionally, set an error state to display to the user
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchWeather();
-  }, []);
+const WeatherAlerts = ({ weatherData, isLoading }: WeatherAlertsProps) => {
 
   const renderLoadingSkeleton = () => {
     return (
@@ -80,8 +65,8 @@ const WeatherAlerts = () => {
                   <p className="font-semibold">{alert.city}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold">{alert.temperature}°C</p>
-                  <p className="text-sm text-muted-foreground">{alert.condition}</p>
+                  <p className="font-semibold">{Math.round(alert.temperature)}°C</p>
+                  <p className="text-sm text-muted-foreground capitalize">{alert.condition}</p>
                 </div>
               </div>
             ))}
