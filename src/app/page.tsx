@@ -8,6 +8,8 @@ import WeatherAlerts from "@/components/dashboard/weather-alerts";
 import NewsFeed from "@/components/dashboard/news-feed";
 import { humanitarianNews, generalNews, incidents as initialIncidents } from "@/lib/mock-data";
 import type { Incident } from '@/lib/types';
+import { Card, CardContent } from '@/components/ui/card';
+import { Newspaper, ShieldAlert } from 'lucide-react';
 
 export default function Home() {
   const [incidents, setIncidents] = useState<Incident[]>(initialIncidents);
@@ -46,17 +48,25 @@ export default function Home() {
           <div className="lg:col-span-4">
             <IncidentMap incidents={incidents} />
           </div>
-          <div className="lg:col-span-4">
-            <AiSummary articles={humanitarianNews} />
+          <div className="lg:col-span-2">
+             <AiSummary articles={humanitarianNews} />
           </div>
           <div className="lg:col-span-2">
             <WeatherAlerts />
           </div>
           <div className="lg:col-span-2">
-            <NewsFeed title="Humanitarian News" items={humanitarianNews} />
+            <NewsFeed 
+              icon={<Newspaper className="h-5 w-5 text-primary" />} 
+              title="Humanitarian News" 
+              items={humanitarianNews} 
+            />
           </div>
           <div className="lg:col-span-2">
-            <NewsFeed title="Ethiopia News" items={generalNews} />
+            <NewsFeed 
+              icon={<Newspaper className="h-5 w-5 text-primary" />} 
+              title="Ethiopia News" 
+              items={generalNews} 
+            />
           </div>
         </div>
       </main>

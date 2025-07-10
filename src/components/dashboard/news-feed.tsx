@@ -2,19 +2,19 @@ import type { NewsArticle } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { Newspaper } from 'lucide-react';
 
 interface NewsFeedProps {
   title: string;
   items: NewsArticle[];
+  icon: React.ReactNode;
 }
 
-const NewsFeed = ({ title, items }: NewsFeedProps) => {
+const NewsFeed = ({ title, items, icon }: NewsFeedProps) => {
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Newspaper className="h-5 w-5" />
+          {icon}
           {title}
         </CardTitle>
       </CardHeader>
