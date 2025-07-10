@@ -20,7 +20,13 @@ const AiSummary = ({ articles }: AiSummaryProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // This function will now only run once when the component mounts.
     async function generateSummary() {
+      if (!articles || articles.length === 0) {
+        setIsLoading(false);
+        return;
+      }
+      
       setIsLoading(true);
       const result = await getSummary({ articles });
 
@@ -36,10 +42,9 @@ const AiSummary = ({ articles }: AiSummaryProps) => {
       setIsLoading(false);
     }
 
-    if (articles.length > 0) {
-      generateSummary();
-    }
-  }, [articles, toast]);
+    generateSummary();
+    // By providing an empty dependency array, we ensure this effect runs only once.
+  }, []);
 
   const renderSummary = () => {
     if (!summary) return null;
