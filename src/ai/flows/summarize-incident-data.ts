@@ -35,22 +35,22 @@ export async function summarizeIncidentData(
   return summarizeIncidentDataFlow(input);
 }
 
-const PromptInputSchema = z.object({
-  articlesJson: z.string(),
-});
-
 const summarizeIncidentDataPrompt = ai.definePrompt({
   name: 'summarizeIncidentDataPrompt',
-  input: {schema: PromptInputSchema},
+  input: {schema: SummarizeIncidentDataInputSchema},
   output: {schema: SummarizeIncidentDataOutputSchema},
   prompt: `You are an expert at summarizing humanitarian incident data for an emergency operations center.
 
-  Given the following JSON array of news articles, provide a concise summary as a single string. The summary must be in a bullet-pointed list format. Each bullet point must start with a markdown asterisk (*).
+  Given the following news articles, provide a concise summary as a single string. The summary must be in a bullet-pointed list format. Each bullet point must start with a markdown asterisk (*).
 
   For each article, create one bullet point that summarizes the key information from the title and snippet. Crucially, each bullet point must end with a markdown link to the original article, like this: [Source](url).
 
   Articles:
-  {{{articlesJson}}}
+  {{#each articles}}
+  - Title: {{this.title}}
+    Snippet: {{this.snippet}}
+    Source: [{{this.source}}]({{this.url}})
+  {{/each}}
   `,
 });
 
@@ -61,9 +61,7 @@ const summarizeIncidentDataFlow = ai.defineFlow(
     outputSchema: SummarizeIncidentDataOutputSchema,
   },
   async (input) => {
-    const {output} = await summarizeIncidentDataPrompt({
-      articlesJson: JSON.stringify(input.articles, null, 2),
-    });
+    const {output} = await summarizeIncidentDataPrompt(input);
     return output!;
   }
 );
