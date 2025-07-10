@@ -10,6 +10,7 @@ export async function getSummary(input: SummarizeIncidentDataInput) {
     return result;
   } catch (error) {
     console.error('Error in getSummary action:', error);
-    return { error: 'An unexpected error occurred while generating the summary.' };
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    return { error: `Failed to generate summary: ${errorMessage}` };
   }
 }
