@@ -5,13 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Globe } from 'lucide-react';
 
-const DynamicMap = dynamic(
-  () => import('@/components/dashboard/dynamic-map'),
-  {
-    loading: () => <Skeleton className="w-full h-[400px] rounded-lg" />,
-    ssr: false,
-  }
-);
+const DynamicMap = dynamic(() => import('@/components/dashboard/dynamic-map'), {
+  loading: () => <Skeleton className="w-full h-[400px] rounded-lg" />,
+  ssr: false,
+});
 
 const IncidentMap = () => {
   return (
