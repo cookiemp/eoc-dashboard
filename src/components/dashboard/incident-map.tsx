@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -28,9 +28,9 @@ interface IncidentMapProps {
 const IncidentMap = ({ incidents }: IncidentMapProps) => {
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
 
-  const handleMarkerClick = (incident: Incident) => {
+  const handleMarkerClick = useCallback((incident: Incident) => {
     setSelectedIncident(incident);
-  };
+  }, []);
 
   const handleDialogClose = () => {
     setSelectedIncident(null);

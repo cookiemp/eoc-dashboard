@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import type { Incident } from '@/lib/types';
 import MapWrapper from './map-wrapper';
 
@@ -12,4 +13,4 @@ const DynamicMap = ({ incidents, onMarkerClick }: DynamicMapProps) => {
   return <MapWrapper incidents={incidents} onMarkerClick={onMarkerClick} />;
 };
 
-export default DynamicMap;
+export default memo(DynamicMap);
