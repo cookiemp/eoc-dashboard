@@ -74,14 +74,12 @@ const getWeatherFlow = ai.defineFlow(
       ai.generate({
         prompt: `What is the current weather in ${city}?`,
         tools: [getCurrentWeather],
-        model: 'googleai/gemini-pro',
       })
     );
 
     const weatherResponses = await Promise.all(weatherPromises);
 
     const weatherData = weatherResponses.map((res) => {
-      // FIX: The correct property is toolResponse.output
       const toolResponse = res.toolResponse;
       if (toolResponse) {
           return toolResponse.output as z.infer<typeof WeatherSchema>;
