@@ -6,7 +6,7 @@ import IncidentMap from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
 import WeatherAlerts from "@/components/dashboard/weather-alerts";
 import NewsFeed from "@/components/dashboard/news-feed";
-import { getIncidents } from '@/ai/flows/get-incidents-flow';
+import { getLatestIncidents, processNewsIntoIncidents } from "@/app/actions";
 import { humanitarianNews, generalNews } from "@/lib/mock-data";
 import type { Incident } from '@/lib/types';
 import { Newspaper } from 'lucide-react';
@@ -14,25 +14,33 @@ import { Newspaper } from 'lucide-react';
 export default function Home() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loadingIncidents, setLoadingIncidents] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    const fetchIncidents = async () => {
+    const fetchAndProcessData = async () => {
       setLoadingIncidents(true);
+      setIsProcessing(true);
       try {
-        const result = await getIncidents();
-        if (result.incidents) {
-          setIncidents(result.incidents);
+        // Step 1: Process the latest news to extract and store incidents.
+        // This action now encapsulates the AI extraction and storage logic.
+        await processNewsIntoIncidents({ articles: humanitarianNews });
+        
+        // Step 2: Fetch the latest list of incidents from the persistent store.
+        const latestIncidents = await getLatestIncidents();
+        
+        if (latestIncidents) {
+          setIncidents(latestIncidents);
         }
       } catch (error) {
-        console.error("Error fetching incidents:", error);
-        // Optionally set some default incidents on error
-        setIncidents([]);
+        console.error("Error processing or fetching incidents:", error);
+        setIncidents([]); // Set to empty on error
       } finally {
         setLoadingIncidents(false);
+        setIsProcessing(false);
       }
     };
 
-    fetchIncidents();
+    fetchAndProcessData();
   }, []);
 
   return (

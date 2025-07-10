@@ -16,7 +16,6 @@ export type HealthAlert = {
 };
 
 export type Incident = {
-  id: number;
   title: string;
   description?: string;
   latitude: number;
