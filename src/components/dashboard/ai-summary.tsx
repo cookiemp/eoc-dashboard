@@ -7,7 +7,7 @@ import type { SummarizeIncidentDataOutput } from '@/ai/flows/summarize-incident-
 import type { NewsArticle } from '@/lib/types';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, AlertTriangle } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
 
 interface AiSummaryProps {
@@ -59,23 +59,37 @@ const AiSummary = ({ articles }: AiSummaryProps) => {
   const renderSummary = () => {
     if (!summary) return null;
 
-    const summaryPoints = summary.summary.split('*').filter(point => point.trim() !== '');
+    const summaryPoints = summary.summary.split(/⚕️|\*/).filter(point => point.trim() !== '');
+    const healthAlerts = summary.summary.includes('⚕️');
 
     return (
-      <ul className="space-y-2 list-none p-0">
-        {summaryPoints.map((point, index) => (
-          <li key={index} className="flex items-start gap-2">
-            <span className="text-primary mt-1">&#9679;</span>
-            <span
-              className="text-sm text-muted-foreground"
-              dangerouslySetInnerHTML={{
-                __html: point
-                  .replace(/\[Source\]\((.*?)\)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-primary underline hover:text-primary/80">Source</a>')
-              }}
-            />
-          </li>
-        ))}
-      </ul>
+      <div className="space-y-4">
+        {healthAlerts && (
+          <div className="flex items-center gap-2 p-3 rounded-md bg-destructive/10 text-destructive border border-destructive/20">
+            <AlertTriangle className="h-5 w-5" />
+            <p className="text-sm font-medium">Public health related alerts identified in the news feed.</p>
+          </div>
+        )}
+        <ul className="space-y-2 list-none p-0">
+          {summaryPoints.map((point, index) => {
+            // The logic needs to be robust enough to handle the emoji.
+            const isHealthAlert = summary.summary.includes('⚕️') && summary.summary.split('*')[index+1]?.trim().startsWith(point.trim());
+            
+            return (
+              <li key={index} className="flex items-start gap-3">
+                <span className="text-primary mt-1">{summary.summary.includes(point) && summary.summary[summary.summary.indexOf(point) - 2] === '⚕️' ? '⚕️' : '●'}</span>
+                <span
+                  className="text-sm text-muted-foreground"
+                  dangerouslySetInnerHTML={{
+                    __html: point
+                      .replace(/\[Source\]\((.*?)\)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-primary underline hover:text-primary/80">Source</a>')
+                  }}
+                />
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     );
   };
 
@@ -86,7 +100,7 @@ const AiSummary = ({ articles }: AiSummaryProps) => {
           <Sparkles className="h-6 w-6 text-primary" />
           <CardTitle>AI-Powered Daily Briefing</CardTitle>
         </div>
-        <CardDescription>An automated summary of the latest humanitarian news, updated daily.</CardDescription>
+        <CardDescription>An automated summary of the latest humanitarian news, updated daily. Health-related issues are highlighted with ⚕️.</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
         {isLoading ? (

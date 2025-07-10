@@ -6,7 +6,6 @@ import IncidentMap from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
 import WeatherAlerts from "@/components/dashboard/weather-alerts";
 import NewsFeed from "@/components/dashboard/news-feed";
-import HealthAlerts from "@/components/dashboard/health-alerts";
 import { humanitarianNews, generalNews, incidents as initialIncidents } from "@/lib/mock-data";
 import type { Incident } from '@/lib/types';
 
@@ -47,7 +46,7 @@ export default function Home() {
           <div className="lg:col-span-4">
             <IncidentMap incidents={incidents} />
           </div>
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-4">
             <AiSummary articles={humanitarianNews} />
           </div>
           <div className="lg:col-span-2">
@@ -58,9 +57,6 @@ export default function Home() {
           </div>
           <div className="lg:col-span-2">
             <NewsFeed title="Ethiopia News" items={generalNews} />
-          </div>
-          <div className="lg:col-span-4">
-            <HealthAlerts />
           </div>
         </div>
       </main>
