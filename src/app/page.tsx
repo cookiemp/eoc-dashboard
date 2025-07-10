@@ -6,7 +6,7 @@ import IncidentMap from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
 import WeatherAlerts from "@/components/dashboard/weather-alerts";
 import NewsFeed from "@/components/dashboard/news-feed";
-import { getLatestIncidents, processNewsIntoIncidents, getWeatherForCitiesAction, getGNewsArticles } from "@/app/actions";
+import { getLatestIncidents, processNewsIntoIncidents, getWeatherForCitiesAction, getTheNewsApiArticles } from "@/app/actions";
 import type { IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
 import { Newspaper, BookHeart } from 'lucide-react';
@@ -28,7 +28,7 @@ export default function Home() {
       setNewsError(null);
       
       try {
-        const result = await getGNewsArticles();
+        const result = await getTheNewsApiArticles();
 
         if (result.error) {
           throw new Error(result.error);
@@ -37,8 +37,7 @@ export default function Home() {
         const articles = result.articles || [];
         
         if (!articles || articles.length === 0) {
-          // This can happen if the API returns no results for the query, which is not an error.
-          console.log('No news articles returned from GNews for the current query.');
+          console.log('No news articles returned from TheNewsAPI for the current query.');
           setHumanitarianNews([]);
         } else {
           setHumanitarianNews(articles);
@@ -54,7 +53,7 @@ export default function Home() {
       } catch (error) {
         console.error("Error fetching or processing news data:", error);
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred while fetching news.";
-        setNewsError(`Failed to fetch news feed. Please ensure your GNEWS_API_KEY is set in the .env file. Error: ${errorMessage}`);
+        setNewsError(`Failed to fetch news feed. Please ensure your API key is set in the .env file. Error: ${errorMessage}`);
         setIncidents([]);
         setHumanitarianNews([]);
       } finally {
