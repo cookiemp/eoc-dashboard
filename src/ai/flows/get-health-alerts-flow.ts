@@ -15,7 +15,7 @@ const HealthAlertSchema = z.object({
   severity: z.enum(['High', 'Medium', 'Low']).describe('The severity of the alert.'),
   region: z.string().describe('The specific region or state in Ethiopia affected by the alert.'),
   details: z.string().describe('A detailed paragraph explaining the health alert, its impact, and recommended actions.'),
-  link: z.string().url().describe('A valid URL to a reputable source (like WHO or CDC) for more information.'),
+  link: z.string().describe('A valid URL to a reputable source (like WHO or CDC) for more information.'),
 });
 
 const GetHealthAlertsOutputSchema = z.object({
