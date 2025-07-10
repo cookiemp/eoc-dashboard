@@ -11,6 +11,8 @@ import type { NewsArticle } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import fs from 'fs/promises';
 import path from 'path';
+import Parser from 'rss-parser';
+
 
 // Define the path to the summary cache file
 const summaryCacheFilePath = path.resolve(process.cwd(), 'src/lib/summary-cache.json');
@@ -73,6 +75,40 @@ export async function getSummary(input: { articles: NewsArticle[] }) {
     return { error: `Failed to generate summary: ${errorMessage}` };
   }
 }
+
+
+/**
+ * Fetches news from the ReliefWeb RSS feed directly from the server.
+ */
+export async function getNewsFeed(): Promise<{ articles: NewsArticle[], error?: string }> {
+  const feedUrl = 'https://reliefweb.int/rss.xml?country=76';
+  const parser = new Parser({
+    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' },
+  });
+
+  try {
+    const feed = await parser.parseURL(feedUrl);
+    if (!feed?.items) {
+      return { articles: [], error: 'Feed is empty or invalid.' };
+    }
+    
+    const articles: NewsArticle[] = feed.items.slice(0, 10).map((item) => ({
+        id: item.guid || item.link || item.title!,
+        title: item.title || 'No Title',
+        source: 'ReliefWeb',
+        snippet: item.contentSnippet || item.content || 'No Snippet',
+        url: item.link || '',
+    }));
+
+    return { articles };
+
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred while fetching the news feed.";
+    console.error("Error fetching or parsing RSS feed:", error);
+    return { articles: [], error: `Failed to load news: ${errorMessage}` };
+  }
+}
+
 
 /**
  * Orchestrates the process of extracting incidents from news articles and storing them.

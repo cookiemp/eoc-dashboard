@@ -6,12 +6,11 @@ import IncidentMap from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
 import WeatherAlerts from "@/components/dashboard/weather-alerts";
 import NewsFeed from "@/components/dashboard/news-feed";
-import { getLatestIncidents, processNewsIntoIncidents, getWeatherForCitiesAction } from "@/app/actions";
+import { getLatestIncidents, processNewsIntoIncidents, getWeatherForCitiesAction, getNewsFeed } from "@/app/actions";
 import type { IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
 import { Newspaper, BookHeart } from 'lucide-react';
 import type { WeatherAlert } from '@/lib/types';
-import Parser from 'rss-parser';
 
 export default function Home() {
   const [incidents, setIncidents] = useState<IncidentWithId[]>([]);
@@ -23,68 +22,22 @@ export default function Home() {
   const [newsError, setNewsError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetches news from an RSS feed using a CORS proxy.
-    const fetchNews = async (category: 'humanitarian' | 'general'): Promise<{ articles: NewsArticle[], error?: string }> => {
-        if (category !== 'humanitarian') {
-            return { articles: [] };
-        }
-
-        const feedUrl = 'https://reliefweb.int/rss.xml?country=76';
-        // Using a public CORS proxy that returns a JSON object.
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
-
-        try {
-            const response = await fetch(proxyUrl);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch from proxy. Status: ${response.status}`);
-            }
-            const data = await response.json();
-            
-            // The actual XML is in the 'contents' property of the proxy's response.
-            const xmlString = data.contents; 
-
-            if (!xmlString) {
-                throw new Error("Received empty response from proxy.");
-            }
-
-            const parser = new Parser();
-            const feed = await parser.parseString(xmlString);
-
-            const articles: NewsArticle[] = feed.items.slice(0, 10).map((item) => ({
-                id: item.guid || item.link || item.title!,
-                title: item.title || 'No Title',
-                source: 'ReliefWeb',
-                snippet: item.contentSnippet || item.content || 'No Snippet',
-                url: item.link || '',
-            }));
-
-            return { articles };
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
-            console.error("Error details:", error);
-            return { articles: [], error: `Failed to fetch news feed: ${errorMessage}` };
-        }
-    };
-
     const fetchAndProcessData = async () => {
       setLoading(true);
       setNewsError(null);
       try {
-        const [hNews, gNews] = await Promise.all([
-          fetchNews('humanitarian'),
-          fetchNews('general')
-        ]);
+        const newsResult = await getNewsFeed();
 
-        if (hNews.error) {
-          setNewsError(hNews.error);
+        if (newsResult.error) {
+          setNewsError(newsResult.error);
           setHumanitarianNews([]);
         } else {
-          setHumanitarianNews(hNews.articles || []);
-          await processNewsIntoIncidents({ articles: hNews.articles || [] });
+          setHumanitarianNews(newsResult.articles || []);
+          // Process the news into incidents after fetching
+          await processNewsIntoIncidents({ articles: newsResult.articles || [] });
         }
         
-        setGeneralNews(gNews.articles || []);
-        
+        // Fetch incidents separately after processing
         const latestIncidents = await getLatestIncidents();
         
         if (latestIncidents) {
@@ -96,7 +49,6 @@ export default function Home() {
         setNewsError("An unexpected error occurred while fetching news.");
         setIncidents([]);
         setHumanitarianNews([]);
-        setGeneralNews([]);
       } finally {
         setLoading(false);
       }
@@ -151,7 +103,7 @@ export default function Home() {
               icon={<Newspaper className="h-5 w-5 text-primary" />} 
               title="General Ethiopia News" 
               items={generalNews}
-              isLoading={loading}
+              isLoading={false} // Since we are not fetching general news yet
             />
           </div>
         </div>
