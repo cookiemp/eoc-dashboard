@@ -29,17 +29,18 @@ export default function Home() {
             return { articles: [] };
         }
 
-        // Using a public CORS proxy to fetch the RSS feed from the client-side.
-        // This avoids server-side IP blocks.
         const feedUrl = 'https://reliefweb.int/rss.xml?country=76';
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`;
+        // Using a public CORS proxy that returns JSONP
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
 
         try {
             const response = await fetch(proxyUrl);
             if (!response.ok) {
                 throw new Error(`Failed to fetch from proxy. Status: ${response.status}`);
             }
-            const xmlString = await response.text();
+            const data = await response.json();
+            const xmlString = data.contents; // The actual XML is in the 'contents' property
+
             if (!xmlString) {
                 throw new Error("Received empty response from proxy.");
             }
