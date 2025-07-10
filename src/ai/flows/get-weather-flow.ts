@@ -81,7 +81,8 @@ const getWeatherFlow = ai.defineFlow(
     );
 
     const weatherData = await Promise.all(weatherResponses.map(async (res) => {
-        const toolResponse = res.toolRequest?.tool.response;
+        // FIX: The correct property is toolResponse, not toolRequest.
+        const toolResponse = res.toolResponse;
         if (toolResponse) {
             return toolResponse as z.infer<typeof WeatherSchema>;
         }
