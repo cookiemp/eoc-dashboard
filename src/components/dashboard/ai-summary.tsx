@@ -20,36 +20,70 @@ const AiSummary = ({ articles }: AiSummaryProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // This function will now only run once when the component mounts.
-    async function generateSummary() {
+    const generateAndCacheSummary = async () => {
       if (!articles || articles.length === 0) {
         setIsLoading(false);
         return;
       }
       
       setIsLoading(true);
-      const result = await getSummary({ articles });
+      try {
+        const result = await getSummary({ articles });
 
-      if (result.error) {
-        toast({
-          variant: 'destructive',
-          title: 'Error Generating Summary',
-          description: result.error,
-        });
-      } else {
-        setSummary(result);
+        if (result.error) {
+          toast({
+            variant: 'destructive',
+            title: 'Error Generating Summary',
+            description: result.error,
+          });
+          setSummary(null);
+        } else {
+          setSummary(result);
+          const today = new Date().toISOString().split('T')[0];
+          const cache = { summary: result, date: today };
+          localStorage.setItem('aiSummaryCache', JSON.stringify(cache));
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+         toast({
+            variant: 'destructive',
+            title: 'Failed to Generate Summary',
+            description: errorMessage,
+          });
+          setSummary(null);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    }
+    };
 
-    generateSummary();
-    // By providing an empty dependency array, we ensure this effect runs only once.
-  }, []);
+    const loadSummary = () => {
+      const today = new Date().toISOString().split('T')[0];
+      const cachedItem = localStorage.getItem('aiSummaryCache');
+
+      if (cachedItem) {
+        try {
+          const { summary: cachedSummary, date: cachedDate } = JSON.parse(cachedItem);
+          if (cachedDate === today) {
+            setSummary(cachedSummary);
+            setIsLoading(false);
+            return;
+          }
+        } catch (error) {
+          // Cached item is invalid, proceed to fetch a new one
+          console.error("Failed to parse cached summary:", error);
+        }
+      }
+      
+      // If no valid cache for today, generate a new one
+      generateAndCacheSummary();
+    };
+
+    loadSummary();
+  }, [articles, toast]);
 
   const renderSummary = () => {
     if (!summary) return null;
 
-    // Split the summary string into an array of bullet points
     const summaryPoints = summary.summary.split('*').filter(point => point.trim() !== '');
 
     return (
@@ -77,7 +111,7 @@ const AiSummary = ({ articles }: AiSummaryProps) => {
           <Sparkles className="h-6 w-6 text-primary" />
           <CardTitle>AI-Powered Daily Briefing</CardTitle>
         </div>
-        <CardDescription>An automated summary of the latest humanitarian news.</CardDescription>
+        <CardDescription>An automated summary of the latest humanitarian news, updated daily.</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
         {isLoading ? (
@@ -91,7 +125,7 @@ const AiSummary = ({ articles }: AiSummaryProps) => {
             {renderSummary()}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">No summary available.</p>
+          <p className="text-sm text-muted-foreground">No summary available. Please check back later.</p>
         )}
       </CardContent>
     </Card>
