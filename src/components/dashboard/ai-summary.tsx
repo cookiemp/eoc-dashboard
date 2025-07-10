@@ -20,7 +20,7 @@ const AiSummary = ({ articles }: AiSummaryProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const generateAndCacheSummary = async () => {
+    const generateSummary = async () => {
       if (!articles || articles.length === 0) {
         setIsLoading(false);
         return;
@@ -39,9 +39,6 @@ const AiSummary = ({ articles }: AiSummaryProps) => {
           setSummary(null);
         } else {
           setSummary(result);
-          const today = new Date().toISOString().split('T')[0];
-          const cache = { summary: result, date: today };
-          localStorage.setItem('aiSummaryCache', JSON.stringify(cache));
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
@@ -56,29 +53,7 @@ const AiSummary = ({ articles }: AiSummaryProps) => {
       }
     };
 
-    const loadSummary = () => {
-      const today = new Date().toISOString().split('T')[0];
-      const cachedItem = localStorage.getItem('aiSummaryCache');
-
-      if (cachedItem) {
-        try {
-          const { summary: cachedSummary, date: cachedDate } = JSON.parse(cachedItem);
-          if (cachedDate === today) {
-            setSummary(cachedSummary);
-            setIsLoading(false);
-            return;
-          }
-        } catch (error) {
-          // Cached item is invalid, proceed to fetch a new one
-          console.error("Failed to parse cached summary:", error);
-        }
-      }
-      
-      // If no valid cache for today, generate a new one
-      generateAndCacheSummary();
-    };
-
-    loadSummary();
+    generateSummary();
   }, [articles, toast]);
 
   const renderSummary = () => {
