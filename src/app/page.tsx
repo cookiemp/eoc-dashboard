@@ -36,11 +36,11 @@ export default function Home() {
 
         const articles = result.articles || [];
         
-        if (!articles || articles.length === 0) {
-          console.log('No news articles returned from TheNewsAPI for the current query.');
-          setHumanitarianNews([]);
-        } else {
-          setHumanitarianNews(articles);
+        // This is now safe, as an empty array is a valid state
+        setHumanitarianNews(articles);
+
+        // Only process incidents if there are articles to process
+        if (articles.length > 0) {
           await processNewsIntoIncidents({ articles });
         }
         
@@ -53,7 +53,7 @@ export default function Home() {
       } catch (error) {
         console.error("Error fetching or processing news data:", error);
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred while fetching news.";
-        setNewsError(`Failed to fetch news feed. Please ensure your API key is set in the .env file. Error: ${errorMessage}`);
+        setNewsError(errorMessage);
         setIncidents([]);
         setHumanitarianNews([]);
       } finally {
