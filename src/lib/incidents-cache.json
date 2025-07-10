@@ -1,5 +1,41 @@
 [
   {
+    "color": "#3b82f6",
+    "description": "An extended drought is exacerbating food insecurity for millions in Ethiopia's Afar and Somali regions, leading to an urgent call for immediate international aid.",
+    "latitude": 9.35,
+    "longitude": 42.15,
+    "title": "Drought Worsens Food Insecurity in Afar and Somali",
+    "id": "1752154661369-fahenhj",
+    "addedAt": "2025-07-10T13:37:41.369Z"
+  },
+  {
+    "color": "#f59e0b",
+    "description": "Localized clashes in parts of the Amhara region have displaced an estimated 30,000 individuals, who are now seeking refuge and requiring urgent humanitarian assistance.",
+    "latitude": 11.59,
+    "longitude": 37.38,
+    "title": "Displacement Due to Clashes in Amhara",
+    "id": "1752154661369-vnk37k8",
+    "addedAt": "2025-07-10T13:37:41.369Z"
+  },
+  {
+    "color": "#ef4444",
+    "description": "The Ministry of Health and partners are scaling up efforts to contain a burgeoning cholera outbreak in several districts of Oromia, focusing on rapid case management and water purification.",
+    "latitude": 8.54,
+    "longitude": 39.27,
+    "title": "Cholera Outbreak in Oromia",
+    "id": "1752154661369-4zhjaq6",
+    "addedAt": "2025-07-10T13:37:41.369Z"
+  },
+  {
+    "color": "#3b82f6",
+    "description": "Heavy seasonal rains have caused widespread flooding in southern Ethiopia, displacing hundreds of families and damaging agricultural lands, creating an urgent need for shelter and emergency relief.",
+    "latitude": 7.06,
+    "longitude": 38.48,
+    "title": "Seasonal Flooding in Southern Ethiopia",
+    "id": "1752154661369-iw1y2mg",
+    "addedAt": "2025-07-10T13:37:41.369Z"
+  },
+  {
     "color": "#22c55e",
     "description": "Over 100,000 people in remote areas of Tigray have received emergency food assistance to alleviate severe food insecurity, though access challenges persist.",
     "latitude": 13.495,
@@ -51,42 +87,6 @@
     "longitude": 38.5,
     "title": "Food Aid Distribution to Millions in Amhara and Tigray",
     "id": "1752154411764-mb9iqwl",
-    "addedAt": "2025-07-10T13:33:31.764Z"
-  },
-  {
-    "color": "#ef4444",
-    "description": "A significant increase in cholera cases has been reported in Ethiopia's Oromia region, prompting an urgent appeal for funding to expand vaccination campaigns and improve access to clean water.",
-    "latitude": 8.5,
-    "longitude": 39.2,
-    "title": "Cholera Outbreak Spreads in Oromia",
-    "id": "1752154411764-zp26uqx",
-    "addedAt": "2025-07-10T13:33:31.764Z"
-  },
-  {
-    "color": "#3b82f6",
-    "description": "Heavy seasonal rains have caused widespread flooding in the Afar and Somali regions, displacing thousands of families and damaging critical infrastructure, prompting humanitarian mobilization.",
-    "latitude": 10.5,
-    "longitude": 41.5,
-    "title": "Widespread Flooding in Afar and Somali Regions",
-    "id": "1752154411764-l0ud3av",
-    "addedAt": "2025-07-10T13:33:31.764Z"
-  },
-  {
-    "color": "#3b82f6",
-    "description": "Parts of Southern Nations, Nationalities, and Peoples' Region (SNNPR) are experiencing deteriorating food security conditions due to erratic rainfall and persistent economic shocks, requiring urgent interventions.",
-    "latitude": 7,
-    "longitude": 38.5,
-    "title": "Deteriorating Food Security in SNNPR",
-    "id": "1752154411764-o07ozwm",
-    "addedAt": "2025-07-10T13:33:31.764Z"
-  },
-  {
-    "color": "#f59e0b",
-    "description": "The International Organization for Migration (IOM) highlights a growing number of internally displaced persons (IDPs) in Ethiopia, particularly due to inter-communal violence, requiring enhanced protection and aid.",
-    "latitude": 9,
-    "longitude": 38.7,
-    "title": "Rising IDP Numbers Across Ethiopia",
-    "id": "1752154411764-9gwvf40",
     "addedAt": "2025-07-10T13:33:31.764Z"
   }
 ]

@@ -1,8 +1,8 @@
 'use server';
 /**
- * @fileOverview A Genkit flow for generating realistic news articles.
+ * @fileOverview A flow for fetching real news articles from an RSS feed.
  *
- * - getNewsArticles - Generates a list of news articles based on a category.
+ * - getNewsArticles - Fetches a list of news articles based on a category.
  * - GetNewsArticlesInput - The input type for the flow.
  * - GetNewsArticlesOutput - The return type for the flow.
  */
@@ -10,6 +10,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import type { NewsArticle } from '@/lib/types';
+import Parser from 'rss-parser';
 
 const NewsArticleSchema = z.object({
   id: z.string().describe("A unique identifier for the news article, e.g., 'hn1' or 'gn1'."),
@@ -37,24 +38,7 @@ export async function getNewsArticles(
 }
 
 
-const getNewsArticlesPrompt = ai.definePrompt({
-  name: 'getNewsArticlesPrompt',
-  input: { schema: GetNewsArticlesInputSchema },
-  output: { schema: GetNewsArticlesOutputSchema },
-  prompt: `You are a news editor for an Emergency Operations Center dashboard focused on Ethiopia.
-  Your task is to generate a list of 5 recent, realistic, and relevant news articles.
-
-  The category of news to generate is: **{{category}}**.
-
-  **Instructions:**
-  - **Humanitarian News:** If the category is 'humanitarian', focus on topics like aid distribution, displacement, health crises, natural disasters, and food security in Ethiopia.
-  - **General News:** If the category is 'general', focus on topics like infrastructure, economic development, cultural events, and politics in Ethiopia.
-  - **Be Realistic:** Create plausible headlines, sources, and snippets. The information should sound like it's from a real news report.
-  - **Generate 5 Articles:** Create exactly 5 distinct articles for the specified category.
-  `,
-});
-
-
+// This flow fetches real news from ReliefWeb's RSS feed for Ethiopia.
 const getNewsArticlesFlow = ai.defineFlow(
   {
     name: 'getNewsArticlesFlow',
@@ -62,7 +46,31 @@ const getNewsArticlesFlow = ai.defineFlow(
     outputSchema: GetNewsArticlesOutputSchema,
   },
   async (input) => {
-    const { output } = await getNewsArticlesPrompt(input);
-    return output!;
+    // We only care about humanitarian news for now.
+    if (input.category !== 'humanitarian') {
+      return { articles: [] };
+    }
+
+    const parser = new Parser();
+    const feedUrl = 'https://reliefweb.int/rss.xml?country=76'; // ReliefWeb RSS feed for Ethiopia
+
+    try {
+      const feed = await parser.parseURL(feedUrl);
+      
+      const articles: NewsArticle[] = feed.items.slice(0, 10).map((item) => ({
+        id: item.guid || item.link || item.title!,
+        title: item.title || 'No Title',
+        source: 'ReliefWeb',
+        snippet: item.contentSnippet || item.content || 'No Snippet',
+        url: item.link || '',
+      }));
+
+      return { articles };
+
+    } catch (error) {
+      console.error('Failed to fetch or parse RSS feed:', error);
+      // On error, return an empty array to avoid breaking the UI
+      return { articles: [] };
+    }
   }
 );
