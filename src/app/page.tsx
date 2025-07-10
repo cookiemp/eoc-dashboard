@@ -11,7 +11,6 @@ import type { IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
 import { Newspaper, BookHeart } from 'lucide-react';
 import type { WeatherAlert } from '@/lib/types';
-import Parser from 'rss-parser';
 
 
 export default function Home() {
@@ -28,33 +27,21 @@ export default function Home() {
       setLoading(true);
       setNewsError(null);
       
-      const parser = new Parser();
-
       try {
-        // Fetch from our own API route proxy
+        // Fetch from our own API route which proxies the ReliefWeb API
         const response = await fetch('/api/news');
 
         if (!response.ok) {
-          // If the server responded with an error, read the JSON error message
           const errorData = await response.json();
           throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
         }
 
-        const xmlString = await response.text();
-        if (!xmlString) {
-          throw new Error('Received empty response from news feed.');
-        }
-
-        const feed = await parser.parseString(xmlString);
+        const articles: NewsArticle[] = await response.json();
         
-        const articles: NewsArticle[] = (feed.items || []).slice(0, 10).map((item) => ({
-            id: item.guid || item.link || item.title!,
-            title: item.title || 'No Title',
-            source: 'ReliefWeb',
-            snippet: item.contentSnippet || item.content || 'No Snippet',
-            url: item.link || '',
-        }));
-
+        if (!articles || articles.length === 0) {
+          throw new Error('Received no articles from the news feed.');
+        }
+        
         setHumanitarianNews(articles);
         await processNewsIntoIncidents({ articles });
         
