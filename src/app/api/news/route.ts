@@ -29,16 +29,22 @@ export async function GET() {
     // Transform the API response into our standard NewsArticle format
     const articles: NewsArticle[] = (data.data || []).map((item: any) => {
       const fields = item.fields;
+      
+      // More robust snippet creation
+      let snippet = 'No Snippet Available';
+      if (fields.body) {
+         // Take the first 200 characters and remove any HTML tags for a clean preview
+        snippet = fields.body.substring(0, 200).replace(/<[^>]+>/g, '');
+        if (fields.body.length > 200) {
+          snippet += '...';
+        }
+      }
+
       return {
-        id: item.id,
+        id: item.id || Math.random().toString(), // Add a fallback for ID
         title: fields.title || 'No Title',
         source: fields.source?.[0]?.shortname || 'ReliefWeb',
-        snippet:
-          fields.body
-            ?.split('</p>')[0]
-            .replace(/<[^>]+>/g, '')
-            .substring(0, 150) + '...' ||
-          'No Snippet',
+        snippet: snippet,
         url: fields.url || item.href,
       };
     });
