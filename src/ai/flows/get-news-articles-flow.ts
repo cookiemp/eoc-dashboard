@@ -52,27 +52,43 @@ const getNewsArticlesFlow = ai.defineFlow(
       return { articles: [] };
     }
 
-    const parser = new Parser({
-      // Add a custom User-Agent header to mimic a browser request.
-      // This can help avoid being blocked or receiving non-XML responses.
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
-      }
-    });
-
+    const parser = new Parser();
     const feedUrl = 'https://reliefweb.int/rss.xml?country=76'; // ReliefWeb RSS feed for Ethiopia
 
-    // Let errors propagate up to the action to be handled there.
-    const feed = await parser.parseURL(feedUrl);
-    
-    const articles: NewsArticle[] = feed.items.slice(0, 10).map((item) => ({
-      id: item.guid || item.link || item.title!,
-      title: item.title || 'No Title',
-      source: 'ReliefWeb',
-      snippet: item.contentSnippet || item.content || 'No Snippet',
-      url: item.link || '',
-    }));
+    try {
+      // Step 1: Use native fetch to get the raw text content. This is more robust.
+      const response = await fetch(feedUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch from ReliefWeb. Status: ${response.status} ${response.statusText}`);
+      }
+      
+      const xmlString = await response.text();
 
-    return { articles };
+      if (!xmlString) {
+        throw new Error("Received empty response from ReliefWeb.");
+      }
+      
+      // Step 2: Parse the string content.
+      const feed = await parser.parseString(xmlString);
+      
+      const articles: NewsArticle[] = feed.items.slice(0, 10).map((item) => ({
+        id: item.guid || item.link || item.title!,
+        title: item.title || 'No Title',
+        source: 'ReliefWeb',
+        snippet: item.contentSnippet || item.content || 'No Snippet',
+        url: item.link || '',
+      }));
+
+      return { articles };
+    } catch (error) {
+      // Re-throw the error so it can be caught by the action and displayed in the UI.
+      const errorMessage = error instanceof Error ? error.message : "An unknown parsing error occurred.";
+      throw new Error(errorMessage);
+    }
   }
 );
