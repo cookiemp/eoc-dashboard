@@ -66,7 +66,7 @@ const NewsFeed = ({ title, items, icon, isLoading, error }: NewsFeedProps) => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          {icon}
+          {error ? <AlertTriangle className="h-5 w-5 text-destructive" /> : icon}
           {title}
         </CardTitle>
       </CardHeader>
