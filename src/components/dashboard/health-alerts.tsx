@@ -38,7 +38,7 @@ const HealthAlerts = () => {
                 key={alert.id}
                 onClick={() => setSelectedAlert(alert)}
                 className={cn(
-                  'p-4 rounded-lg border text-left transition-all duration-200',
+                  'p-4 rounded-lg border text-left transition-all duration-200 hover:shadow-lg',
                   severityStyles[alert.severity]
                 )}
               >
@@ -61,14 +61,16 @@ const HealthAlerts = () => {
           <DialogHeader>
             <DialogTitle>{selectedAlert?.title}</DialogTitle>
             <DialogDescription className="pt-2">
-              <p className="mb-4">{selectedAlert?.details}</p>
-              <Button asChild>
-                <a href={selectedAlert?.link} target="_blank" rel="noopener noreferrer">
-                  Learn More
-                </a>
-              </Button>
+              {selectedAlert?.details}
             </DialogDescription>
           </DialogHeader>
+          <div className="pt-4">
+            <Button asChild>
+              <a href={selectedAlert?.link} target="_blank" rel="noopener noreferrer">
+                Learn More
+              </a>
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>
