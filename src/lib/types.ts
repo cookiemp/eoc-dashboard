@@ -17,6 +17,8 @@ export type HealthAlert = {
   title: string;
   severity: 'High' | 'Medium' | 'Low';
   region: string;
+  details: string;
+  link: string;
 };
 
 export type Incident = {

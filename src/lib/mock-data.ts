@@ -11,6 +11,8 @@ export const humanitarianNews: NewsArticle[] = [
   { id: 'hn1', title: 'Food Aid Distribution Begins in Tigray Region', source: 'ReliefWeb', snippet: 'International aid agencies have started distributing...', url: 'https://reliefweb.int/report/ethiopia/food-aid-distribution-begins-tigray-region' },
   { id: 'hn2', title: 'Water Shortage Crisis Worsens in Somali Region', source: 'UN OCHA', snippet: 'Urgent action is needed as drought conditions persist...', url: 'https://www.unocha.org/ethiopia' },
   { id: 'hn3', title: 'Displacement Camp in Amhara Receives Medical Supplies', source: 'WHO', snippet: 'Essential medical supplies were delivered to...', url: 'https://www.who.int/countries/eth/' },
+  { id: 'hn4', title: 'Urgent Appeal for Nutrition Support in Afar', source: 'UNICEF', snippet: 'Malnutrition rates among children are rising alarmingly...', url: 'https://www.unicef.org/ethiopia/' },
+  { id: 'hn5', title: 'Flooding Displaces Thousands in Gambela Region', source: 'IOM', snippet: 'Heavy rains have led to widespread flooding, forcing families to flee...', url: 'https://ethiopia.iom.int/' },
 ];
 
 export const generalNews: NewsArticle[] = [
@@ -20,14 +22,14 @@ export const generalNews: NewsArticle[] = [
 ];
 
 export const healthAlerts: HealthAlert[] = [
-  { id: 'ha1', title: 'Cholera Outbreak', severity: 'High', region: 'Gambela' },
-  { id: 'ha2', title: 'Malaria Season Warning', severity: 'Medium', region: 'Benishangul-Gumuz' },
-  { id: 'ha3', title: 'Measles Vaccination Campaign', severity: 'Low', region: 'SNNPR' },
+  { id: 'ha1', title: 'Cholera Outbreak', severity: 'High', region: 'Gambela', details: 'A significant cholera outbreak has been reported in the Gambela region, with cases rising daily. Health officials are implementing emergency water purification measures and have established treatment centers. Residents are advised to boil all drinking water.', link: 'https://www.who.int/news-room/fact-sheets/detail/cholera' },
+  { id: 'ha2', title: 'Malaria Season Warning', severity: 'Medium', region: 'Benishangul-Gumuz', details: 'The onset of the rainy season has increased the risk of malaria in Benishangul-Gumuz. Distribution of insecticide-treated bed nets is underway. Prophylactic medications are recommended for vulnerable groups.', link: 'https://www.who.int/news-room/fact-sheets/detail/malaria' },
+  { id: 'ha3', title: 'Measles Vaccination Campaign', severity: 'Low', region: 'SNNPR', details: 'A preventative measles vaccination campaign is being launched across the Southern Nations, Nationalities, and Peoples\' Region (SNNPR) to boost immunity and prevent potential outbreaks. All children under 5 are eligible.', link: 'https://www.who.int/news-room/fact-sheets/detail/measles' },
 ];
 
 export const incidents: Incident[] = [
-  { id: 1, title: 'Flood Warning', description: 'Heavy rainfall has led to severe flooding in the Afar region. Major rivers have overflowed their banks, displacing thousands of families and disrupting agricultural activities. Emergency response teams are on site.', top: '48%', left: '52%', color: 'blue' },
-  { id: 2, title: 'Health Emergency', description: 'A significant health emergency has been declared in the Somali region due to a fast-spreading disease. Mobile clinics have been dispatched, but more medical supplies and personnel are urgently needed.', top: '65%', left: '80%', color: 'red' },
-  { id: 3, title: 'Conflict Zone', description: 'Reports of localized conflict in the northern Tigray region have been confirmed. Humanitarian access is currently restricted, raising concerns for the safety and well-being of the civilian population.', top: '25%', left: '60%', color: 'yellow' },
-  { id: 4, title: 'Displacement Camp', description: 'A new displacement camp has been established in the Oromia region to shelter families fleeing from drought-affected areas. The camp is in need of clean water, food, and sanitation facilities.', top: '70%', left: '45%', color: 'green' },
+  { id: 1, title: 'Flood Warning', description: 'Heavy rainfall has led to severe flooding in the Afar region. Major rivers have overflowed their banks, displacing thousands of families and disrupting agricultural activities. Emergency response teams are on site.', top: '48', left: '82', color: '#3b82f6' }, // Blue
+  { id: 2, title: 'Health Emergency', description: 'A significant health emergency has been declared in the Somali region due to a fast-spreading disease. Mobile clinics have been dispatched, but more medical supplies and personnel are urgently needed.', top: '65', left: '80', color: '#ef4444' }, // Red
+  { id: 3, title: 'Conflict Zone', description: 'Reports of localized conflict in the northern Tigray region have been confirmed. Humanitarian access is currently restricted, raising concerns for the safety and well-being of the civilian population.', top: '25', left: '60', color: '#f59e0b' }, // Yellow
+  { id: 4, title: 'Displacement Camp', description: 'A new displacement camp has been established in the Oromia region to shelter families fleeing from drought-affected areas. The camp is in need of clean water, food, and sanitation facilities.', top: '70', left: '45', color: '#22c55e' }, // Green
 ];

@@ -10,28 +10,18 @@ interface MapWrapperProps {
 }
 
 const createIncidentIcon = (color: string) => {
+  const iconHtml = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="${color}" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="drop-shadow-lg">
+      <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/>
+      <circle cx="12" cy="10" r="3" fill="white"/>
+    </svg>
+  `;
   return L.divIcon({
-    html: `
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="28"
-        height="28"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="${color}"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="lucide lucide-map-pin"
-      >
-        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-        <circle cx="12" cy="10" r="3" fill="${color}" />
-      </svg>
-    `,
-    className: 'leaflet-marker-icon',
-    iconSize: [28, 28],
-    iconAnchor: [14, 28],
-    popupAnchor: [0, -28],
+    html: iconHtml,
+    className: 'leaflet-marker-icon', // This class is important to remove default Leaflet styles
+    iconSize: [32, 32],
+    iconAnchor: [16, 32], // Point of the icon which will correspond to marker's location
+    popupAnchor: [0, -32], // Point from which the popup should open relative to the iconAnchor
   });
 };
 
@@ -73,10 +63,11 @@ const MapWrapper = ({ incidents, onMarkerClick }: MapWrapperProps) => {
 
     // Add new markers
     incidents.forEach((incident: Incident) => {
-      const position: [number, number] = [
-        parseFloat(incident.top.replace('%', '')) * (14.5 - 5.5) / 100 + 5.5,
-        parseFloat(incident.left.replace('%', '')) * (48 - 33) / 100 + 33
-      ];
+      // Simple conversion from percentage to lat/lng for Ethiopia
+      // This is a rough approximation and may need refinement
+      const lat = parseFloat(incident.top) / 100 * (15 - 3) + 3; // Approx lat range for Ethiopia
+      const lng = parseFloat(incident.left) / 100 * (48 - 33) + 33; // Approx lng range
+      const position: [number, number] = [lat, lng];
         
       const icon = createIncidentIcon(incident.color);
         

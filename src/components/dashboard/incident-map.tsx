@@ -15,7 +15,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { Incident } from '@/lib/types';
-import MapWrapper from './map-wrapper';
 
 const MapWithNoSSR = dynamic(() => import('@/components/dashboard/map-wrapper'), {
   ssr: false,
