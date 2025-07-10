@@ -6,11 +6,12 @@ import IncidentMap from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
 import WeatherAlerts from "@/components/dashboard/weather-alerts";
 import NewsFeed from "@/components/dashboard/news-feed";
-import { getLatestIncidents, processNewsIntoIncidents, getNewsArticles, getWeatherForCitiesAction } from "@/app/actions";
+import { getLatestIncidents, processNewsIntoIncidents, getWeatherForCitiesAction } from "@/app/actions";
 import type { IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
 import { Newspaper, BookHeart } from 'lucide-react';
 import type { WeatherAlert } from '@/lib/types';
+import Parser from 'rss-parser';
 
 export default function Home() {
   const [incidents, setIncidents] = useState<IncidentWithId[]>([]);
@@ -22,13 +23,52 @@ export default function Home() {
   const [newsError, setNewsError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Fetches news from an RSS feed using a CORS proxy.
+    const fetchNews = async (category: 'humanitarian' | 'general'): Promise<{ articles: NewsArticle[], error?: string }> => {
+        if (category !== 'humanitarian') {
+            return { articles: [] };
+        }
+
+        // Using a public CORS proxy to fetch the RSS feed from the client-side.
+        // This avoids server-side IP blocks.
+        const feedUrl = 'https://reliefweb.int/rss.xml?country=76';
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`;
+
+        try {
+            const response = await fetch(proxyUrl);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch from proxy. Status: ${response.status}`);
+            }
+            const xmlString = await response.text();
+            if (!xmlString) {
+                throw new Error("Received empty response from proxy.");
+            }
+
+            const parser = new Parser();
+            const feed = await parser.parseString(xmlString);
+
+            const articles: NewsArticle[] = feed.items.slice(0, 10).map((item) => ({
+                id: item.guid || item.link || item.title!,
+                title: item.title || 'No Title',
+                source: 'ReliefWeb',
+                snippet: item.contentSnippet || item.content || 'No Snippet',
+                url: item.link || '',
+            }));
+
+            return { articles };
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+            return { articles: [], error: `Failed to fetch news feed: ${errorMessage}` };
+        }
+    };
+
     const fetchAndProcessData = async () => {
       setLoading(true);
       setNewsError(null);
       try {
         const [hNews, gNews] = await Promise.all([
-          getNewsArticles({ category: 'humanitarian' }),
-          getNewsArticles({ category: 'general' })
+          fetchNews('humanitarian'),
+          fetchNews('general')
         ]);
 
         if (hNews.error) {

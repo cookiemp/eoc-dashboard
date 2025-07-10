@@ -2,8 +2,6 @@
 
 import { summarizeIncidentData, type SummarizeIncidentDataOutput } from '@/ai/flows/summarize-incident-data';
 import { extractIncidentsFromNews } from '@/ai/flows/extract-incidents-from-news-flow';
-import { getNewsArticles as getNewsArticlesFlow } from '@/ai/flows/get-news-articles-flow';
-import type { GetNewsArticlesInput, GetNewsArticlesOutput } from '@/ai/flows/get-news-articles-flow';
 import { generateIncidentDossier as generateIncidentDossierFlow } from '@/ai/flows/generate-incident-dossier-flow';
 import type { GenerateIncidentDossierInput, GenerateIncidentDossierOutput } from '@/ai/flows/generate-incident-dossier-flow';
 import { getWeatherForCities } from '@/ai/flows/get-weather-flow';
@@ -110,20 +108,6 @@ export async function getLatestIncidents(): Promise<IncidentWithId[]> {
     return [];
   }
 }
-
-/**
- * Fetches news articles using the Genkit flow.
- */
-export async function getNewsArticles(input: GetNewsArticlesInput): Promise<GetNewsArticlesOutput> {
-  try {
-    return await getNewsArticlesFlow(input);
-  } catch (error) {
-    console.error(`Error fetching '${input.category}' news:`, error);
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-    return { articles: [], error: `Failed to fetch news feed: ${errorMessage}` };
-  }
-}
-
 
 /**
  * Generates a detailed incident dossier using the Genkit flow.
