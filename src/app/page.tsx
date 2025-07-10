@@ -30,7 +30,7 @@ export default function Home() {
         }
 
         const feedUrl = 'https://reliefweb.int/rss.xml?country=76';
-        // Using a public CORS proxy that returns JSONP
+        // Using a public CORS proxy that returns a JSON object.
         const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
 
         try {
@@ -39,7 +39,9 @@ export default function Home() {
                 throw new Error(`Failed to fetch from proxy. Status: ${response.status}`);
             }
             const data = await response.json();
-            const xmlString = data.contents; // The actual XML is in the 'contents' property
+            
+            // The actual XML is in the 'contents' property of the proxy's response.
+            const xmlString = data.contents; 
 
             if (!xmlString) {
                 throw new Error("Received empty response from proxy.");
@@ -59,6 +61,7 @@ export default function Home() {
             return { articles };
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+            console.error("Error details:", error);
             return { articles: [], error: `Failed to fetch news feed: ${errorMessage}` };
         }
     };
