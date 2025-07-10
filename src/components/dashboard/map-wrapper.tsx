@@ -63,7 +63,7 @@ const MapWrapper = ({ incidents }: MapWrapperProps) => {
         
         const icon = createIncidentIcon(incident.color);
         
-        L.marker(position, { icon }).addTo(map).bindPopup(incident.title);
+        L.marker(position, { icon }).addTo(map).bindTooltip(incident.title);
       });
     }
 
