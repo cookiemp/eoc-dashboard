@@ -71,7 +71,7 @@ const MapWrapper = ({ incidents }: MapWrapperProps) => {
       const icon = createIncidentIcon(incident.color);
       
       const tooltipContent = `
-        <div class="font-sans">
+        <div class="font-sans max-w-xs whitespace-normal">
           <strong class="text-base">${incident.title}</strong>
           <br>
           <p class="text-sm mt-1">${incident.description || 'No details available.'}</p>
