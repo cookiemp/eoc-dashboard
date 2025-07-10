@@ -16,7 +16,7 @@ export default function Home() {
             <IncidentMap />
           </div>
           <div className="lg:col-span-2">
-            <AiSummary />
+            <AiSummary articles={humanitarianNews} />
           </div>
           <div className="lg:col-span-2">
             <WeatherAlerts />
