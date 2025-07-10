@@ -8,15 +8,15 @@ export const weatherAlerts: WeatherAlert[] = [
 ];
 
 export const humanitarianNews: NewsArticle[] = [
-  { id: 'hn1', title: 'Food Aid Distribution Begins in Tigray Region', source: 'ReliefWeb', snippet: 'International aid agencies have started distributing...', url: '#' },
-  { id: 'hn2', title: 'Water Shortage Crisis Worsens in Somali Region', source: 'UN OCHA', snippet: 'Urgent action is needed as drought conditions persist...', url: '#' },
-  { id: 'hn3', title: 'Displacement Camp in Amhara Receives Medical Supplies', source: 'WHO', snippet: 'Essential medical supplies were delivered to...', url: '#' },
+  { id: 'hn1', title: 'Food Aid Distribution Begins in Tigray Region', source: 'ReliefWeb', snippet: 'International aid agencies have started distributing...', url: 'https://reliefweb.int/report/ethiopia/food-aid-distribution-begins-tigray-region' },
+  { id: 'hn2', title: 'Water Shortage Crisis Worsens in Somali Region', source: 'UN OCHA', snippet: 'Urgent action is needed as drought conditions persist...', url: 'https://www.unocha.org/ethiopia' },
+  { id: 'hn3', title: 'Displacement Camp in Amhara Receives Medical Supplies', source: 'WHO', snippet: 'Essential medical supplies were delivered to...', url: 'https://www.who.int/countries/eth/' },
 ];
 
 export const generalNews: NewsArticle[] = [
-  { id: 'gn1', title: 'Ethiopian Airlines Expands to New Asian Destinations', source: 'Ethiopian News Agency', snippet: 'The national carrier announced new flight routes...', url: '#' },
-  { id: 'gn2', title: 'New Infrastructure Projects Launched in Oromia', source: 'Fana Broadcasting', snippet: 'The regional government has kicked off several...', url: '#' },
-  { id: 'gn3', title: 'Cultural Festival Celebrated in Awassa', source: 'Addis Standard', snippet: 'The annual festival of cultures brought together...', url: '#' },
+  { id: 'gn1', title: 'Ethiopian Airlines Expands to New Asian Destinations', source: 'Ethiopian News Agency', snippet: 'The national carrier announced new flight routes...', url: 'https://www.ena.et' },
+  { id: 'gn2', title: 'New Infrastructure Projects Launched in Oromia', source: 'Fana Broadcasting', snippet: 'The regional government has kicked off several...', url: 'https://www.fanabc.com/english/' },
+  { id: 'gn3', title: 'Cultural Festival Celebrated in Awassa', source: 'Addis Standard', snippet: 'The annual festival of cultures brought together...', url: 'https://addisstandard.com/' },
 ];
 
 export const healthAlerts: HealthAlert[] = [
