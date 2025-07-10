@@ -91,7 +91,7 @@ const MapWrapper = ({ incidents, onMarkerClick }: MapWrapperProps) => {
     });
   }, [incidents, onMarkerClick]);
 
-  return <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />;
+  return <div ref={mapContainerRef} style={{ height: '100%', width: '100%', zIndex: 1 }} />;
 };
 
 export default MapWrapper;
