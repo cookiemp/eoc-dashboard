@@ -25,7 +25,7 @@ export type Incident = {
   id: number;
   title: string;
   description?: string;
-  top: string;
-  left: string;
+  latitude: number;
+  longitude: number;
   color: string;
 };

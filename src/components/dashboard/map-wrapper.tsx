@@ -62,11 +62,7 @@ const MapWrapper = ({ incidents }: MapWrapperProps) => {
 
     // Add new markers
     incidents.forEach((incident: Incident) => {
-      // Simple conversion from percentage to lat/lng for Ethiopia
-      // This is a rough approximation and may need refinement
-      const lat = parseFloat(incident.top) / 100 * (15 - 3) + 3; // Approx lat range for Ethiopia
-      const lng = parseFloat(incident.left) / 100 * (48 - 33) + 33; // Approx lng range
-      const position: [number, number] = [lat, lng];
+      const position: [number, number] = [incident.latitude, incident.longitude];
         
       const icon = createIncidentIcon(incident.color);
       
