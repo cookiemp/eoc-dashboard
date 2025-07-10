@@ -6,7 +6,6 @@ import L from 'leaflet';
 
 interface MapWrapperProps {
   incidents: Incident[];
-  onMarkerClick: (incident: Incident) => void;
 }
 
 const createIncidentIcon = (color: string) => {
@@ -25,7 +24,7 @@ const createIncidentIcon = (color: string) => {
   });
 };
 
-const MapWrapper = ({ incidents, onMarkerClick }: MapWrapperProps) => {
+const MapWrapper = ({ incidents }: MapWrapperProps) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
@@ -70,21 +69,22 @@ const MapWrapper = ({ incidents, onMarkerClick }: MapWrapperProps) => {
       const position: [number, number] = [lat, lng];
         
       const icon = createIncidentIcon(incident.color);
+      
+      const tooltipContent = `
+        <div class="font-sans">
+          <strong class="text-base">${incident.title}</strong>
+          <br>
+          <p class="text-sm mt-1">${incident.description || 'No details available.'}</p>
+        </div>
+      `;
         
       const marker = L.marker(position, { icon })
         .addTo(map)
-        .bindTooltip(incident.title)
-        .on('click', (e) => {
-            // This is the critical fix. Remove focus from the marker's element.
-            if (e.originalEvent.currentTarget) {
-              (e.originalEvent.currentTarget as HTMLElement).blur();
-            }
-            onMarkerClick(incident)
-        });
+        .bindTooltip(tooltipContent);
       
       markersRef.current.push(marker);
     });
-  }, [incidents, onMarkerClick]);
+  }, [incidents]);
 
   return <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />;
 };
