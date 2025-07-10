@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { icon } from 'leaflet';
@@ -18,10 +17,12 @@ const ICON = icon({
   shadowSize: [41, 41],
 });
 
-// Another workaround for a common issue in React's strict mode with Leaflet.
+// A placeholder component to be displayed while the map is loading,
+// which helps prevent re-initialization issues in React's Strict Mode.
 const MapPlaceholder = () => {
   return (
-    <p>
+    <p className="flex items-center justify-center h-full">
+      Loading map...
       <noscript>You need to enable JavaScript to see this map.</noscript>
     </p>
   );
@@ -29,15 +30,6 @@ const MapPlaceholder = () => {
 
 const DynamicMap = () => {
   const center: [number, number] = [9.145, 40.4897]; // Centered on Ethiopia
-
-  // This effect sets the placeholder class for the map container.
-  // This is a workaround for a common Leaflet issue in React Strict Mode.
-  useEffect(() => {
-    const mapContainer = document.querySelector('.leaflet-container');
-    if (mapContainer && !mapContainer.classList.contains('leaflet-container-rendered')) {
-      mapContainer.classList.add('leaflet-container-rendered');
-    }
-  }, []);
 
   return (
     <MapContainer 
