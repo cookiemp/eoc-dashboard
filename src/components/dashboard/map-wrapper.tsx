@@ -1,19 +1,15 @@
 'use client';
 
-import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import type { Incident } from '@/lib/types';
-import { icon } from 'leaflet';
+import L from 'leaflet';
 
 // This is a workaround for a known issue with Leaflet and Webpack.
-// It ensures the marker icons are displayed correctly.
-const ICON = icon({
+// It ensures the marker icons are displayed correctly by setting default paths.
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: '/marker-icon-2x.png',
   iconUrl: '/marker-icon.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
   shadowUrl: '/marker-shadow.png',
-  shadowSize: [41, 41],
 });
 
 interface MapWrapperProps {
@@ -42,7 +38,6 @@ const MapWrapper = ({ incidents }: MapWrapperProps) => {
             parseFloat(incident.top.replace('%', '')) * (14.5 - 5.5) / 100 + 5.5,
             parseFloat(incident.left.replace('%', '')) * (48 - 33) / 100 + 33
           ]}
-          icon={ICON}
         >
           <Popup>{incident.title}</Popup>
         </Marker>
