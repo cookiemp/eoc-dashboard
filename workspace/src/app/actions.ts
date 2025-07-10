@@ -4,10 +4,8 @@ import { summarizeIncidentData } from '@/ai/flows/summarize-incident-data';
 import { extractIncidentsFromNews } from '@/ai/flows/extract-incidents-from-news-flow';
 import { generateIncidentDossier as generateIncidentDossierFlow } from '@/ai/flows/generate-incident-dossier-flow';
 import type { GenerateIncidentDossierInput, GenerateIncidentDossierOutput } from '@/ai/flows/generate-incident-dossier-flow';
-import { getWeatherForCities } from '@/ai/flows/get-weather-flow';
-import type { GetWeatherForCitiesOutput } from '@/ai/flows/get-weather-flow';
 import { addIncidents, getIncidents, IncidentWithId } from '@/services/incident-service';
-import type { NewsArticle } from '@/lib/types';
+import type { NewsArticle, WeatherAlert } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import fs from 'fs/promises';
 import path from 'path';
@@ -126,23 +124,62 @@ export async function generateIncidentDossier(input: GenerateIncidentDossierInpu
 }
 
 
-/**
- * An action that fetches the weather by providing the required API key.
- */
-export async function getWeatherForCitiesAction(input: { cities: string[] }): Promise<GetWeatherForCitiesOutput> {
+// --- Weather Fetching Logic ---
+const cityCoordinates: { [city: string]: { lat: number; lon: number } } = {
+  'Addis Ababa': { lat: 9.02497, lon: 38.74689 },
+  'Dire Dawa': { lat: 9.5931, lon: 41.8661 },
+  'Gondar': { lat: 12.6, lon: 37.4667 },
+  'Mekelle': { lat: 13.4969, lon: 39.4769 },
+  'Hawassa': { lat: 7.0625, lon: 38.4765 },
+};
+
+async function fetchWeatherForCity(city: string, apiKey: string): Promise<WeatherAlert | null> {
+  const coords = cityCoordinates[city];
+  if (!coords) {
+    console.error(`Coordinates for city not found: ${city}`);
+    return null;
+  }
+
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${coords.lat}&lon=${coords.lon}&appid=${apiKey}&units=metric`;
+
+  try {
+    const response = await fetch(url, { cache: 'no-store' });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Failed to fetch weather for ${city}. Status: ${response.status}`, errorText);
+      return null;
+    }
+    const data = await response.json();
+    return {
+      city: data.name,
+      temperature: data.main.temp,
+      condition: data.weather[0]?.description?.toLowerCase() || 'N/A',
+    };
+  } catch (error) {
+    console.error(`Error fetching weather for ${city}:`, error);
+    return null;
+  }
+}
+
+export async function getWeatherForCitiesAction(input: { cities: string[] }): Promise<{ weather: WeatherAlert[] }> {
   const apiKey = process.env.OPENWEATHERMAP_API_KEY;
   if (!apiKey) {
-    // This case will be handled by the UI, which will show the API key error message.
+    console.error('OpenWeatherMap API key is not configured.');
     return { weather: [] };
   }
+  
   try {
-    // Correctly call the exported flow function
-    return await getWeatherForCities({ ...input, apiKey });
+    const weatherResults = await Promise.all(
+      input.cities.map((city) => fetchWeatherForCity(city, apiKey))
+    );
+    const validWeatherData = weatherResults.filter((data): data is WeatherAlert => data !== null);
+    return { weather: validWeatherData };
   } catch (error) {
     console.error('Error in getWeatherForCities action:', error);
     return { weather: [] };
   }
 }
+
 
 /**
  * Fetches news from TheNewsAPI.

@@ -73,11 +73,7 @@ async function fetchWeatherForCity(city: string, apiKey: string): Promise<Weathe
   }
 }
 
-/**
- * The main exported function that retrieves weather for a list of cities.
- * This is a Genkit flow that directly calls a real API.
- */
-export const getWeatherForCities = ai.defineFlow(
+const getWeatherForCitiesFlow = ai.defineFlow(
   {
     name: 'getWeatherForCitiesFlow',
     inputSchema: GetWeatherForCitiesInputSchema,
@@ -97,3 +93,11 @@ export const getWeatherForCities = ai.defineFlow(
     return { weather: validWeatherData };
   }
 );
+
+
+/**
+ * The main exported function that retrieves weather for a list of cities.
+ * This is the wrapper that the server action will call.
+ */
+export async function getWeatherForCities(input: GetWeatherForCitiesInput): Promise<GetWeatherForCitiesOutput> {
+  return getWeather
