@@ -13,7 +13,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { Incident } from '@/lib/types';
-import { Button } from '../ui/button';
 
 const MapWithNoSSR = dynamic(() => import('@/components/dashboard/map-wrapper'), {
   ssr: false,
