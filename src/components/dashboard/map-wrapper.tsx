@@ -74,7 +74,13 @@ const MapWrapper = ({ incidents, onMarkerClick }: MapWrapperProps) => {
       const marker = L.marker(position, { icon })
         .addTo(map)
         .bindTooltip(incident.title)
-        .on('click', () => onMarkerClick(incident));
+        .on('click', (e) => {
+            // This is the critical fix. Remove focus from the marker's element.
+            if (e.originalEvent.currentTarget) {
+              (e.originalEvent.currentTarget as HTMLElement).blur();
+            }
+            onMarkerClick(incident)
+        });
       
       markersRef.current.push(marker);
     });
