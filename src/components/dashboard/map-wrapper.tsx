@@ -28,7 +28,7 @@ const createIncidentIcon = (color: string) => {
         <circle cx="12" cy="10" r="3" fill="${color}" />
       </svg>
     `,
-    className: 'leaflet-marker-icon', // Use a class to remove default styling
+    className: 'leaflet-marker-icon',
     iconSize: [28, 28],
     iconAnchor: [14, 28],
     popupAnchor: [0, -28],
@@ -36,44 +36,60 @@ const createIncidentIcon = (color: string) => {
 };
 
 const MapWrapper = ({ incidents, onMarkerClick }: MapWrapperProps) => {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<L.Map | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.Marker[]>([]);
 
+  // Effect for initializing and cleaning up the map
   useEffect(() => {
-    if (mapRef.current && !mapInstance.current) {
+    if (mapContainerRef.current && !mapInstanceRef.current) {
       const center: [number, number] = [9.145, 40.4897]; // Centered on Ethiopia
       
-      const map = L.map(mapRef.current).setView(center, 6);
-      mapInstance.current = map;
+      const map = L.map(mapContainerRef.current).setView(center, 6);
+      mapInstanceRef.current = map;
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
-
-      incidents.forEach((incident: Incident) => {
-        const position: [number, number] = [
-            parseFloat(incident.top.replace('%', '')) * (14.5 - 5.5) / 100 + 5.5,
-            parseFloat(incident.left.replace('%', '')) * (48 - 33) / 100 + 33
-        ];
-        
-        const icon = createIncidentIcon(incident.color);
-        
-        L.marker(position, { icon })
-         .addTo(map)
-         .bindTooltip(incident.title)
-         .on('click', () => onMarkerClick(incident));
-      });
     }
 
+    // Cleanup function to run when the component unmounts
     return () => {
-      if (mapInstance.current) {
-        mapInstance.current.remove();
-        mapInstance.current = null;
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
       }
     };
+  }, []); // Empty dependency array ensures this runs only once
+
+  // Effect for updating markers when incidents change
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    // Clear existing markers
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+
+    // Add new markers
+    incidents.forEach((incident: Incident) => {
+      const position: [number, number] = [
+        parseFloat(incident.top.replace('%', '')) * (14.5 - 5.5) / 100 + 5.5,
+        parseFloat(incident.left.replace('%', '')) * (48 - 33) / 100 + 33
+      ];
+        
+      const icon = createIncidentIcon(incident.color);
+        
+      const marker = L.marker(position, { icon })
+        .addTo(map)
+        .bindTooltip(incident.title)
+        .on('click', () => onMarkerClick(incident));
+      
+      markersRef.current.push(marker);
+    });
   }, [incidents, onMarkerClick]);
 
-  return <div ref={mapRef} style={{ height: '100%', width: '100%' }} />;
+  return <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />;
 };
 
 export default MapWrapper;

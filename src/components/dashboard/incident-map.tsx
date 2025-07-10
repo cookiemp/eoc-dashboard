@@ -15,11 +15,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { Incident } from '@/lib/types';
+import MapWrapper from './map-wrapper';
 
-const MapWrapper = dynamic(() => import('@/components/dashboard/map-wrapper'), {
-  loading: () => <Skeleton className="w-full h-[400px] rounded-lg" />,
+const MapWithNoSSR = dynamic(() => import('@/components/dashboard/map-wrapper'), {
   ssr: false,
+  loading: () => <Skeleton className="w-full h-[400px] rounded-lg" />,
 });
+
 
 interface IncidentMapProps {
   incidents: Incident[];
@@ -46,7 +48,7 @@ const IncidentMap = ({ incidents }: IncidentMapProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="h-[400px]">
-          <MapWrapper incidents={incidents} onMarkerClick={handleMarkerClick} />
+          <MapWithNoSSR incidents={incidents} onMarkerClick={handleMarkerClick} />
         </CardContent>
       </Card>
 
