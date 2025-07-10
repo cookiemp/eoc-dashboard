@@ -32,7 +32,7 @@ export async function GET() {
       
       // More robust snippet creation based on documentation review
       let snippet = 'No Snippet Available';
-      if (fields.body) {
+      if (fields.body && typeof fields.body === 'string') {
          // Take the first 200 characters and remove any HTML tags for a clean preview
         snippet = fields.body.substring(0, 200).replace(/<[^>]+>/g, '');
         if (fields.body.length > 200) {
@@ -43,7 +43,7 @@ export async function GET() {
       return {
         // According to docs, `id` and `href` are top-level, others are in `fields`.
         id: item.id || Math.random().toString(),
-        title: fields.title || 'No Title',
+        title: fields.title || 'No Title Available',
         source: fields.source?.[0]?.shortname || 'ReliefWeb',
         snippet: snippet,
         url: fields.url || item.href,
