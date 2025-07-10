@@ -52,7 +52,14 @@ const getNewsArticlesFlow = ai.defineFlow(
       return { articles: [] };
     }
 
-    const parser = new Parser();
+    const parser = new Parser({
+      // Add a custom User-Agent header to mimic a browser request.
+      // This can help avoid being blocked or receiving non-XML responses.
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
+      }
+    });
+
     const feedUrl = 'https://reliefweb.int/rss.xml?country=76'; // ReliefWeb RSS feed for Ethiopia
 
     // Let errors propagate up to the action to be handled there.
