@@ -1,12 +1,44 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Header from "@/components/dashboard/header";
 import IncidentMap from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
 import WeatherAlerts from "@/components/dashboard/weather-alerts";
 import NewsFeed from "@/components/dashboard/news-feed";
 import HealthAlerts from "@/components/dashboard/health-alerts";
-import { humanitarianNews, generalNews, incidents } from "@/lib/mock-data";
+import { humanitarianNews, generalNews, incidents as initialIncidents } from "@/lib/mock-data";
+import type { Incident } from '@/lib/types';
 
 export default function Home() {
+  const [incidents, setIncidents] = useState<Incident[]>(initialIncidents);
+
+  useEffect(() => {
+    // Simulate a new incident appearing after 5 seconds
+    const timer = setTimeout(() => {
+      const newIncident: Incident = {
+        id: 5,
+        title: 'New: Food Security Alert',
+        description: 'A new report indicates potential food security issues in the southern regions due to delayed rains. Monitoring is in effect.',
+        latitude: 7.0,
+        longitude: 38.0,
+        color: '#8b5cf6', // A distinct purple color
+      };
+      
+      // Add the new incident to the list, ensuring no duplicates by ID
+      setIncidents(prevIncidents => {
+        if (prevIncidents.find(inc => inc.id === newIncident.id)) {
+          return prevIncidents;
+        }
+        return [...prevIncidents, newIncident];
+      });
+
+    }, 5000);
+
+    // Cleanup the timer if the component unmounts
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header />
