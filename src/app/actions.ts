@@ -166,3 +166,47 @@ export async function getTheNewsApiArticles(): Promise<{ articles?: NewsArticle[
     return { error: `Failed to connect to TheNewsAPI: ${errorMessage}` };
   }
 }
+
+/**
+ * Fetches general news about Ethiopia from TheNewsAPI.
+ */
+export async function getGeneralNews(): Promise<{ articles?: NewsArticle[], error?: string }> {
+  const apiKey = process.env.THENEWSAPI_API_KEY;
+  if (!apiKey) {
+    return { error: 'TheNewsAPI API key is not configured.' };
+  }
+
+  // A broader query for general news.
+  const query = 'Ethiopia';
+  const url = `https://api.thenewsapi.com/v1/news/all?api_token=${apiKey}&search=${encodeURIComponent(query)}&language=en&limit=5`;
+
+  try {
+    const response = await fetch(url, {
+      next: { revalidate: 3600 }, // Cache for 1 hour
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('TheNewsAPI General News Error:', errorData);
+      const errorMessage = errorData?.error?.message || `API responded with status ${response.status}`;
+      return { error: `TheNewsAPI Error: ${errorMessage}` };
+    }
+
+    const data = await response.json();
+
+    const articles: NewsArticle[] = (data.data || []).map((item: any) => ({
+      id: item.uuid,
+      title: item.title || 'No Title Available',
+      source: item.source || 'Unknown Source',
+      snippet: item.snippet || 'No snippet available.',
+      url: item.url,
+    }));
+
+    return { articles };
+
+  } catch (error) {
+    console.error('Failed to fetch general news from TheNewsAPI:', error);
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    return { error: `Failed to connect to TheNewsAPI: ${errorMessage}` };
+  }
+}

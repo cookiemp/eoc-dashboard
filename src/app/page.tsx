@@ -5,7 +5,7 @@ import Header from "@/components/dashboard/header";
 import IncidentMap from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
 import NewsFeed from "@/components/dashboard/news-feed";
-import { getLatestIncidents, processNewsIntoIncidents, getTheNewsApiArticles } from "@/app/actions";
+import { getLatestIncidents, processNewsIntoIncidents, getTheNewsApiArticles, getGeneralNews } from "@/app/actions";
 import type { IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
 import { Newspaper, BookHeart } from 'lucide-react';
@@ -15,13 +15,17 @@ export default function Home() {
   const [incidents, setIncidents] = useState<IncidentWithId[]>([]);
   const [humanitarianNews, setHumanitarianNews] = useState<NewsArticle[]>([]);
   const [generalNews, setGeneralNews] = useState<NewsArticle[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [newsError, setNewsError] = useState<string | null>(null);
+
+  const [humanitarianNewsLoading, setHumanitarianNewsLoading] = useState(true);
+  const [generalNewsLoading, setGeneralNewsLoading] = useState(true);
+
+  const [humanitarianNewsError, setHumanitarianNewsError] = useState<string | null>(null);
+  const [generalNewsError, setGeneralNewsError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchAndProcessData = async () => {
-      setLoading(true);
-      setNewsError(null);
+    const fetchHumanitarianData = async () => {
+      setHumanitarianNewsLoading(true);
+      setHumanitarianNewsError(null);
       
       try {
         const result = await getTheNewsApiArticles();
@@ -31,33 +35,50 @@ export default function Home() {
         }
 
         const articles = result.articles || [];
-        
-        // This is now safe, as an empty array is a valid state
         setHumanitarianNews(articles);
 
-        // Only process incidents if there are articles to process
         if (articles.length > 0) {
           await processNewsIntoIncidents({ articles });
         }
         
-        // Fetch incidents separately after processing
         const latestIncidents = await getLatestIncidents();
         if (latestIncidents) {
           setIncidents(latestIncidents);
         }
 
       } catch (error) {
-        console.error("Error fetching or processing news data:", error);
-        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred while fetching news.";
-        setNewsError(errorMessage);
-        setIncidents([]);
+        console.error("Error fetching or processing humanitarian news data:", error);
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+        setHumanitarianNewsError(errorMessage);
+        // Also clear related data on error
+        setIncidents([]); 
         setHumanitarianNews([]);
       } finally {
-        setLoading(false);
+        setHumanitarianNewsLoading(false);
+      }
+    };
+
+    const fetchGeneralData = async () => {
+      setGeneralNewsLoading(true);
+      setGeneralNewsError(null);
+      try {
+        const result = await getGeneralNews();
+        if (result.error) {
+          throw new Error(result.error);
+        }
+        setGeneralNews(result.articles || []);
+      } catch (error) {
+         console.error("Error fetching general news data:", error);
+         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+         setGeneralNewsError(errorMessage);
+         setGeneralNews([]);
+      } finally {
+        setGeneralNewsLoading(false);
       }
     };
     
-    fetchAndProcessData();
+    fetchHumanitarianData();
+    fetchGeneralData();
   }, []);
 
   return (
@@ -76,8 +97,8 @@ export default function Home() {
               icon={<BookHeart className="h-5 w-5 text-primary" />} 
               title="Humanitarian News" 
               items={humanitarianNews}
-              isLoading={loading}
-              error={newsError}
+              isLoading={humanitarianNewsLoading}
+              error={humanitarianNewsError}
             />
           </div>
           <div className="lg:col-span-2">
@@ -85,7 +106,8 @@ export default function Home() {
               icon={<Newspaper className="h-5 w-5 text-primary" />} 
               title="General Ethiopia News" 
               items={generalNews}
-              isLoading={false} // Since we are not fetching general news yet
+              isLoading={generalNewsLoading}
+              error={generalNewsError}
             />
           </div>
         </div>
