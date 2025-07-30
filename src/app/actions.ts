@@ -89,16 +89,14 @@ export async function getSummary(input: { articles: NewsArticle[] }) {
   const today = new Date().toISOString().split('T')[0];
   
   try {
-    const cache = await readSummaryCache();
-
-    // Force regeneration if articles changed (check first article title)
-    const firstArticleTitle = input.articles?.[0]?.title || '';
-    const isNewArticleSet = firstArticleTitle.includes('Ethiopia Drought Response');
+    // Temporarily bypass cache completely to force regeneration
+    console.log('Bypassing cache, generating fresh summary...');
     
-    // Prevent re-summarizing if we already have one for today AND articles haven't changed
-    if (cache.summary && cache.date === today && !isNewArticleSet) {
-      return cache.summary;
-    }
+    // Always regenerate for now (we'll re-enable caching later)
+    // const cache = await readSummaryCache();
+    // if (cache.summary && cache.date === today) {
+    //   return cache.summary;
+    // }
 
     // Don't generate a summary if there are no articles
     if (!input.articles || input.articles.length === 0) {
