@@ -23,7 +23,8 @@ export default function Home() {
   const [generalNewsError, setGeneralNewsError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchHumanitarianData = async () => {
+    const fetchAllData = async () => {
+      // Fetch humanitarian data
       setHumanitarianNewsLoading(true);
       setHumanitarianNewsError(null);
       
@@ -56,9 +57,8 @@ export default function Home() {
       } finally {
         setHumanitarianNewsLoading(false);
       }
-    };
 
-    const fetchGeneralData = async () => {
+      // Fetch general news data
       setGeneralNewsLoading(true);
       setGeneralNewsError(null);
       try {
@@ -77,8 +77,14 @@ export default function Home() {
       }
     };
     
-    fetchHumanitarianData();
-    fetchGeneralData();
+    // Initial data fetch
+    fetchAllData();
+
+    // Set up auto-refresh every 30 minutes (1800000 milliseconds)
+    const intervalId = setInterval(fetchAllData, 1800000);
+
+    // Cleanup function to clear interval when component unmounts
+    return () => clearInterval(intervalId);
   }, []);
 
   return (

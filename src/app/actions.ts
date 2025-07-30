@@ -86,28 +86,37 @@ async function writeSummaryCacheToFile(data: SummaryCache): Promise<void> {
 }
 
 export async function getSummary(input: { articles: NewsArticle[] }) {
-  const today = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
+  const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000); // 30 minutes ago
   
   try {
-    // Temporarily bypass cache completely to force regeneration
-    console.log('Bypassing cache, generating fresh summary...');
-    
-    // Always regenerate for now (we'll re-enable caching later)
-    // const cache = await readSummaryCache();
-    // if (cache.summary && cache.date === today) {
-    //   return cache.summary;
-    // }
-
     // Don't generate a summary if there are no articles
     if (!input.articles || input.articles.length === 0) {
       return { summary: "No articles available to summarize." };
     }
 
-    // Otherwise, generate a new summary.
+    // Check if we have a valid cached summary
+    const cache = await readSummaryCache();
+    if (cache.summary && cache.date) {
+      const cacheDate = new Date(cache.date);
+      // Use cached summary if it's less than 30 minutes old
+      if (cacheDate > thirtyMinutesAgo) {
+        console.log('Using cached summary from:', cache.date);
+        return cache.summary;
+      }
+    }
+
+    console.log('Generating fresh summary...');
+    
+    // Generate a new summary
     const result = await summarizeIncidentData(input);
     
-    // Save the new summary to the cache file.
-    await writeSummaryCache({ summary: result, date: today });
+    // Save the new summary to the cache with current timestamp
+    await writeSummaryCache({ 
+      summary: result, 
+      date: now.toISOString() // Store full timestamp for 30-minute check
+    });
     
     revalidatePath('/'); // Revalidate the path to show the new summary
     return result;
@@ -184,7 +193,7 @@ async function getIfrcNews(): Promise<{ articles?: NewsArticle[], error?: string
   
   try {
     const response = await fetch(url, {
-      cache: 'no-store', // Disable cache temporarily
+      next: { revalidate: 1800 }, // 30 minutes cache
     });
 
     if (!response.ok) {
@@ -211,63 +220,84 @@ async function getIfrcNews(): Promise<{ articles?: NewsArticle[], error?: string
 }
 
 /**
+ * Fetches humanitarian news from ReliefWeb API for Ethiopia.
+ */
+async function getReliefWebNews(): Promise<{ articles?: NewsArticle[], error?: string }> {
+  const url = 'https://api.reliefweb.int/v1/reports?appname=ercs-dashboard&profile=list&preset=latest&limit=10&filter[field]=primary_country.iso3&filter[value]=eth';
+  
+  try {
+    const response = await fetch(url, {
+      next: { revalidate: 1800 }, // 30 minutes cache
+    });
+
+    if (!response.ok) {
+      return { error: `ReliefWeb API Error: ${response.status}` };
+    }
+
+    const data = await response.json();
+
+    const articles: NewsArticle[] = (data.data || []).map((item: any) => ({
+      id: item.id.toString(),
+      title: item.fields?.title || 'No Title Available',
+      source: item.fields?.source?.[0]?.name || 'ReliefWeb',
+      snippet: item.fields?.body || item.fields?.summary || 'No summary available.',
+      url: item.fields?.url || `https://reliefweb.int/node/${item.id}`,
+    }));
+
+    return { articles };
+
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    return { error: `Failed to connect to ReliefWeb API: ${errorMessage}` };
+  }
+}
+
+/**
  * Fetches humanitarian news specifically about Ethiopia from curated sources.
  */
 export async function getHumanitarianNews(): Promise<{ articles?: NewsArticle[], error?: string }> {
   console.log('getHumanitarianNews called at:', new Date().toISOString());
   
-  // Create mock Ethiopia-specific humanitarian news since APIs are problematic
-  const mockEthiopiaNews: NewsArticle[] = [
-    {
-      id: 'eth-drought-2025',
-      title: 'Ethiopia Drought Response: Emergency Food Assistance Scaled Up',
-      source: 'UN Office for the Coordination of Humanitarian Affairs (OCHA)',
-      snippet: 'Humanitarian partners are scaling up emergency food assistance in drought-affected areas of Ethiopia, reaching over 1.2 million people in the past month.',
-      url: 'https://www.unocha.org/ethiopia'
-    },
-    {
-      id: 'eth-health-2025', 
-      title: 'Mobile Health Clinics Deploy to Remote Ethiopian Communities',
-      source: 'World Health Organization (WHO)',
-      snippet: 'WHO and partners have deployed mobile health clinics to provide essential healthcare services in remote areas of Oromia and Somali regions.',
-      url: 'https://www.who.int/countries/eth/'
-    },
-    {
-      id: 'eth-education-2025',
-      title: 'UNICEF Supports Education for Displaced Children in Ethiopia', 
-      source: 'United Nations Children\'s Fund (UNICEF)',
-      snippet: 'UNICEF is supporting temporary learning spaces for over 50,000 displaced children across Ethiopia, providing essential educational materials and teacher training.',
-      url: 'https://www.unicef.org/ethiopia/'
-    },
-    {
-      id: 'eth-water-2025',
-      title: 'Water Crisis in Ethiopia: Emergency Wells Drilled in Affected Areas',
-      source: 'International Committee of the Red Cross (ICRC)', 
-      snippet: 'Emergency water wells have been drilled in drought-affected communities, providing clean water access to over 80,000 people in the Somali region.',
-      url: 'https://www.icrc.org/en/where-we-work/africa/ethiopia'
-    },
-    {
-      id: 'eth-nutrition-2025',
-      title: 'Malnutrition Screening Programs Expanded Across Ethiopian Regions',
-      source: 'World Food Programme (WFP)',
-      snippet: 'WFP has expanded malnutrition screening and treatment programs, reaching vulnerable communities in Tigray, Amhara, and Afar regions.',
-      url: 'https://www.wfp.org/countries/ethiopia'
-    }
-  ];
+  // Use Promise.allSettled to fetch from multiple sources for resilience
+  const apiResults = await Promise.allSettled([
+    getReliefWebNews(),
+    getIfrcNews()
+  ]);
 
-  // Try to get IFRC data as well
-  try {
-    const ifrcResult = await getIfrcNews();
-    if (ifrcResult.articles && ifrcResult.articles.length > 0) {
-      // Combine with mock data
-      const combined = [...mockEthiopiaNews, ...ifrcResult.articles];
-      return { articles: combined.slice(0, 5) }; // Limit to 5 total
+  const allArticles: NewsArticle[] = [];
+  const errors: string[] = [];
+
+  // Process results from Promise.allSettled
+  for (const result of apiResults) {
+    if (result.status === 'fulfilled') {
+      const { articles, error } = result.value;
+      if (articles && articles.length > 0) {
+        allArticles.push(...articles);
+      } else if (error) {
+        errors.push(error);
+      }
+    } else {
+      errors.push(`API call failed: ${result.reason}`);
     }
-  } catch (error) {
-    console.log('IFRC fetch failed, using mock data only');
   }
 
-  return { articles: mockEthiopiaNews };
+  // Deduplicate articles by title (simple match)
+  const uniqueArticles = allArticles.filter((article, index, self) => 
+    index === self.findIndex(a => a.title.toLowerCase() === article.title.toLowerCase())
+  );
+
+  // If we have articles, return them (limit to 10)
+  if (uniqueArticles.length > 0) {
+    return { articles: uniqueArticles.slice(0, 10) };
+  }
+
+  // If all API calls failed, return an error message
+  if (errors.length > 0) {
+    return { error: `All humanitarian news sources failed: ${errors.join('; ')}` };
+  }
+
+  // Fallback case
+  return { error: 'No humanitarian news articles could be retrieved at this time.' };
 }
 
 
@@ -288,7 +318,7 @@ export async function getGeneralNews(): Promise<{ articles?: NewsArticle[], erro
       headers: {
         'X-API-Key': apiKey,
       },
-      cache: 'no-store', // Disable cache temporarily
+      next: { revalidate: 1800 }, // 30 minutes cache
     });
 
     if (!response.ok) {
