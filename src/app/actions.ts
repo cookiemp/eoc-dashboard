@@ -212,6 +212,8 @@ async function getIfrcNews(): Promise<{ articles?: NewsArticle[], error?: string
  * Fetches humanitarian news specifically about Ethiopia from curated sources.
  */
 export async function getHumanitarianNews(): Promise<{ articles?: NewsArticle[], error?: string }> {
+  console.log('getHumanitarianNews called at:', new Date().toISOString());
+  
   // Create mock Ethiopia-specific humanitarian news since APIs are problematic
   const mockEthiopiaNews: NewsArticle[] = [
     {
