@@ -223,7 +223,7 @@ async function getIfrcNews(): Promise<{ articles?: NewsArticle[], error?: string
  * Fetches humanitarian news from ReliefWeb API for Ethiopia.
  */
 async function getReliefWebNews(): Promise<{ articles?: NewsArticle[], error?: string }> {
-  const url = 'https://api.reliefweb.int/v1/reports?appname=ercs-dashboard&profile=list&preset=latest&limit=10&filter[field]=primary_country.iso3&filter[value]=eth';
+  const url = 'https://api.reliefweb.int/v1/reports?appname=ercs-dashboard&profile=list&preset=latest&limit=15&filter[field]=primary_country.iso3&filter[value]=eth';
   
   try {
     const response = await fetch(url, {
@@ -236,15 +236,27 @@ async function getReliefWebNews(): Promise<{ articles?: NewsArticle[], error?: s
 
     const data = await response.json();
 
-    const articles: NewsArticle[] = (data.data || []).map((item: any) => ({
-      id: item.id.toString(),
-      title: item.fields?.title || 'No Title Available',
-      source: item.fields?.source?.[0]?.name || 'ReliefWeb',
-      snippet: item.fields?.body?.summary || item.fields?.body || item.fields?.summary || 'No summary available.',
-      url: item.fields?.url || `https://reliefweb.int/node/${item.id}`,
-    }));
+    // Filter and map articles, ensuring they're Ethiopia-focused
+    const articles: NewsArticle[] = (data.data || [])
+      .filter((item: any) => {
+        const title = item.fields?.title || '';
+        // Only include articles that explicitly mention Ethiopia in the title
+        // or are clearly about Ethiopia (not just refugees FROM other places TO Ethiopia)
+        return (
+          title.toLowerCase().includes('ethiopia') &&
+          !title.toLowerCase().includes('sudan situation') &&
+          !title.toLowerCase().includes('south sudan situation')
+        );
+      })
+      .map((item: any) => ({
+        id: item.id.toString(),
+        title: item.fields?.title || 'No Title Available',
+        source: item.fields?.source?.[0]?.name || 'ReliefWeb',
+        snippet: item.fields?.body?.summary || item.fields?.body || item.fields?.summary || 'Ethiopian humanitarian situation update.',
+        url: item.fields?.url || `https://reliefweb.int/node/${item.id}`,
+      }));
 
-    return { articles };
+    return { articles: articles.slice(0, 10) }; // Limit to 10 after filtering
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
