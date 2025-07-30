@@ -58,23 +58,25 @@ const extractIncidentsPrompt = ai.definePrompt({
   Review the following articles. For each article, try to identify Ethiopian locations and humanitarian activities from the TITLE and any available content.
 
   **IMPORTANT RULES:**
-  1.  **Create One Incident Per Article:** Each humanitarian article should result in one map marker. DO NOT skip articles just because they lack detail.
-  2.  **National-Level Reports:** If an article has a national scope (e.g., 'Ethiopia: Humanitarian Response', 'Ethiopia Health Cluster Bulletin', 'Ethiopia Solutions Index') but doesn't mention a specific region, place the marker in Addis Ababa (9.03, 38.74) to represent the nationwide activity.
-  3.  **Regional Reports:** If an article mentions a specific Ethiopian region, place the marker in that region using these coordinates:
-     - Addis Ababa: 9.03, 38.74
-     - Oromia region: 8.5, 39.5
-     - Amhara region: 11.5, 38.0
-     - Tigray region: 13.5, 39.5
-     - Afar region: 11.8, 41.0
-     - Somali region: 6.5, 43.5
-     - SNNPR: 7.0, 37.5
+  1.  **Create One Incident Per Article:** Each humanitarian article should result in one map marker.
+  2.  **Extract Specific Locations:** Look carefully for any mention of Ethiopian regions, cities, or areas in titles and snippets. Common locations include:
+     - Border regions: Somali region (for South Sudan situations), Tigray, Afar
+     - Agricultural areas: Oromia, Amhara, SNNPR (for farming/food security)
+     - Conflict areas: Tigray, Amhara, Oromia
+     - Drought-prone: Afar, Somali, parts of Oromia
+  3.  **Smart Geographic Placement:** Use these coordinates based on content type:
+     - **South Sudan displacement**: Somali region (6.5, 43.5) or Gambela (8.2, 34.6)
+     - **Farming/agriculture**: Oromia (8.5, 39.5) or Amhara (11.5, 38.0)
+     - **Health clusters**: Distribute across regions - Tigray (13.5, 39.5), Amhara (11.5, 38.0), Oromia (8.5, 39.5)
+     - **Severe weather**: Afar (11.8, 41.0) for droughts, Somali (6.5, 43.5) for floods
+     - **Logistics operations**: Major regions like Oromia (8.5, 39.5), Amhara (11.5, 38.0)
+     - **Only use Addis Ababa (9.03, 38.74)** for truly national-level policy reports
   4.  **Categorize with Color:** Assign colors based on content:
-      - Red (#ef4444): Health, WASH, medical (e.g., 'Health Cluster', 'WASH Cluster')
+      - Red (#ef4444): Health, WASH, medical
       - Blue (#3b82f6): Weather, severe weather, natural disasters
-      - Green (#22c55e): Food, agriculture, displacement, logistics, general humanitarian (e.g., 'WFP', 'Displacement', 'ES/NFI', 'Logistics')
+      - Green (#22c55e): Food, agriculture, displacement, logistics, humanitarian operations
       - Amber (#f59e0b): Conflict or security-related issues
-  5.  **Work with Titles Only:** Extract meaningful information from titles even if snippets say 'No summary available.'
-  6.  **Be Generous:** Create incidents for ALL Ethiopia-related humanitarian articles, don't be overly restrictive
+  5.  **Distribute Geographically:** Don't cluster everything in Addis Ababa. Spread incidents across relevant Ethiopian regions based on the type of humanitarian activity.
 
   **Articles to Analyze:**
   {{#each articles}}
