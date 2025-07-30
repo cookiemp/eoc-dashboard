@@ -27,7 +27,7 @@ const IncidentSchema = z.object({
   color: z
     .string()
     .describe(
-      "A hex color code representing the incident type. Use '#3b82f6' (blue) for weather/natural disasters, '#ef4444' (red) for health emergencies, '#f59e0b' (amber) for conflict, and '#22c55e' (green) for other operational updates like displacement camps."
+      "A hex color code representing the incident type. Use '#3b82f6' (blue) for weather/natural disasters, '#ef4444' (red) for health emergencies, '#f59e0b' (amber) for conflict/security, and '#22c55e' (green) for other operational updates (e.g., displacement, aid distribution, funding)."
     ),
 });
 
@@ -64,7 +64,7 @@ const extractIncidentsPrompt = ai.definePrompt({
       - Blue (#3b82f6) for weather/natural disasters (floods, droughts).
       - Red (#ef4444) for health emergencies (disease outbreaks, medical supply needs).
       - Amber (#f59e0b) for conflict or security-related issues.
-      - Green (#22c55e) for other operational updates (e.g., new displacement camps, aid distribution points, funding news).
+      - Green (#22c55e) for other operational updates (e.g., new displacement camps, aid distribution points, funding news, general reports on a region).
   4.  **No Duplicates:** If multiple articles report on the same event, only create one incident object for it.
   5.  **Output:** If no articles contain actionable incidents, output an empty 'incidents' array.
 

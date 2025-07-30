@@ -82,7 +82,13 @@ export async function processNewsIntoIncidents(input: { articles: NewsArticle[] 
       return;
     }
 
-    const { incidents: extractedIncidents } = await extractIncidentsFromNews(input);
+    const { incidents: extractedIncidents } = await extractIncidentsFromNews({
+      articles: input.articles.map(article => ({
+        ...article,
+        // Ensure snippet is not too long for the prompt
+        snippet: article.snippet.slice(0, 500),
+      }))
+    });
 
     if (extractedIncidents && extractedIncidents.length > 0) {
       // The service will handle caching, capping, and removing old incidents.
@@ -124,17 +130,10 @@ export async function generateIncidentDossier(input: GenerateIncidentDossierInpu
 }
 
 /**
- * Fetches news from TheNewsAPI.
- * This is a reliable, server-side fetch.
+ * Fetches the latest humanitarian reports about Ethiopia from the ReliefWeb API.
  */
 export async function getTheNewsApiArticles(): Promise<{ articles?: NewsArticle[], error?: string }> {
-  const apiKey = process.env.THENEWSAPI_API_KEY;
-  if (!apiKey) {
-    return { error: 'TheNewsAPI API key is not configured. Please set THENEWSAPI_API_KEY in the .env file.' };
-  }
-
-  const query = '"humanitarian aid" OR "crisis response" Ethiopia';
-  const url = `https://api.thenewsapi.com/v1/news/all?api_token=${apiKey}&search=${encodeURIComponent(query)}&language=en&limit=5`;
+  const url = `https://api.reliefweb.int/v1/reports?appname=ercs-dashboard&query[value]=Ethiopia&preset=latest&profile=report&limit=5`;
 
   try {
     const response = await fetch(url, {
@@ -143,29 +142,31 @@ export async function getTheNewsApiArticles(): Promise<{ articles?: NewsArticle[
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('TheNewsAPI Error:', errorData);
+      console.error('ReliefWeb API Error:', errorData);
       const errorMessage = errorData?.error?.message || `API responded with status ${response.status}`;
-      return { error: `TheNewsAPI Error: ${errorMessage}` };
+      return { error: `ReliefWeb API Error: ${errorMessage}` };
     }
 
     const data = await response.json();
 
     const articles: NewsArticle[] = (data.data || []).map((item: any) => ({
-      id: item.uuid,
-      title: item.title || 'No Title Available',
-      source: item.source || 'Unknown Source',
-      snippet: item.snippet || 'No snippet available.',
-      url: item.url,
+      id: item.id.toString(),
+      title: item.fields.title || 'No Title Available',
+      source: item.fields.source?.[0]?.name || 'Unknown Source',
+      // ReliefWeb uses 'body' for the main content, which can be long. We'll use it as a snippet.
+      snippet: item.fields.body?.split('\n\n')[0] || 'No snippet available.',
+      url: item.fields.url || item.href,
     }));
     
     return { articles };
 
   } catch (error) {
-    console.error('Failed to fetch from TheNewsAPI:', error);
+    console.error('Failed to fetch from ReliefWeb API:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-    return { error: `Failed to connect to TheNewsAPI: ${errorMessage}` };
+    return { error: `Failed to connect to ReliefWeb API: ${errorMessage}` };
   }
 }
+
 
 /**
  * Fetches general news about Ethiopia from TheNewsAPI.
