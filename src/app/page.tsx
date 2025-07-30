@@ -4,22 +4,18 @@ import { useState, useEffect } from 'react';
 import Header from "@/components/dashboard/header";
 import IncidentMap from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
-import WeatherAlerts from "@/components/dashboard/weather-alerts";
 import NewsFeed from "@/components/dashboard/news-feed";
-import { getLatestIncidents, processNewsIntoIncidents, getWeatherForCitiesAction, getTheNewsApiArticles } from "@/app/actions";
+import { getLatestIncidents, processNewsIntoIncidents, getTheNewsApiArticles } from "@/app/actions";
 import type { IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
 import { Newspaper, BookHeart } from 'lucide-react';
-import type { WeatherAlert } from '@/lib/types';
 
 
 export default function Home() {
   const [incidents, setIncidents] = useState<IncidentWithId[]>([]);
   const [humanitarianNews, setHumanitarianNews] = useState<NewsArticle[]>([]);
   const [generalNews, setGeneralNews] = useState<NewsArticle[]>([]);
-  const [weatherData, setWeatherData] = useState<WeatherAlert[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingWeather, setLoadingWeather] = useState(true);
   const [newsError, setNewsError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -61,25 +57,7 @@ export default function Home() {
       }
     };
     
-    const fetchWeatherData = async () => {
-      setLoadingWeather(true);
-      try {
-        const citiesToFetch = ['Addis Ababa', 'Dire Dawa', 'Gondar', 'Mekelle', 'Hawassa'];
-        const weatherResult = await getWeatherForCitiesAction({ cities: citiesToFetch });
-        if (weatherResult.weather) {
-          setWeatherData(weatherResult.weather);
-        }
-      } catch (error) {
-        console.error("Error fetching weather data:", error);
-        setWeatherData([]);
-      } finally {
-        setLoadingWeather(false);
-      }
-    };
-
-
     fetchAndProcessData();
-    fetchWeatherData();
   }, []);
 
   return (
@@ -92,9 +70,6 @@ export default function Home() {
           </div>
           <div className="lg:col-span-4">
              <AiSummary articles={humanitarianNews} />
-          </div>
-          <div className="lg:col-span-2">
-            <WeatherAlerts weatherData={weatherData} isLoading={loadingWeather} />
           </div>
           <div className="lg:col-span-2">
             <NewsFeed 

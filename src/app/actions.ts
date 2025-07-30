@@ -4,8 +4,6 @@ import { summarizeIncidentData } from '@/ai/flows/summarize-incident-data';
 import { extractIncidentsFromNews } from '@/ai/flows/extract-incidents-from-news-flow';
 import { generateIncidentDossier as generateIncidentDossierFlow } from '@/ai/flows/generate-incident-dossier-flow';
 import type { GenerateIncidentDossierInput, GenerateIncidentDossierOutput } from '@/ai/flows/generate-incident-dossier-flow';
-import { getWeatherForCities } from '@/ai/flows/get-weather-flow';
-import type { GetWeatherForCitiesOutput } from '@/ai/flows/get-weather-flow';
 import { addIncidents, getIncidents, IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
@@ -122,25 +120,6 @@ export async function generateIncidentDossier(input: GenerateIncidentDossierInpu
       error: `Failed to generate dossier: ${error instanceof Error ? error.message : 'An unknown error occurred.'}`,
       executiveSummary: '',
     };
-  }
-}
-
-
-/**
- * An action that fetches the weather by providing the required API key.
- */
-export async function getWeatherForCitiesAction(input: { cities: string[] }): Promise<GetWeatherForCitiesOutput> {
-  const apiKey = process.env.OPENWEATHERMAP_API_KEY;
-  if (!apiKey) {
-    // This case will be handled by the UI, which will show the API key error message.
-    return { weather: [] };
-  }
-  try {
-    // Correctly call the exported flow function
-    return await getWeatherForCities({ ...input, apiKey });
-  } catch (error) {
-    console.error('Error in getWeatherForCities action:', error);
-    return { weather: [] };
   }
 }
 
