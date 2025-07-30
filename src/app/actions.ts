@@ -240,7 +240,7 @@ async function getReliefWebNews(): Promise<{ articles?: NewsArticle[], error?: s
       id: item.id.toString(),
       title: item.fields?.title || 'No Title Available',
       source: item.fields?.source?.[0]?.name || 'ReliefWeb',
-      snippet: item.fields?.body || item.fields?.summary || 'No summary available.',
+      snippet: item.fields?.body?.summary || item.fields?.body || item.fields?.summary || 'No summary available.',
       url: item.fields?.url || `https://reliefweb.int/node/${item.id}`,
     }));
 
