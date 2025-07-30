@@ -43,8 +43,8 @@ const generateIncidentDossierFlow = ai.defineFlow(
   async (input) => {
     
     const { output } = await ai.generate({
-      prompt: `Generate a detailed, professional, one-paragraph executive summary for an emergency operations center briefing.
-      Base the summary on the following incident details. Expand on the information given to create a comprehensive overview.
+      prompt: `You are an analyst for the Ethiopia Red Cross Society. Generate a detailed, professional, one-paragraph executive summary for an emergency operations center briefing.
+      Base the summary on the following incident details from Ethiopia. Expand on the information given to create a comprehensive overview.
       
       Incident Title: ${input.title}
       Incident Description: ${input.description}`,
