@@ -58,23 +58,23 @@ const extractIncidentsPrompt = ai.definePrompt({
   Review the following articles. For each article, try to identify Ethiopian locations and humanitarian activities from the TITLE and any available content.
 
   **IMPORTANT RULES:**
-  1.  **Work with Limited Data:** Even if snippets are minimal or say "No summary available," try to extract incidents from article titles if they mention specific Ethiopian locations or regions.
-  2.  **Ethiopian Locations:** Look for mentions of Ethiopian cities, regions, or areas like: Addis Ababa, Oromia, Amhara, Tigray, Afar, Somali, SNNPR, Gambela, Benishangul-Gumuz, Harari, Dire Dawa, etc.
-  3.  **Plausible Geolocation:** Use your knowledge of Ethiopian geography to assign coordinates:
-     - Addis Ababa: ~9.03, 38.74
-     - Oromia region: ~8.5, 39.5
-     - Amhara region: ~11.5, 38.0
-     - Tigray region: ~13.5, 39.5
-     - Afar region: ~11.8, 41.0
-     - Somali region: ~6.5, 43.5
-     - SNNPR: ~7.0, 37.5
+  1.  **Create One Incident Per Article:** Each humanitarian article should result in one map marker. DO NOT skip articles just because they lack detail.
+  2.  **National-Level Reports:** If an article has a national scope (e.g., 'Ethiopia: Humanitarian Response', 'Ethiopia Health Cluster Bulletin', 'Ethiopia Solutions Index') but doesn't mention a specific region, place the marker in Addis Ababa (9.03, 38.74) to represent the nationwide activity.
+  3.  **Regional Reports:** If an article mentions a specific Ethiopian region, place the marker in that region using these coordinates:
+     - Addis Ababa: 9.03, 38.74
+     - Oromia region: 8.5, 39.5
+     - Amhara region: 11.5, 38.0
+     - Tigray region: 13.5, 39.5
+     - Afar region: 11.8, 41.0
+     - Somali region: 6.5, 43.5
+     - SNNPR: 7.0, 37.5
   4.  **Categorize with Color:** Assign colors based on content:
-      - Blue (#3b82f6) for weather/natural disasters (floods, droughts)
-      - Red (#ef4444) for health emergencies (disease outbreaks, medical supply needs)
-      - Amber (#f59e0b) for conflict or security-related issues
-      - Green (#22c55e) for humanitarian operations (aid distribution, displacement camps, general humanitarian response)
-  5.  **Default to Humanitarian Operations:** If the article type is unclear but mentions Ethiopia, default to green (humanitarian operations)
-  6.  **Output:** Create incidents even from limited title information if it mentions Ethiopian locations
+      - Red (#ef4444): Health, WASH, medical (e.g., 'Health Cluster', 'WASH Cluster')
+      - Blue (#3b82f6): Weather, severe weather, natural disasters
+      - Green (#22c55e): Food, agriculture, displacement, logistics, general humanitarian (e.g., 'WFP', 'Displacement', 'ES/NFI', 'Logistics')
+      - Amber (#f59e0b): Conflict or security-related issues
+  5.  **Work with Titles Only:** Extract meaningful information from titles even if snippets say 'No summary available.'
+  6.  **Be Generous:** Create incidents for ALL Ethiopia-related humanitarian articles, don't be overly restrictive
 
   **Articles to Analyze:**
   {{#each articles}}
