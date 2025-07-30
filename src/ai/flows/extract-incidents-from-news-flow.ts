@@ -53,18 +53,18 @@ const extractIncidentsPrompt = ai.definePrompt({
   name: 'extractIncidentsPrompt',
   input: { schema: ExtractIncidentsFromNewsInputSchema },
   output: { schema: ExtractIncidentsFromNewsOutputSchema },
-  prompt: `You are an intelligence analyst for the Ethiopia Red Cross Society Emergency Operations Center. Your task is to extract structured data about specific, actionable humanitarian incidents from a list of news articles.
+  prompt: `You are an intelligence analyst for the Ethiopia Red Cross Society Emergency Operations Center. Your task is to extract structured data about humanitarian incidents from a list of news articles to be plotted on a map.
 
-  Review the following articles. For each article that describes a distinct humanitarian incident (like a flood, disease outbreak, conflict, or new displacement camp), create a corresponding incident object.
+  Review the following articles. For each article that mentions a specific, identifiable location or region within Ethiopia, create a corresponding incident object.
 
   **IMPORTANT RULES:**
-  1.  **Extract, Don't Invent:** Only create incidents for events explicitly mentioned in the articles. If an article is general news (e.g., "new airline routes"), do NOT create an incident for it.
+  1.  **Extract, Don't Invent:** Only create incidents for events explicitly mentioned in the articles. If an article doesn't mention a specific place in Ethiopia, do not create an incident.
   2.  **Plausible Geolocation:** Based on the locations mentioned in the article, determine a plausible, specific latitude and longitude within Ethiopia.
   3.  **Categorize with Color:** Assign a color based on the incident category:
       - Blue (#3b82f6) for weather/natural disasters (floods, droughts).
       - Red (#ef4444) for health emergencies (disease outbreaks, medical supply needs).
       - Amber (#f59e0b) for conflict or security-related issues.
-      - Green (#22c55e) for other operational updates (e.g., new displacement camps, aid distribution points).
+      - Green (#22c55e) for other operational updates (e.g., new displacement camps, aid distribution points, funding news).
   4.  **No Duplicates:** If multiple articles report on the same event, only create one incident object for it.
   5.  **Output:** If no articles contain actionable incidents, output an empty 'incidents' array.
 
