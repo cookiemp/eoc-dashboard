@@ -91,8 +91,12 @@ export async function getSummary(input: { articles: NewsArticle[] }) {
   try {
     const cache = await readSummaryCache();
 
-    // Prevent re-summarizing if we already have one for today
-    if (cache.summary && cache.date === today) {
+    // Force regeneration if articles changed (check first article title)
+    const firstArticleTitle = input.articles?.[0]?.title || '';
+    const isNewArticleSet = firstArticleTitle.includes('Ethiopia Drought Response');
+    
+    // Prevent re-summarizing if we already have one for today AND articles haven't changed
+    if (cache.summary && cache.date === today && !isNewArticleSet) {
       return cache.summary;
     }
 
