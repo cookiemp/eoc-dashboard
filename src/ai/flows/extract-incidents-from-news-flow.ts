@@ -55,18 +55,26 @@ const extractIncidentsPrompt = ai.definePrompt({
   output: { schema: ExtractIncidentsFromNewsOutputSchema },
   prompt: `You are an intelligence analyst for the Ethiopia Red Cross Society Emergency Operations Center. Your task is to extract structured data about humanitarian incidents from a list of news articles to be plotted on a map.
 
-  Review the following articles. For each article that mentions a specific, identifiable location or region within Ethiopia, create a corresponding incident object.
+  Review the following articles. For each article, try to identify Ethiopian locations and humanitarian activities from the TITLE and any available content.
 
   **IMPORTANT RULES:**
-  1.  **Extract, Don't Invent:** Only create incidents for events explicitly mentioned in the articles. If an article doesn't mention a specific place in Ethiopia, do not create an incident.
-  2.  **Plausible Geolocation:** Based on the locations mentioned in the article, determine a plausible, specific latitude and longitude within Ethiopia.
-  3.  **Categorize with Color:** Assign a color based on the incident category:
-      - Blue (#3b82f6) for weather/natural disasters (floods, droughts).
-      - Red (#ef4444) for health emergencies (disease outbreaks, medical supply needs).
-      - Amber (#f59e0b) for conflict or security-related issues.
-      - Green (#22c55e) for other operational updates (e.g., new displacement camps, aid distribution points, funding news, general reports on a region).
-  4.  **No Duplicates:** If multiple articles report on the same event, only create one incident object for it.
-  5.  **Output:** If no articles contain actionable incidents, output an empty 'incidents' array.
+  1.  **Work with Limited Data:** Even if snippets are minimal or say "No summary available," try to extract incidents from article titles if they mention specific Ethiopian locations or regions.
+  2.  **Ethiopian Locations:** Look for mentions of Ethiopian cities, regions, or areas like: Addis Ababa, Oromia, Amhara, Tigray, Afar, Somali, SNNPR, Gambela, Benishangul-Gumuz, Harari, Dire Dawa, etc.
+  3.  **Plausible Geolocation:** Use your knowledge of Ethiopian geography to assign coordinates:
+     - Addis Ababa: ~9.03, 38.74
+     - Oromia region: ~8.5, 39.5
+     - Amhara region: ~11.5, 38.0
+     - Tigray region: ~13.5, 39.5
+     - Afar region: ~11.8, 41.0
+     - Somali region: ~6.5, 43.5
+     - SNNPR: ~7.0, 37.5
+  4.  **Categorize with Color:** Assign colors based on content:
+      - Blue (#3b82f6) for weather/natural disasters (floods, droughts)
+      - Red (#ef4444) for health emergencies (disease outbreaks, medical supply needs)
+      - Amber (#f59e0b) for conflict or security-related issues
+      - Green (#22c55e) for humanitarian operations (aid distribution, displacement camps, general humanitarian response)
+  5.  **Default to Humanitarian Operations:** If the article type is unclear but mentions Ethiopia, default to green (humanitarian operations)
+  6.  **Output:** Create incidents even from limited title information if it mentions Ethiopian locations
 
   **Articles to Analyze:**
   {{#each articles}}
