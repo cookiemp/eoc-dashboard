@@ -182,7 +182,7 @@ async function getIfrcNews(): Promise<{ articles?: NewsArticle[], error?: string
   
   try {
     const response = await fetch(url, {
-      next: { revalidate: 3600 }, // Cache for 1 hour
+      cache: 'no-store', // Disable cache temporarily
     });
 
     if (!response.ok) {
@@ -213,7 +213,7 @@ async function getIfrcNews(): Promise<{ articles?: NewsArticle[], error?: string
  */
 export async function getHumanitarianNews(): Promise<{ articles?: NewsArticle[], error?: string }> {
   const [reliefWebResult, ifrcResult] = await Promise.allSettled([
-    fetch(`https://api.reliefweb.int/v1/reports?appname=ercs-dashboard&profile=list&preset=latest&limit=10&filter[field]=primary_country.iso3&filter[value]=eth`)
+    fetch(`https://api.reliefweb.int/v1/reports?appname=ercs-dashboard&profile=list&preset=latest&limit=10&filter[field]=primary_country.iso3&filter[value]=eth`, { cache: 'no-store' })
       .then(res => res.json()),
     getIfrcNews(),
   ]);
@@ -276,7 +276,7 @@ export async function getGeneralNews(): Promise<{ articles?: NewsArticle[], erro
       headers: {
         'X-API-Key': apiKey,
       },
-      next: { revalidate: 3600 }, // Cache for 1 hour
+      cache: 'no-store', // Disable cache temporarily
     });
 
     if (!response.ok) {
