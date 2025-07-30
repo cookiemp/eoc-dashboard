@@ -76,23 +76,23 @@ export async function addIncidents(newIncidents: Incident[]): Promise<void> {
     id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
     addedAt: new Date().toISOString(),
   }));
+  
+  // Combine all incidents
+  let allIncidents = [...currentIncidents, ...incidentsToAdd];
 
-  // Combine and sort incidents by time added (newest first)
-  let allIncidents = [...currentIncidents, ...incidentsToAdd].sort(
+  // De-duplicate based on title. This is a simple but effective strategy.
+  // We keep the first occurrence (which will be the newest if sorted, but we sort later).
+  const uniqueIncidents = allIncidents.filter((incident, index, self) =>
+    index === self.findIndex((t) => t.title === incident.title)
+  );
+
+  // Sort all unique incidents by time added (newest first)
+  const sortedIncidents = uniqueIncidents.sort(
     (a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()
   );
 
-  // De-duplicate based on title and a close-enough lat/lon to avoid re-adding the same incident
-   allIncidents = allIncidents.filter((incident, index, self) =>
-    index === self.findIndex((t) => (
-      t.title === incident.title && 
-      Math.abs(t.latitude - incident.latitude) < 0.1 &&
-      Math.abs(t.longitude - incident.longitude) < 0.1
-    ))
-  );
-
   // Enforce the cap by taking the most recent ones
-  const updatedIncidents = allIncidents.slice(0, MAX_INCIDENTS);
+  const updatedIncidents = sortedIncidents.slice(0, MAX_INCIDENTS);
 
   await writeIncidentCache(updatedIncidents);
 }
