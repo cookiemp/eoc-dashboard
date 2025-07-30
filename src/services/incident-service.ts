@@ -10,9 +10,23 @@ export type IncidentWithId = Incident & {
   addedAt: string; // ISO string for timestamp
 };
 
-// Define the path to the incident cache file
+// Define the path to the incident cache file (fallback)
 const incidentCachePath = path.resolve(process.cwd(), 'src/lib/incidents-cache.json');
 const MAX_INCIDENTS = 10;
+
+// Firebase integration with fallback
+let useFirestore = false;
+let firestore: any = null;
+
+try {
+  const { firestore: firestoreInstance } = require('@/lib/firebase-admin');
+  firestore = firestoreInstance;
+  useFirestore = true;
+  console.log('Using Firestore for incident storage');
+} catch (error) {
+  console.log('Firestore not configured, falling back to file-based storage');
+  useFirestore = false;
+}
 
 /**
  * Reads the current list of incidents from the cache file.
@@ -55,7 +69,18 @@ async function writeIncidentCache(incidents: IncidentWithId[]): Promise<void> {
  * @returns A promise that resolves to the current list of incidents.
  */
 export async function getIncidents(): Promise<IncidentWithId[]> {
-  return await readIncidentCache();
+  if (useFirestore) {
+    try {
+      const incidentsCol = firestore.collection('incidents');
+      const snapshot = await incidentsCol.orderBy('addedAt', 'desc').limit(MAX_INCIDENTS).get();
+      return snapshot.docs.map((doc: any) => doc.data() as IncidentWithId);
+    } catch (error) {
+      console.error('Error fetching from Firestore, falling back to file cache', error);
+      return await readIncidentCache(); // Fallback on error
+    }
+  } else {
+    return await readIncidentCache();
+  }
 }
 
 /**
@@ -67,31 +92,63 @@ export async function addIncidents(newIncidents: Incident[]): Promise<void> {
     return;
   }
 
+  if (useFirestore) {
+    try {
+      const incidentsCol = firestore.collection('incidents');
+      const batch = firestore.batch();
+
+      // Simple deduplication by checking for existing titles
+      for (const incident of newIncidents) {
+        const querySnapshot = await incidentsCol.where('title', '==', incident.title).limit(1).get();
+        if (querySnapshot.empty) {
+          const docRef = incidentsCol.doc(); // Auto-generate ID
+          batch.set(docRef, {
+            ...incident,
+            id: docRef.id,
+            addedAt: new Date().toISOString(),
+          });
+        }
+      }
+      await batch.commit();
+
+      // After adding, enforce the MAX_INCIDENTS limit
+      const snapshot = await incidentsCol.orderBy('addedAt', 'desc').get();
+      if (snapshot.size > MAX_INCIDENTS) {
+        const deleteBatch = firestore.batch();
+        snapshot.docs.slice(MAX_INCIDENTS).forEach((doc: any) => {
+          deleteBatch.delete(doc.ref);
+        });
+        await deleteBatch.commit();
+      }
+    } catch (error) {
+      console.error('Error writing to Firestore, falling back to file cache', error);
+      await addIncidentsToFile(newIncidents); // Fallback on error
+    }
+  } else {
+    await addIncidentsToFile(newIncidents);
+  }
+}
+
+// Extracted file-based logic to its own function for clarity
+async function addIncidentsToFile(newIncidents: Incident[]): Promise<void> {
   let currentIncidents = await readIncidentCache();
 
-  // Add new incidents with unique IDs and timestamps
   const incidentsToAdd: IncidentWithId[] = newIncidents.map((incident) => ({
     ...incident,
-    // Create a simple unique ID. In a real app, use something like UUID.
     id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
     addedAt: new Date().toISOString(),
   }));
-  
-  // Combine all incidents
+
   let allIncidents = [...currentIncidents, ...incidentsToAdd];
 
-  // De-duplicate based on title. This is a simple but effective strategy.
-  // We keep the first occurrence (which will be the newest if sorted, but we sort later).
   const uniqueIncidents = allIncidents.filter((incident, index, self) =>
     index === self.findIndex((t) => t.title === incident.title)
   );
 
-  // Sort all unique incidents by time added (newest first)
   const sortedIncidents = uniqueIncidents.sort(
     (a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()
   );
 
-  // Enforce the cap by taking the most recent ones
   const updatedIncidents = sortedIncidents.slice(0, MAX_INCIDENTS);
 
   await writeIncidentCache(updatedIncidents);

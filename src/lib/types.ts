@@ -6,6 +6,12 @@ export type NewsArticle = {
   url: string;
 };
 
+export type WeatherAlert = {
+  city: string;
+  temperature: number;
+  condition: string;
+};
+
 export type HealthAlert = {
   id: string;
   title: string;

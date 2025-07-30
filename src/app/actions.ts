@@ -10,7 +10,7 @@ import { revalidatePath } from 'next/cache';
 import fs from 'fs/promises';
 import path from 'path';
 
-// Define the path to the summary cache file
+// Define the path to the summary cache file (fallback)
 const summaryCacheFilePath = path.resolve(process.cwd(), 'src/lib/summary-cache.json');
 
 // Define a type for our cache structure
@@ -19,24 +19,69 @@ type SummaryCache = {
   date: string | null;
 };
 
+// Firebase integration with fallback
+let useFirestore = false;
+let firestore: any = null;
+
+try {
+  const { firestore: firestoreInstance } = require('@/lib/firebase-admin');
+  firestore = firestoreInstance;
+  useFirestore = true;
+  console.log('Using Firestore for summary cache');
+} catch (error) {
+  console.log('Firestore not configured, falling back to file-based cache');
+  useFirestore = false;
+}
+
 // Helper function to read the summary cache
 async function readSummaryCache(): Promise<SummaryCache> {
-  try {
-    const data = await fs.readFile(summaryCacheFilePath, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    // If the file doesn't exist or is invalid, return an empty cache structure
-    console.error('Error reading summary cache:', error);
-    return { summary: null, date: null };
+  if (useFirestore) {
+    try {
+      const doc = await firestore.collection('cache').doc('daily-summary').get();
+      if (doc.exists) {
+        return doc.data() as SummaryCache;
+      } else {
+        return { summary: null, date: null };
+      }
+    } catch (error) {
+      console.error('Error reading from Firestore, falling back to file cache', error);
+      return await readSummaryCacheFromFile(); // Fallback on error
+    }
+  } else {
+    return await readSummaryCacheFromFile();
   }
 }
 
 // Helper function to write to the summary cache
 async function writeSummaryCache(data: SummaryCache): Promise<void> {
+  if (useFirestore) {
+    try {
+      await firestore.collection('cache').doc('daily-summary').set(data);
+    } catch (error) {
+      console.error('Error writing to Firestore, falling back to file cache', error);
+      await writeSummaryCacheToFile(data); // Fallback on error
+    }
+  } else {
+    await writeSummaryCacheToFile(data);
+  }
+}
+
+// File-based cache functions for fallback
+async function readSummaryCacheFromFile(): Promise<SummaryCache> {
+  try {
+    const data = await fs.readFile(summaryCacheFilePath, 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error reading summary cache from file:', error);
+    return { summary: null, date: null };
+  }
+}
+
+async function writeSummaryCacheToFile(data: SummaryCache): Promise<void> {
   try {
     await fs.writeFile(summaryCacheFilePath, JSON.stringify(data, null, 2), 'utf-8');
   } catch (error) {
-    console.error('Error writing to summary cache:', error);
+    console.error('Error writing to summary cache file:', error);
   }
 }
 
