@@ -212,44 +212,49 @@ async function getIfrcNews(): Promise<{ articles?: NewsArticle[], error?: string
  * Fetches and merges humanitarian news from multiple high-quality sources.
  */
 export async function getHumanitarianNews(): Promise<{ articles?: NewsArticle[], error?: string }> {
-  const [reliefWebResult, ifrcResult] = await Promise.all([
-    fetch(`https://api.reliefweb.int/v1/reports?appname=ercs-dashboard&profile=list&preset=latest&limit=5&filter[field]=primary_country.iso3&filter[value]=eth`).then(res => res.json()),
+  const [reliefWebResult, ifrcResult] = await Promise.allSettled([
+    fetch(`https://api.reliefweb.int/v1/reports?appname=ercs-dashboard&profile=list&preset=latest&limit=10&filter[field]=primary_country.iso3&filter[value]=eth`)
+      .then(res => res.json()),
     getIfrcNews(),
   ]);
 
   const allArticles: NewsArticle[] = [];
-  let combinedError: string | null = null;
+  const errors: string[] = [];
 
   // Process ReliefWeb results
-  if (reliefWebResult.data) {
-    const reliefWebArticles: NewsArticle[] = (reliefWebResult.data || []).map((item: any) => ({
-      id: item.id.toString(),
-      title: item.fields.title || 'No Title Available',
-      source: item.fields.source?.[0]?.name || 'Unknown Source',
-      snippet: item.fields.body?.split('\n\n')[0] || 'No snippet available.',
-      url: item.fields.url || item.href,
-    }));
+  if (reliefWebResult.status === 'fulfilled' && reliefWebResult.value.data) {
+    const reliefWebArticles: NewsArticle[] = (reliefWebResult.value.data || [])
+      .filter((item: any) => item.fields.primary_country?.iso3 === 'eth') // Strict filtering
+      .map((item: any) => ({
+        id: item.id.toString(),
+        title: item.fields.title || 'No Title Available',
+        source: item.fields.source?.[0]?.name || 'ReliefWeb',
+        snippet: item.fields.body?.split('\n\n')[0] || 'No snippet available.',
+        url: item.fields.url || item.href,
+      }));
     allArticles.push(...reliefWebArticles);
   } else {
-    combinedError = `ReliefWeb API Error: ${reliefWebResult.error?.message || 'Unknown error'}`;
+    errors.push('ReliefWeb API Error');
+    console.error('ReliefWeb fetch failed:', reliefWebResult.status === 'rejected' ? reliefWebResult.reason : 'No data');
   }
 
   // Process IFRC results
-  if (ifrcResult.articles) {
-    allArticles.push(...ifrcResult.articles);
-  } else if (ifrcResult.error) {
-    combinedError = combinedError ? `${combinedError}; ${ifrcResult.error}` : ifrcResult.error;
+  if (ifrcResult.status === 'fulfilled' && ifrcResult.value.articles) {
+    allArticles.push(...ifrcResult.value.articles);
+  } else {
+    errors.push('IFRC API Error');
+    console.error('IFRC fetch failed:', ifrcResult.status === 'rejected' ? ifrcResult.reason : 'No articles');
   }
 
   // Deduplicate articles based on title
   const uniqueArticles = allArticles.filter((article, index, self) =>
-    index === self.findIndex((a) => a.title === article.title)
+    index === self.findIndex((a) => a.title.trim().toLowerCase() === article.title.trim().toLowerCase())
   );
 
   if (uniqueArticles.length > 0) {
     return { articles: uniqueArticles };
   } else {
-    return { error: combinedError || "No humanitarian news could be fetched." };
+    return { error: errors.join('; ') || "No humanitarian news could be fetched." };
   }
 }
 
