@@ -133,7 +133,7 @@ export async function generateIncidentDossier(input: GenerateIncidentDossierInpu
  * Fetches the latest humanitarian reports about Ethiopia from the ReliefWeb API.
  */
 export async function getTheNewsApiArticles(): Promise<{ articles?: NewsArticle[], error?: string }> {
-  const url = `https://api.reliefweb.int/v1/reports?appname=ercs-dashboard&query[value]=Ethiopia&preset=latest&profile=report&limit=5`;
+  const url = `https://api.reliefweb.int/v1/reports?appname=ercs-dashboard&query[value]=Ethiopia&preset=latest&profile=list&limit=5`;
 
   try {
     const response = await fetch(url, {
