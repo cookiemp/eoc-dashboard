@@ -5,7 +5,7 @@ import Header from "@/components/dashboard/header";
 import IncidentMap from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
 import NewsFeed from "@/components/dashboard/news-feed";
-import { getLatestIncidents, processNewsIntoIncidents, getTheNewsApiArticles, getGeneralNews } from "@/app/actions";
+import { getLatestIncidents, processNewsIntoIncidents, getHumanitarianNews, getGeneralNews } from "@/app/actions";
 import type { IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
 import { Newspaper, BookHeart } from 'lucide-react';
@@ -28,7 +28,7 @@ export default function Home() {
       setHumanitarianNewsError(null);
       
       try {
-        const result = await getTheNewsApiArticles();
+        const result = await getHumanitarianNews();
 
         if (result.error) {
           throw new Error(result.error);

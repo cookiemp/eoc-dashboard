@@ -175,11 +175,11 @@ export async function generateIncidentDossier(input: GenerateIncidentDossierInpu
 }
 
 /**
- * Fetches the latest humanitarian reports about Ethiopia from the ReliefWeb API.
+ * Fetches news from the International Federation of Red Cross (IFRC) API for Ethiopia.
  */
-export async function getTheNewsApiArticles(): Promise<{ articles?: NewsArticle[], error?: string }> {
-  const url = `https://api.reliefweb.int/v1/reports?appname=ercs-dashboard&query[value]=Ethiopia&preset=latest&profile=list&limit=5`;
-
+async function getIfrcNews(): Promise<{ articles?: NewsArticle[], error?: string }> {
+  const url = 'https://go-api.ifrc.org/api/v2/appeal/?country__in=ET';
+  
   try {
     const response = await fetch(url, {
       next: { revalidate: 3600 }, // Cache for 1 hour
@@ -187,28 +187,69 @@ export async function getTheNewsApiArticles(): Promise<{ articles?: NewsArticle[
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('ReliefWeb API Error:', errorData);
-      const errorMessage = errorData?.error?.message || `API responded with status ${response.status}`;
-      return { error: `ReliefWeb API Error: ${errorMessage}` };
+      return { error: `IFRC API Error: ${errorData.detail || response.status}` };
     }
 
     const data = await response.json();
 
-    const articles: NewsArticle[] = (data.data || []).map((item: any) => ({
+    const articles: NewsArticle[] = (data.results || []).map((item: any) => ({
       id: item.id.toString(),
-      title: item.fields.title || 'No Title Available',
-      source: item.fields.source?.[0]?.name || 'Unknown Source',
-      // ReliefWeb uses 'body' for the main content, which can be long. We'll use it as a snippet.
-      snippet: item.fields.body?.split('\n\n')[0] || 'No snippet available.',
-      url: item.fields.url || item.href,
+      title: item.name || 'No Title Available',
+      source: 'International Federation of Red Cross (IFRC)',
+      snippet: item.summary || 'No summary available.',
+      url: `https://go.ifrc.org/appeals/${item.id}`,
     }));
-    
+
     return { articles };
 
   } catch (error) {
-    console.error('Failed to fetch from ReliefWeb API:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-    return { error: `Failed to connect to ReliefWeb API: ${errorMessage}` };
+    return { error: `Failed to connect to IFRC API: ${errorMessage}` };
+  }
+}
+
+/**
+ * Fetches and merges humanitarian news from multiple high-quality sources.
+ */
+export async function getHumanitarianNews(): Promise<{ articles?: NewsArticle[], error?: string }> {
+  const [reliefWebResult, ifrcResult] = await Promise.all([
+    fetch(`https://api.reliefweb.int/v1/reports?appname=ercs-dashboard&profile=list&preset=latest&limit=5&filter[field]=primary_country.iso3&filter[value]=eth`).then(res => res.json()),
+    getIfrcNews(),
+  ]);
+
+  const allArticles: NewsArticle[] = [];
+  let combinedError: string | null = null;
+
+  // Process ReliefWeb results
+  if (reliefWebResult.data) {
+    const reliefWebArticles: NewsArticle[] = (reliefWebResult.data || []).map((item: any) => ({
+      id: item.id.toString(),
+      title: item.fields.title || 'No Title Available',
+      source: item.fields.source?.[0]?.name || 'Unknown Source',
+      snippet: item.fields.body?.split('\n\n')[0] || 'No snippet available.',
+      url: item.fields.url || item.href,
+    }));
+    allArticles.push(...reliefWebArticles);
+  } else {
+    combinedError = `ReliefWeb API Error: ${reliefWebResult.error?.message || 'Unknown error'}`;
+  }
+
+  // Process IFRC results
+  if (ifrcResult.articles) {
+    allArticles.push(...ifrcResult.articles);
+  } else if (ifrcResult.error) {
+    combinedError = combinedError ? `${combinedError}; ${ifrcResult.error}` : ifrcResult.error;
+  }
+
+  // Deduplicate articles based on title
+  const uniqueArticles = allArticles.filter((article, index, self) =>
+    index === self.findIndex((a) => a.title === article.title)
+  );
+
+  if (uniqueArticles.length > 0) {
+    return { articles: uniqueArticles };
+  } else {
+    return { error: combinedError || "No humanitarian news could be fetched." };
   }
 }
 
