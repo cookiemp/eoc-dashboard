@@ -41,11 +41,20 @@ const summarizeIncidentDataPrompt = ai.definePrompt({
   output: {schema: SummarizeIncidentDataOutputSchema},
   prompt: `You are an expert at summarizing humanitarian incident data for the Ethiopia Red Cross Society emergency operations center.
 
-  Given the following news articles about Ethiopia, provide a concise summary as a single string. The summary must be in a bullet-pointed list format. Each bullet point must start with a markdown asterisk (*).
+  Given the following news articles about Ethiopia, provide a concise summary as a single string. The summary must be in a bullet-pointed list format with each bullet point on a separate line.
 
-  For each article, create one bullet point that summarizes the key information from the title and snippet. Crucially, each bullet point must end with a markdown link to the original article, like this: [Source](url).
+  FORMATTING REQUIREMENTS:
+  - Each bullet point must start with a markdown asterisk (*) followed by a space
+  - Each bullet point must be on its own line (separated by \n)
+  - Each bullet point must end with a markdown link to the original article: [Source](url)
+  - If an article is about a public health issue (disease outbreak, health crisis, medical supplies), start that bullet point with ⚕️* (emoji + asterisk)
 
-  IMPORTANT: If an article is about a public health issue, such as a disease outbreak, health crisis, or medical supply delivery, you MUST start that bullet point with a ⚕️ emoji before the asterisk.
+  For each article, create one bullet point that summarizes the key information from the title and snippet.
+
+  Example format:
+  * First summary point here. [Source](url1)
+  * Second summary point here. [Source](url2)
+  ⚕️* Health-related summary point here. [Source](url3)
 
   Articles:
   {{#each articles}}

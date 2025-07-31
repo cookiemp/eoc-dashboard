@@ -59,8 +59,32 @@ const AiSummary = ({ articles }: AiSummaryProps) => {
   const renderSummary = () => {
     if (!summary) return null;
 
-    const summaryPoints = summary.summary.split(/⚕️|\*/).filter(point => point.trim() !== '');
-    const healthAlerts = summary.summary.includes('⚕️');
+    // Split on line breaks first, then properly parse bullet points
+    const lines = summary.summary.split('\n').filter(line => line.trim() !== '');
+    const summaryPoints: Array<{text: string, isHealthAlert: boolean}> = [];
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      // Check if line starts with bullet point markers
+      if (trimmedLine.startsWith('⚕️*') || trimmedLine.startsWith('⚕️ *')) {
+        // Health alert bullet point
+        const text = trimmedLine.replace(/^⚕️\s*\*\s*/, '').trim();
+        if (text) summaryPoints.push({ text, isHealthAlert: true });
+      } else if (trimmedLine.startsWith('*')) {
+        // Regular bullet point
+        const text = trimmedLine.replace(/^\*\s*/, '').trim();
+        if (text) summaryPoints.push({ text, isHealthAlert: false });
+      } else if (trimmedLine.startsWith('⚕️')) {
+        // Health alert without asterisk
+        const text = trimmedLine.replace(/^⚕️\s*/, '').trim();
+        if (text) summaryPoints.push({ text, isHealthAlert: true });
+      } else if (trimmedLine && !trimmedLine.includes(':')) {
+        // Any other non-empty line that doesn't look like a header
+        summaryPoints.push({ text: trimmedLine, isHealthAlert: false });
+      }
+    }
+    
+    const healthAlerts = summaryPoints.some(point => point.isHealthAlert);
 
     return (
       <div className="space-y-4">
@@ -71,23 +95,18 @@ const AiSummary = ({ articles }: AiSummaryProps) => {
           </div>
         )}
         <ul className="space-y-2 list-none p-0">
-          {summaryPoints.map((point, index) => {
-            // The logic needs to be robust enough to handle the emoji.
-            const isHealthAlert = summary.summary.includes('⚕️') && summary.summary.split('*')[index+1]?.trim().startsWith(point.trim());
-            
-            return (
-              <li key={index} className="flex items-start gap-3">
-                <span className="text-primary mt-1">{summary.summary.includes(point) && summary.summary[summary.summary.indexOf(point) - 2] === '⚕️' ? '⚕️' : '●'}</span>
-                <span
-                  className="text-sm text-muted-foreground"
-                  dangerouslySetInnerHTML={{
-                    __html: point
-                      .replace(/\[Source\]\((.*?)\)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-primary underline hover:text-primary/80">Source</a>')
-                  }}
-                />
-              </li>
-            );
-          })}
+          {summaryPoints.map((point, index) => (
+            <li key={index} className="flex items-start gap-3">
+              <span className="text-primary mt-1">{point.isHealthAlert ? '⚕️' : '●'}</span>
+              <span
+                className="text-sm text-muted-foreground"
+                dangerouslySetInnerHTML={{
+                  __html: point.text
+                    .replace(/\[Source\]\((.*?)\)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-primary underline hover:text-primary/80">Source</a>')
+                }}
+              />
+            </li>
+          ))}
         </ul>
       </div>
     );

@@ -85,6 +85,18 @@ async function writeSummaryCacheToFile(data: SummaryCache): Promise<void> {
   }
 }
 
+/**
+ * Clears the summary cache to force regeneration.
+ */
+export async function clearSummaryCache(): Promise<void> {
+  try {
+    await writeSummaryCache({ summary: null, date: null });
+    console.log('Summary cache cleared');
+  } catch (error) {
+    console.error('Error clearing summary cache:', error);
+  }
+}
+
 export async function getSummary(input: { articles: NewsArticle[] }) {
   const now = new Date();
   const today = now.toISOString().split('T')[0];
@@ -103,7 +115,12 @@ export async function getSummary(input: { articles: NewsArticle[] }) {
       // Use cached summary if it's less than 30 minutes old
       if (cacheDate > thirtyMinutesAgo) {
         console.log('Using cached summary from:', cache.date);
-        return cache.summary;
+        // Add debugging to check for truncated summaries
+        if (typeof cache.summary.summary === 'string' && cache.summary.summary.length < 100) {
+          console.warn('Cached summary appears truncated, regenerating...', cache.summary.summary);
+        } else {
+          return cache.summary;
+        }
       }
     }
 
@@ -111,6 +128,20 @@ export async function getSummary(input: { articles: NewsArticle[] }) {
     
     // Generate a new summary
     const result = await summarizeIncidentData(input);
+    
+    // Ensure proper formatting with line breaks between bullet points
+    if (result.summary) {
+      // Clean up the summary formatting
+      result.summary = result.summary
+        .replace(/\*\s*/g, '\n* ') // Ensure newlines before asterisks
+        .replace(/⚕️\*/g, '\n⚕️*') // Ensure newlines before health alerts
+        .replace(/^\n/, '') // Remove leading newline
+        .trim();
+    }
+    
+    // Add debugging for the generated summary
+    console.log('Generated summary length:', result.summary?.length || 0);
+    console.log('Generated summary preview:', result.summary?.substring(0, 200) + '...');
     
     // Save the new summary to the cache with current timestamp
     await writeSummaryCache({ 
