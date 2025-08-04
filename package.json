@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test:crawlers": "tsx ./tests/optimized-crawler-test-suite.ts",
     "test:un-ocha": "tsx ./tests/un-ocha-crawler-test.ts",
-    "analyze:sites": "tsx ./scripts/analyze-sites.ts"
+    "analyze:sites": "tsx ./scripts/analyze-sites.ts",
+    "crawl:github-actions": "tsx ./scripts/github-actions-crawler.ts"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.13.0",

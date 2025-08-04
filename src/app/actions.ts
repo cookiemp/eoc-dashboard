@@ -359,11 +359,13 @@ export async function getAllNewsWithCategorization(): Promise<{ humanitarian?: C
       getHumanitarianNews(),
       (async () => {
         try {
-          const { fetchCrawledArticles } = await import('@/services/crawler-server');
-          return await fetchCrawledArticles();
+          // Use Firebase news service instead of direct crawler
+          const { getCrawledNews } = await import('@/services/firebase-news-service');
+          const result = await getCrawledNews(15); // Get up to 15 crawled articles
+          return { articles: result.articles };
         } catch (error) {
-          console.warn('Crawler service unavailable:', error);
-          return { articles: [], error: 'Crawler service unavailable' };
+          console.warn('Firebase crawler service unavailable:', error);
+          return { articles: [], error: 'Crawled news service unavailable' };
         }
       })(),
       getNewsAPIFallback()
