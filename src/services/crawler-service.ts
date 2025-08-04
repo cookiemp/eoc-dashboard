@@ -241,6 +241,8 @@ export class CrawlerService {
     this.crawlers.push(new TestCrawler());
     // Add BBC Africa crawler
     this.crawlers.push(new BbcAfricaCrawler());
+    // Add Al Jazeera Africa crawler
+    this.crawlers.push(new AlJazeeraAfricaCrawler());
   }
 
   /**
@@ -294,6 +296,93 @@ export class CrawlerService {
 
     console.log(`Crawled ${uniqueArticles.length} unique articles from ${results.length} sources`);
     return uniqueArticles;
+  }
+}
+
+/**
+ * Al Jazeera Africa crawler for real news
+ */
+export class AlJazeeraAfricaCrawler extends BaseCrawler {
+  constructor() {
+    super({
+      name: 'Al Jazeera Africa',
+      baseUrl: 'https://www.aljazeera.com/africa',
+      selectors: {
+        articleLinks: 'a[href*="/news/"], a[href*="/africa/"]',
+        title: 'h1, .article-header__title',
+        content: '.wysiwyg, .article-p, .content p',
+        date: '.date-simple, .screen-reader-text'
+      },
+      maxArticles: 3,
+      respectsRobotsTxt: true
+    });
+  }
+
+  protected async performCrawl(): Promise<NewsArticle[]> {
+    const browser = await puppeteer.launch({ 
+      headless: true, 
+      args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+    });
+    const page = await browser.newPage();
+    const articles: NewsArticle[] = [];
+
+    try {
+      // Set user agent
+      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
+      
+      console.log(`Fetching ${this.config.baseUrl}...`);
+      await page.goto(this.config.baseUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+      
+      // Get article links
+      const links = await page.$$eval(
+        this.config.selectors.articleLinks, 
+        (anchors) => anchors.map(anchor => (anchor as HTMLAnchorElement).href)
+      );
+      
+      console.log(`Found ${links.length} article links, processing ${Math.min(links.length, this.config.maxArticles || 3)}...`);
+      
+      // Process each article
+      for (let i = 0; i < Math.min(links.length, this.config.maxArticles || 3); i++) {
+        const link = links[i];
+        try {
+          await page.goto(link, { waitUntil: 'networkidle2', timeout: 30000 });
+          
+          // Get title
+          const title = await page.$eval(
+            this.config.selectors.title, 
+            element => element.textContent?.trim() || ''
+          ).catch(() => '');
+          
+          // Get content snippets
+          const contentElements = await page.$$(this.config.selectors.content);
+          let snippet = '';
+          for (const elem of contentElements.slice(0, 3)) { // First 3 paragraphs
+            const text = await elem.evaluate(e => e.textContent?.trim() || '');
+            snippet += text + ' ';
+          }
+          
+          if (title && snippet.trim()) {
+            const id = this.generateArticleId(title, this.config.name);
+            articles.push({
+              id,
+              title,
+              source: this.config.name,
+              snippet: this.cleanText(snippet),
+              url: link
+            });
+            console.log(`✓ Extracted: ${title.substring(0, 50)}...`);
+          }
+        } catch (error) {
+          console.error(`Failed to process article ${link}:`, error instanceof Error ? error.message : 'Unknown error');
+        }
+      }
+    } catch (error) {
+      console.error('Error during Al Jazeera Africa crawl:', error);
+    } finally {
+      await browser.close();
+    }
+
+    return articles;
   }
 }
 
