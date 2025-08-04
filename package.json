@@ -9,7 +9,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:crawlers": "tsx ./tests/optimized-crawler-test-suite.ts",
+    "test:un-ocha": "tsx ./tests/un-ocha-crawler-test.ts",
+    "analyze:sites": "tsx ./scripts/analyze-sites.ts"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.13.0",

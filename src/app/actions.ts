@@ -345,9 +345,46 @@ export async function getHumanitarianNews(): Promise<{ articles?: NewsArticle[],
 
 
 /**
- * Fetches general news about Ethiopia from NewsAPI.org (reliable sources only).
+ * Fetches general news about Ethiopia using optimized web crawlers.
+ * Falls back to NewsAPI if crawling fails.
  */
 export async function getGeneralNews(): Promise<{ articles?: NewsArticle[], error?: string }> {
+  console.log('getGeneralNews called at:', new Date().toISOString());
+  
+  try {
+    // Use the server-side crawler wrapper
+    const { fetchCrawledArticles } = await import('@/services/crawler-server');
+    const result = await fetchCrawledArticles();
+    
+    if (result.articles && result.articles.length > 0) {
+      console.log(`✅ Successfully crawled ${result.articles.length} articles from multiple sources`);
+      return result;
+    } else {
+      console.warn('⚠️ No articles returned from crawlers, falling back to NewsAPI');
+      return await getNewsAPIFallback();
+    }
+    
+  } catch (error) {
+    console.error('❌ Crawler service failed:', error);
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    
+    // Fallback to NewsAPI on crawler failure
+    console.log('📰 Falling back to NewsAPI...');
+    const fallbackResult = await getNewsAPIFallback();
+    
+    if (fallbackResult.articles && fallbackResult.articles.length > 0) {
+      return fallbackResult;
+    }
+    
+    // If both crawler and NewsAPI fail, return the crawler error
+    return { error: `Web crawlers failed (${errorMessage}) and NewsAPI fallback also failed.` };
+  }
+}
+
+/**
+ * Fallback function using NewsAPI.org (reliable sources only).
+ */
+async function getNewsAPIFallback(): Promise<{ articles?: NewsArticle[], error?: string }> {
   const apiKey = process.env.NEWSAPI_API_KEY;
   if (!apiKey) {
     return { error: 'NewsAPI API key is not configured. Get one free at newsapi.org' };
