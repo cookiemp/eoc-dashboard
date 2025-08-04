@@ -144,6 +144,93 @@ export class TestCrawler extends BaseCrawler {
 }
 
 /**
+ * BBC Africa crawler for real news
+ */
+export class BbcAfricaCrawler extends BaseCrawler {
+  constructor() {
+    super({
+      name: 'BBC Africa',
+      baseUrl: 'https://www.bbc.com/news/world/africa',
+      selectors: {
+        articleLinks: 'a[href*="/news/world-africa-"], a[href*="/news/"][href*="africa"]',
+        title: 'h1[data-testid="headline"], h1.story-body__h1, h1',
+        content: '[data-component="text-block"], .story-body__inner p, p',
+        date: 'time, .date'
+      },
+      maxArticles: 3,
+      respectsRobotsTxt: true
+    });
+  }
+
+  protected async performCrawl(): Promise<NewsArticle[]> {
+    const browser = await puppeteer.launch({ 
+      headless: true, 
+      args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+    });
+    const page = await browser.newPage();
+    const articles: NewsArticle[] = [];
+
+    try {
+      // Set user agent
+      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
+      
+      console.log(`Fetching ${this.config.baseUrl}...`);
+      await page.goto(this.config.baseUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+      
+      // Get article links
+      const links = await page.$$eval(
+        this.config.selectors.articleLinks, 
+        (anchors) => anchors.map(anchor => (anchor as HTMLAnchorElement).href)
+      );
+      
+      console.log(`Found ${links.length} article links, processing ${Math.min(links.length, this.config.maxArticles || 3)}...`);
+      
+      // Process each article
+      for (let i = 0; i < Math.min(links.length, this.config.maxArticles || 3); i++) {
+        const link = links[i];
+        try {
+          await page.goto(link, { waitUntil: 'networkidle2', timeout: 30000 });
+          
+          // Get title
+          const title = await page.$eval(
+            this.config.selectors.title, 
+            element => element.textContent?.trim() || ''
+          ).catch(() => '');
+          
+          // Get content snippets
+          const contentElements = await page.$$(this.config.selectors.content);
+          let snippet = '';
+          for (const elem of contentElements.slice(0, 3)) { // First 3 paragraphs
+            const text = await elem.evaluate(e => e.textContent?.trim() || '');
+            snippet += text + ' ';
+          }
+          
+          if (title && snippet.trim()) {
+            const id = this.generateArticleId(title, this.config.name);
+            articles.push({
+              id,
+              title,
+              source: this.config.name,
+              snippet: this.cleanText(snippet),
+              url: link
+            });
+            console.log(`✓ Extracted: ${title.substring(0, 50)}...`);
+          }
+        } catch (error) {
+          console.error(`Failed to process article ${link}:`, error instanceof Error ? error.message : 'Unknown error');
+        }
+      }
+    } catch (error) {
+      console.error('Error during BBC Africa crawl:', error);
+    } finally {
+      await browser.close();
+    }
+
+    return articles;
+  }
+}
+
+/**
  * Main crawler service that orchestrates all crawlers
  */
 export class CrawlerService {
@@ -152,6 +239,8 @@ export class CrawlerService {
   constructor() {
     // Initialize with test crawler for now
     this.crawlers.push(new TestCrawler());
+    // Add BBC Africa crawler
+    this.crawlers.push(new BbcAfricaCrawler());
   }
 
   /**
