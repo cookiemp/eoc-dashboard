@@ -35,24 +35,28 @@ jobs:
       - name: Install Chrome for Puppeteer
         run: |
           # Install Chrome
-          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          echo "deb http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/googlechrome-linux-keyring.gpg
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/googlechrome-linux-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
           
-          # Install additional dependencies for Puppeteer
+          # Install additional dependencies for Puppeteer (Ubuntu 24.04 compatible)
           sudo apt-get install -y \
             libnss3 \
             libxss1 \
-            libasound2 \
+            libasound2t64 \
             libxtst6 \
             libxrandr2 \
-            libasound2 \
             libpangocairo-1.0-0 \
             libatk1.0-0 \
             libcairo-gobject2 \
             libgtk-3-0 \
-            libgdk-pixbuf2.0-0
+            libgdk-pixbuf2.0-0 \
+            libdrm2 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxfixes3 \
+            libxss1
 
       - name: Run news crawlers
         env:
