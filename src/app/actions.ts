@@ -507,7 +507,16 @@ export async function getGeneralNews(): Promise<{ articles?: NewsArticle[], erro
  */
 async function getNewsAPIFallback(): Promise<{ articles?: NewsArticle[], error?: string }> {
   const apiKey = process.env.NEWSAPI_API_KEY;
+  
+  // Debug logging
+  console.log('🔍 NewsAPI Debug Info:');
+  console.log('- NODE_ENV:', process.env.NODE_ENV);
+  console.log('- API Key exists:', !!apiKey);
+  console.log('- API Key length:', apiKey?.length || 0);
+  console.log('- API Key preview:', apiKey ? `${apiKey.substring(0, 10)}...` : 'NOT_SET');
+  
   if (!apiKey) {
+    console.error('❌ NewsAPI API key is missing!');
     return { error: 'NewsAPI API key is not configured. Get one free at newsapi.org' };
   }
 
