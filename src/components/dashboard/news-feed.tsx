@@ -1,16 +1,23 @@
 import type { NewsArticle } from '@/lib/types';
+import type { CategorizedArticle } from '@/ai/flows/categorize-news-articles-flow';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertTriangle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { AlertTriangle, Brain, Target } from 'lucide-react';
 
 interface NewsFeedProps {
   title: string;
-  items: NewsArticle[];
+  items: (NewsArticle | CategorizedArticle)[];
   icon: React.ReactNode;
   isLoading: boolean;
   error?: string | null;
+}
+
+// Type guard to check if an item is a CategorizedArticle
+function isCategorizedArticle(item: NewsArticle | CategorizedArticle): item is CategorizedArticle {
+  return 'category' in item && 'confidence' in item;
 }
 
 const NewsFeed = ({ title, items, icon, isLoading, error }: NewsFeedProps) => {
@@ -53,6 +60,21 @@ const NewsFeed = ({ title, items, icon, isLoading, error }: NewsFeedProps) => {
               <Button variant="link" asChild className="p-0 h-auto mt-1">
                 <a href={item.url} target="_blank" rel="noopener noreferrer">Read more</a>
               </Button>
+              {isCategorizedArticle(item) && (
+                <div className="mt-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge className="text-xs" variant={item.category === 'humanitarian' ? 'default' : 'secondary'}>
+                      {item.category === 'humanitarian' ? 'Humanitarian' : 'General'}
+                    </Badge>
+                    <Badge className="text-xs" variant="outline">
+                      <Brain className="h-3 w-3 mr-1" /> {Math.round(item.confidence * 100)}%
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    <Target className="inline h-3 w-3 mr-1" /> {item.reasoning}
+                  </p>
+                </div>
+              )}
             </li>
           ))}
         </ul>

@@ -136,7 +136,22 @@ The dashboard is **fully operational** and meets all Phase 2 requirements:
 
 ## Phase 6: Reliability & Performance
 
-### 1. Enhanced Error Recovery
+### 1. AI Performance Optimizations
+**Current State**: AI categorization runs for every article fetch
+**Improvement**: Cache AI results and optimize API usage
+
+**Implementation**:
+- Cache AI categorization results to improve performance
+- Implement fallback strategies when Gemini API is unavailable
+- Add rate limiting for API calls to prevent quota exhaustion
+- Store AI results in database to avoid re-processing same articles
+
+**Files to modify**:
+- `src/app/actions.ts` (add caching logic)
+- `src/ai/flows/categorize-news-flow.ts` (implement caching)
+- New utility: `src/lib/ai-cache.ts`
+
+### 2. Enhanced Error Recovery
 **Current State**: Graceful error handling with fallbacks
 **Improvement**: Active retry and recovery mechanisms
 

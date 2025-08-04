@@ -3,7 +3,9 @@
 import { summarizeIncidentData } from '@/ai/flows/summarize-incident-data';
 import { extractIncidentsFromNews } from '@/ai/flows/extract-incidents-from-news-flow';
 import { generateIncidentDossier as generateIncidentDossierFlow } from '@/ai/flows/generate-incident-dossier-flow';
+import { categorizeNewsArticles } from '@/ai/flows/categorize-news-articles-flow';
 import type { GenerateIncidentDossierInput, GenerateIncidentDossierOutput } from '@/ai/flows/generate-incident-dossier-flow';
+import type { CategorizedArticle } from '@/ai/flows/categorize-news-articles-flow';
 import { addIncidents, getIncidents, IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
@@ -345,39 +347,158 @@ export async function getHumanitarianNews(): Promise<{ articles?: NewsArticle[],
 
 
 /**
- * Fetches general news about Ethiopia using optimized web crawlers.
- * Falls back to NewsAPI if crawling fails.
+ * Fetches all news from multiple sources and uses AI to categorize them.
+ * Returns both humanitarian and general news articles with AI classification.
  */
-export async function getGeneralNews(): Promise<{ articles?: NewsArticle[], error?: string }> {
-  console.log('getGeneralNews called at:', new Date().toISOString());
+export async function getAllNewsWithCategorization(): Promise<{ humanitarian?: CategorizedArticle[], general?: CategorizedArticle[], summary?: { humanitarianCount: number, generalCount: number }, error?: string }> {
+  console.log('getAllNewsWithCategorization called at:', new Date().toISOString());
   
   try {
-    // Use the server-side crawler wrapper
-    const { fetchCrawledArticles } = await import('@/services/crawler-server');
-    const result = await fetchCrawledArticles();
-    
-    if (result.articles && result.articles.length > 0) {
-      console.log(`✅ Successfully crawled ${result.articles.length} articles from multiple sources`);
-      return result;
-    } else {
-      console.warn('⚠️ No articles returned from crawlers, falling back to NewsAPI');
-      return await getNewsAPIFallback();
+    // Fetch from all sources concurrently
+    const [humanitarianResult, crawlerResult, newsApiResult] = await Promise.allSettled([
+      getHumanitarianNews(),
+      (async () => {
+        try {
+          const { fetchCrawledArticles } = await import('@/services/crawler-server');
+          return await fetchCrawledArticles();
+        } catch (error) {
+          console.warn('Crawler service unavailable:', error);
+          return { articles: [], error: 'Crawler service unavailable' };
+        }
+      })(),
+      getNewsAPIFallback()
+    ]);
+
+    // Collect all articles from all sources
+    const allArticles: NewsArticle[] = [];
+    const errors: string[] = [];
+
+    // Process humanitarian news (already known to be humanitarian)
+    const humanitarianArticles: NewsArticle[] = [];
+    if (humanitarianResult.status === 'fulfilled' && humanitarianResult.value.articles) {
+      humanitarianArticles.push(...humanitarianResult.value.articles);
+    } else if (humanitarianResult.status === 'fulfilled' && humanitarianResult.value.error) {
+      errors.push(`Humanitarian sources: ${humanitarianResult.value.error}`);
     }
+
+    // Process crawler results (need AI categorization)
+    if (crawlerResult.status === 'fulfilled' && crawlerResult.value.articles) {
+      allArticles.push(...crawlerResult.value.articles);
+    } else if (crawlerResult.status === 'fulfilled' && crawlerResult.value.error) {
+      errors.push(`Crawler sources: ${crawlerResult.value.error}`);
+    }
+
+    // Process NewsAPI results (need AI categorization)
+    if (newsApiResult.status === 'fulfilled' && newsApiResult.value.articles) {
+      allArticles.push(...newsApiResult.value.articles);
+    } else if (newsApiResult.status === 'fulfilled' && newsApiResult.value.error) {
+      errors.push(`NewsAPI: ${newsApiResult.value.error}`);
+    }
+
+    // Deduplicate articles by title
+    const uniqueArticles = allArticles.filter((article, index, self) => 
+      index === self.findIndex(a => a.title.toLowerCase() === article.title.toLowerCase())
+    );
+
+    console.log(`Processing ${uniqueArticles.length} articles for AI categorization...`);
+
+    let categorizedArticles: CategorizedArticle[] = [];
+    
+    // Only run AI categorization if we have articles to process
+    if (uniqueArticles.length > 0) {
+      try {
+        const categorizationResult = await categorizeNewsArticles({ articles: uniqueArticles });
+        categorizedArticles = categorizationResult.categorizedArticles || [];
+        console.log(`AI categorization completed: ${categorizedArticles.length} articles processed`);
+      } catch (categorizationError) {
+        console.error('AI categorization failed:', categorizationError);
+        // Fallback: treat all articles as general news
+        categorizedArticles = uniqueArticles.map(article => ({
+          ...article,
+          category: 'general' as const,
+          confidence: 0.5,
+          reasoning: 'AI categorization failed, defaulted to general'
+        }));
+      }
+    }
+
+    // Separate AI-categorized articles and add pre-classified humanitarian articles
+    const aiHumanitarian = categorizedArticles.filter(article => article.category === 'humanitarian');
+    const aiGeneral = categorizedArticles.filter(article => article.category === 'general');
+    
+    // Convert pre-classified humanitarian articles to CategorizedArticle format
+    const preClassifiedHumanitarian: CategorizedArticle[] = humanitarianArticles.map(article => ({
+      ...article,
+      category: 'humanitarian' as const,
+      confidence: 1.0,
+      reasoning: 'From dedicated humanitarian news sources (ReliefWeb, IFRC)'
+    }));
+
+    // Combine and deduplicate final results
+    const allHumanitarian = [...preClassifiedHumanitarian, ...aiHumanitarian]
+      .filter((article, index, self) => 
+        index === self.findIndex(a => a.title.toLowerCase() === article.title.toLowerCase())
+      )
+      .slice(0, 15); // Limit humanitarian articles
+
+    const finalGeneral = aiGeneral.slice(0, 10); // Limit general articles
+
+    const summary = {
+      humanitarianCount: allHumanitarian.length,
+      generalCount: finalGeneral.length
+    };
+
+    console.log(`✅ News categorization complete: ${summary.humanitarianCount} humanitarian, ${summary.generalCount} general`);
+
+    // Return error only if we have no articles at all
+    if (allHumanitarian.length === 0 && finalGeneral.length === 0) {
+      return { 
+        error: errors.length > 0 ? `All news sources failed: ${errors.join('; ')}` : 'No articles could be retrieved from any source'
+      };
+    }
+
+    return {
+      humanitarian: allHumanitarian,
+      general: finalGeneral,
+      summary
+    };
+
+  } catch (error) {
+    console.error('Error in getAllNewsWithCategorization:', error);
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    return { error: `Failed to fetch and categorize news: ${errorMessage}` };
+  }
+}
+
+/**
+ * Legacy function - now calls the unified categorization system and returns only general news.
+ * Maintained for backward compatibility.
+ */
+export async function getGeneralNews(): Promise<{ articles?: NewsArticle[], error?: string }> {
+  console.log('getGeneralNews (legacy) called at:', new Date().toISOString());
+  
+  try {
+    const result = await getAllNewsWithCategorization();
+    
+    if (result.error) {
+      return { error: result.error };
+    }
+    
+    // Convert CategorizedArticle back to NewsArticle for backward compatibility
+    const articles: NewsArticle[] = (result.general || []).map(article => ({
+      id: article.id,
+      title: article.title,
+      source: article.source,
+      snippet: article.snippet,
+      url: article.url
+    }));
+    
+    return { articles };
     
   } catch (error) {
-    console.error('❌ Crawler service failed:', error);
+    console.error('Error in getGeneralNews (legacy):', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-    
-    // Fallback to NewsAPI on crawler failure
-    console.log('📰 Falling back to NewsAPI...');
-    const fallbackResult = await getNewsAPIFallback();
-    
-    if (fallbackResult.articles && fallbackResult.articles.length > 0) {
-      return fallbackResult;
-    }
-    
-    // If both crawler and NewsAPI fail, return the crawler error
-    return { error: `Web crawlers failed (${errorMessage}) and NewsAPI fallback also failed.` };
+    return { error: `Failed to fetch general news: ${errorMessage}` };
   }
 }
 

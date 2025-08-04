@@ -1,92 +1,92 @@
 [
   {
     "color": "#22c55e",
-    "description": "An overview of the humanitarian situation and response efforts planned for Ethiopia in 2025.",
+    "description": "A general update providing an overview of the humanitarian situation and response efforts across Ethiopia.",
     "latitude": 9.03,
     "longitude": 38.74,
-    "title": "Humanitarian Response in 2025",
-    "id": "1754306464903-hyed70w",
-    "addedAt": "2025-08-04T11:21:04.903Z"
+    "title": "Ethiopia: Humanitarian Response in 2025",
+    "id": "1754312048877-ge8uu79",
+    "addedAt": "2025-08-04T12:54:08.877Z"
   },
   {
     "color": "#22c55e",
-    "description": "Ethiopian farmers are adopting new practices to improve agriculture, supported by the World Food Programme.",
+    "description": "Ethiopian farmers are adopting new, improved growing practices to enhance food security and agricultural productivity.",
     "latitude": 8.5,
     "longitude": 39.5,
-    "title": "Farmers Revamp Growing Practices",
-    "id": "1754306464903-q7csnwt",
-    "addedAt": "2025-08-04T11:21:04.903Z"
+    "title": "\"Life-changing\": Ethiopian farmers revamp age-old growing practices",
+    "id": "1754312048877-vmrv3xp",
+    "addedAt": "2025-08-04T12:54:08.877Z"
   },
   {
     "color": "#22c55e",
-    "description": "Key findings from the Ethiopia Solutions Index report, addressing various humanitarian challenges.",
+    "description": "Key findings from the Ethiopia Solutions Index highlight various approaches and progress in addressing humanitarian challenges.",
     "latitude": 9.03,
     "longitude": 38.74,
-    "title": "Solutions Index Key Findings",
-    "id": "1754306464903-he4szhk",
-    "addedAt": "2025-08-04T11:21:04.903Z"
+    "title": "Ethiopia: Solutions Index - Key Findings (February 2025)",
+    "id": "1754312048877-tdn9ufp",
+    "addedAt": "2025-08-04T12:54:08.877Z"
   },
   {
     "color": "#ef4444",
-    "description": "Updates and key information from the Ethiopia Health Cluster for June 2025, detailing health-related humanitarian efforts.",
-    "latitude": 11.5,
-    "longitude": 38,
-    "title": "Health Cluster Bulletin",
-    "id": "1754306464903-c2wtf3l",
-    "addedAt": "2025-08-04T11:21:04.903Z"
+    "description": "A bulletin from the Health Cluster detailing the ongoing health-related humanitarian activities and concerns in Ethiopia.",
+    "latitude": 13.5,
+    "longitude": 39.5,
+    "title": "Ethiopia Health Cluster Bulletin (June 2025)",
+    "id": "1754312048877-fg2y43o",
+    "addedAt": "2025-08-04T12:54:08.877Z"
   },
   {
     "color": "#22c55e",
-    "description": "Report on populations of concern to UNHCR in Ethiopia as of June 2025, likely focusing on refugees and displaced persons.",
+    "description": "UNHCR reports on the number of refugees and populations of concern in Ethiopia as of June 30, 2025.",
     "latitude": 8.2,
     "longitude": 34.6,
-    "title": "Population of Concern to UNHCR",
-    "id": "1754306464903-s83n0jk",
-    "addedAt": "2025-08-04T11:21:04.903Z"
+    "title": "Regional Bureau for East, Horn of Africa, and the Great Lakes - Ethiopia Situation | Population of Concern to UNHCR as of 30 June 2025",
+    "id": "1754312048877-b8mf1di",
+    "addedAt": "2025-08-04T12:54:08.877Z"
   },
   {
     "color": "#ef4444",
-    "description": "Meeting minutes from the Ethiopia WASH Cluster ETF on 15 July 2025, discussing water, sanitation, and hygiene interventions.",
-    "latitude": 8.5,
-    "longitude": 39.5,
-    "title": "WASH Cluster ETF Meeting",
-    "id": "1754306464903-is70tzh",
-    "addedAt": "2025-08-04T11:21:04.903Z"
+    "description": "Meeting minutes from the WASH Cluster ETF outlining discussions and actions related to water, sanitation, and hygiene efforts in Ethiopia.",
+    "latitude": 11.5,
+    "longitude": 38,
+    "title": "Ethiopia: WASH Cluster ETF meeting minutes - 15 July 2025",
+    "id": "1754312048877-ppdjd4s",
+    "addedAt": "2025-08-04T12:54:08.877Z"
   },
   {
     "color": "#3b82f6",
-    "description": "Daily flash report on severe weather conditions in Ethiopia, with contributions from various humanitarian organizations.",
+    "description": "Reports indicate severe weather conditions impacting various regions in Ethiopia, requiring humanitarian attention.",
     "latitude": 11.8,
     "longitude": 41,
-    "title": "Severe Weather Update",
-    "id": "1754306464903-nr68t6v",
-    "addedAt": "2025-08-04T11:21:04.903Z"
+    "title": "Ethiopia – Severe weather",
+    "id": "1754312048877-pik7jor",
+    "addedAt": "2025-08-04T12:54:08.877Z"
   },
   {
     "color": "#22c55e",
-    "description": "An infographic summarizing humanitarian logistics operations across Ethiopia for June 2025.",
+    "description": "An infographic providing a monthly overview of logistics operations and humanitarian aid movements across Ethiopia.",
     "latitude": 11.5,
     "longitude": 38,
-    "title": "Monthly Logistics Operations Overview",
-    "id": "1754306464903-xwzcbd9",
-    "addedAt": "2025-08-04T11:21:04.903Z"
+    "title": "Ethiopia - Monthly Operation Overview Infographic, June 2025",
+    "id": "1754312048877-dgeojlt",
+    "addedAt": "2025-08-04T12:54:08.877Z"
   },
   {
     "color": "#22c55e",
-    "description": "Mid-year report on emergency shelter and non-food item distributions in Ethiopia, detailing progress and challenges.",
+    "description": "A mid-year report from the ES/NFI Cluster detailing progress, challenges, and field insights on emergency shelter and non-food item distribution in Ethiopia.",
     "latitude": 6.5,
     "longitude": 43.5,
-    "title": "ES/NFI Cluster Mid-Year Report",
-    "id": "1754306464903-gecws24",
-    "addedAt": "2025-08-04T11:21:04.903Z"
+    "title": "Ethiopia ES/NFI Cluster Mid-Year Report 2025: Progress, Challenges, and Voices from the Field (July 2025)",
+    "id": "1754312048877-iazdxp7",
+    "addedAt": "2025-08-04T12:54:08.877Z"
   },
   {
     "color": "#22c55e",
-    "description": "Assessment of the feasibility of cash assistance programs in Ethiopia, conducted in March 2025.",
+    "description": "A joint assessment was conducted to determine the feasibility of cash assistance programs in Ethiopia.",
     "latitude": 9.03,
     "longitude": 38.74,
-    "title": "Joint Cash Feasibility Assessment",
-    "id": "1754306464903-yiawsq0",
-    "addedAt": "2025-08-04T11:21:04.903Z"
+    "title": "Ethiopia | Joint Cash Feasibility Assessment (JCFA) 03 - 14 March 2025",
+    "id": "1754312048877-dy0gjzn",
+    "addedAt": "2025-08-04T12:54:08.877Z"
   }
 ]
