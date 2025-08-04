@@ -32,55 +32,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Chrome for Puppeteer
+      - name: Setup Chrome for Puppeteer
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+          
+      - name: Install Puppeteer dependencies
         run: |
-          # Update package list
           sudo apt-get update
-          
-          # Install Chrome directly from Google's repository
-          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/googlechrome-linux-keyring.gpg
-          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/googlechrome-linux-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-          
-          # Install Puppeteer dependencies for Ubuntu 24.04
           sudo apt-get install -y \
-            ca-certificates \
-            fonts-liberation \
+            libgbm1 \
             libasound2t64 \
             libatk-bridge2.0-0 \
-            libatk1.0-0 \
-            libc6 \
-            libcairo2 \
-            libcups2 \
-            libdbus-1-3 \
-            libexpat1 \
-            libfontconfig1 \
-            libgbm1 \
-            libgcc1 \
-            libglib2.0-0 \
-            libgtk-3-0 \
-            libnspr4 \
-            libnss3 \
-            libpango-1.0-0 \
-            libpangocairo-1.0-0 \
-            libstdc++6 \
-            libx11-6 \
-            libx11-xcb1 \
-            libxcb1 \
+            libdrm2 \
+            libxkbcommon0 \
             libxcomposite1 \
-            libxcursor1 \
             libxdamage1 \
-            libxext6 \
-            libxfixes3 \
-            libxi6 \
             libxrandr2 \
-            libxrender1 \
-            libxss1 \
-            libxtst6 \
-            lsb-release \
-            wget \
-            xdg-utils
+            libgbm1 \
+            libgtk-3-0
 
       - name: Run news crawlers
         env:
@@ -95,7 +66,7 @@ jobs:
           
           # Puppeteer configuration
           PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
-          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
+          PUPPETEER_EXECUTABLE_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
         run: |
           echo "🚀 Starting news crawler workflow..."
           echo "📅 Current time: $(date)"
