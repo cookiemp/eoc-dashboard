@@ -531,6 +531,12 @@ async function getNewsAPIFallback(): Promise<{ articles?: NewsArticle[], error?:
 
     const data = await response.json();
 
+    // Check if the response has the expected structure
+    if (!data || !data.articles) {
+      console.error('NewsAPI returned unexpected response structure:', data);
+      return { error: `NewsAPI Error: ${data?.message || 'Invalid response structure'}` };
+    }
+
     const articles: NewsArticle[] = (data.articles || []).map((item: any) => ({
       id: item.url, // Use URL as unique ID
       title: item.title || 'No Title Available',
