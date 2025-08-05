@@ -5,6 +5,7 @@ import Header from "@/components/dashboard/header";
 import IncidentMap from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
 import NewsFeed from "@/components/dashboard/news-feed";
+import CrawlerHealth from "@/components/dashboard/CrawlerHealth";
 import { getLatestIncidents, processNewsIntoIncidents, getAllNewsWithCategorization } from "@/app/actions";
 import type { IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
@@ -115,6 +116,11 @@ export default function Home() {
         <div className="grid gap-6 md:gap-8 grid-cols-1 lg:grid-cols-4">
           <div className="lg:col-span-4">
             <IncidentMap incidents={incidents} />
+          </div>
+
+          {/* Crawler Health Section */}
+          <div className="lg:col-span-4">
+            <CrawlerHealth />
           </div>
           <div className="lg:col-span-4">
              <AiSummary articles={humanitarianNews} />

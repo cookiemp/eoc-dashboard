@@ -14,19 +14,10 @@ export type IncidentWithId = Incident & {
 const incidentCachePath = path.resolve(process.cwd(), 'src/lib/incidents-cache.json');
 const MAX_INCIDENTS = 10;
 
-// Firebase integration with fallback
-let useFirestore = false;
-let firestore: any = null;
+// Import Firebase utilities
+import { getFirestore } from '@/lib/firebase-admin';
 
-try {
-  const { firestore: firestoreInstance } = require('@/lib/firebase-admin');
-  firestore = firestoreInstance;
-  useFirestore = true;
-  console.log('Using Firestore for incident storage');
-} catch (error) {
-  console.log('Firestore not configured, falling back to file-based storage');
-  useFirestore = false;
-}
+console.log('Using Firestore for incident storage');
 
 /**
  * Reads the current list of incidents from the cache file.
@@ -69,7 +60,8 @@ async function writeIncidentCache(incidents: IncidentWithId[]): Promise<void> {
  * @returns A promise that resolves to the current list of incidents.
  */
 export async function getIncidents(): Promise<IncidentWithId[]> {
-  if (useFirestore) {
+  const firestore = await getFirestore();
+  if (firestore) {
     try {
       const incidentsCol = firestore.collection('incidents');
       const snapshot = await incidentsCol.orderBy('addedAt', 'desc').limit(MAX_INCIDENTS).get();
@@ -92,7 +84,8 @@ export async function addIncidents(newIncidents: Incident[]): Promise<void> {
     return;
   }
 
-  if (useFirestore) {
+  const firestore = await getFirestore();
+  if (firestore) {
     try {
       const incidentsCol = firestore.collection('incidents');
       const batch = firestore.batch();

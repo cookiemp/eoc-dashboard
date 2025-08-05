@@ -9,7 +9,7 @@
  * Used by the Vercel app to display fresh news without running crawlers.
  */
 
-import { firestore } from '@/lib/firebase-admin';
+import { firestore, isFirebaseAvailable, getFirestore } from '@/lib/firebase-admin';
 import type { NewsArticle } from '@/lib/types';
 
 // Firebase collections (must match GitHub Actions script)
@@ -39,18 +39,66 @@ export type NewsServiceResult = {
  * Get latest crawled articles from Firebase
  */
 export async function getCrawledNews(limit: number = 20): Promise<NewsServiceResult> {
+  // Check if Firebase is available
+  if (!isFirebaseAvailable() || !firestore) {
+    console.warn('⚠️ Firebase not available for getCrawledNews');
+    return {
+      articles: [],
+      status: {
+        isHealthy: false,
+        lastRunStatus: 'failure'
+      },
+      lastUpdated: new Date().toISOString(),
+      sources: []
+    };
+  }
+
   try {
     console.log('🔍 Fetching crawled news from Firebase...');
     
-    // Get articles ordered by crawledAt desc
+    // Get articles with a simpler query to avoid index requirement
+    // First try to get all active articles, then sort them
     const articlesQuery = await firestore
       .collection(COLLECTIONS.ARTICLES)
       .where('isActive', '==', true)
-      .orderBy('crawledAt', 'desc')
-      .limit(limit)
+      .limit(limit * 2) // Get more to sort properly
       .get();
 
-    const articles: NewsArticle[] = articlesQuery.docs.map(doc => {
+    // Sort by crawledAt manually and limit
+    const sortedDocs = articlesQuery.docs
+      .sort((a: any, b: any) => {
+        const aData = a.data();
+        const bData = b.data();
+        
+        // Handle both Firestore Timestamp and string formats
+        let aTime: Date;
+        let bTime: Date;
+        
+        if (aData.crawledAt?.toDate) {
+          // Firestore Timestamp
+          aTime = aData.crawledAt.toDate();
+        } else if (aData.crawledAt) {
+          // String format
+          aTime = new Date(aData.crawledAt);
+        } else {
+          aTime = new Date(0);
+        }
+        
+        if (bData.crawledAt?.toDate) {
+          // Firestore Timestamp
+          bTime = bData.crawledAt.toDate();
+        } else if (bData.crawledAt) {
+          // String format
+          bTime = new Date(bData.crawledAt);
+        } else {
+          bTime = new Date(0);
+        }
+        
+        return bTime.getTime() - aTime.getTime(); // Descending order
+      })
+      .slice(0, limit);
+
+    const articles: NewsArticle[] = sortedDocs.map((doc: any) => {
       const data = doc.data();
       return {
         id: data.id,
@@ -102,6 +150,12 @@ export async function getCrawledNews(limit: number = 20): Promise<NewsServiceRes
  * Get articles from a specific source
  */
 export async function getCrawledNewsBySource(source: string, limit: number = 10): Promise<NewsArticle[]> {
+  // Check if Firebase is available
+  if (!isFirebaseAvailable() || !firestore) {
+    console.warn(`⚠️ Firebase not available for getCrawledNewsBySource (${source})`);
+    return [];
+  }
+
   try {
     console.log(`🔍 Fetching ${source} articles from Firebase...`);
     
@@ -113,7 +167,7 @@ export async function getCrawledNewsBySource(source: string, limit: number = 10)
       .limit(limit)
       .get();
 
-    const articles: NewsArticle[] = articlesQuery.docs.map(doc => {
+    const articles: NewsArticle[] = articlesQuery.docs.map((doc: any) => {
       const data = doc.data();
       return {
         id: data.id,
@@ -137,14 +191,21 @@ export async function getCrawledNewsBySource(source: string, limit: number = 10)
  * Get crawler run history for monitoring
  */
 export async function getCrawlerRunHistory(limit: number = 10): Promise<any[]> {
+  // Use the async getFirestore function instead of checking isFirebaseAvailable
+  const firestoreInstance = await getFirestore();
+  if (!firestoreInstance) {
+    console.warn('⚠️ Firebase not available for getCrawlerRunHistory');
+    return [];
+  }
+
   try {
-    const runsQuery = await firestore
+    const runsQuery = await firestoreInstance
       .collection(COLLECTIONS.CRAWLER_RUNS)
       .orderBy('timestamp', 'desc')
       .limit(limit)
       .get();
 
-    const runs = runsQuery.docs.map(doc => ({
+    const runs = runsQuery.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data()
     }));
@@ -161,8 +222,15 @@ export async function getCrawlerRunHistory(limit: number = 10): Promise<any[]> {
  * Check if crawler service is healthy
  */
 export async function getCrawlerHealth(): Promise<{ isHealthy: boolean; lastRunAt?: string; status?: string }> {
+  // Use the async getFirestore function instead of checking isFirebaseAvailable
+  const firestoreInstance = await getFirestore();
+  if (!firestoreInstance) {
+    console.warn('⚠️ Firebase not available for getCrawlerHealth');
+    return { isHealthy: false, status: 'Firebase service unavailable' };
+  }
+
   try {
-    const statusDoc = await firestore
+    const statusDoc = await firestoreInstance
       .collection(COLLECTIONS.METADATA)
       .doc('status')
       .get();
@@ -194,6 +262,12 @@ export async function getCrawlerHealth(): Promise<{ isHealthy: boolean; lastRunA
  * Get available news sources
  */
 export async function getAvailableSources(): Promise<string[]> {
+  // Check if Firebase is available
+  if (!isFirebaseAvailable() || !firestore) {
+    console.warn('⚠️ Firebase not available for getAvailableSources');
+    return [];
+  }
+
   try {
     const sourcesQuery = await firestore
       .collection(COLLECTIONS.ARTICLES)
@@ -201,7 +275,7 @@ export async function getAvailableSources(): Promise<string[]> {
       .select('source')
       .get();
 
-    const sources = [...new Set(sourcesQuery.docs.map(doc => doc.data().source))];
+    const sources = [...new Set(sourcesQuery.docs.map((doc: any) => doc.data().source as string))];
     return sources.sort();
 
   } catch (error) {

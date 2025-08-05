@@ -21,23 +21,15 @@ type SummaryCache = {
   date: string | null;
 };
 
-// Firebase integration with fallback
-let useFirestore = false;
-let firestore: any = null;
+// Import Firebase utilities
+import { getFirestore } from '@/lib/firebase-admin';
 
-try {
-  const { firestore: firestoreInstance } = require('@/lib/firebase-admin');
-  firestore = firestoreInstance;
-  useFirestore = true;
-  console.log('Using Firestore for summary cache');
-} catch (error) {
-  console.log('Firestore not configured, falling back to file-based cache');
-  useFirestore = false;
-}
+console.log('Using Firestore for summary cache');
 
 // Helper function to read the summary cache
 async function readSummaryCache(): Promise<SummaryCache> {
-  if (useFirestore) {
+  const firestore = await getFirestore();
+  if (firestore) {
     try {
       const doc = await firestore.collection('cache').doc('daily-summary').get();
       if (doc.exists) {
@@ -56,7 +48,8 @@ async function readSummaryCache(): Promise<SummaryCache> {
 
 // Helper function to write to the summary cache
 async function writeSummaryCache(data: SummaryCache): Promise<void> {
-  if (useFirestore) {
+  const firestore = await getFirestore();
+  if (firestore) {
     try {
       await firestore.collection('cache').doc('daily-summary').set(data);
     } catch (error) {
