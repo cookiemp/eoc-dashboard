@@ -3,8 +3,8 @@
 import { 
   OptimizedCrawlerService, 
   OptimizedTestCrawler, 
-  OptimizedBbcAfricaCrawler, 
-  OptimizedAlJazeeraAfricaCrawler, 
+  OptimizedBbcEthiopiaCrawler, 
+  OptimizedAlJazeeraEthiopiaCrawler, 
   OptimizedUnOchaCrawler,
   CrawlerResult 
 } from '../src/services/optimized-crawler-service';
@@ -189,8 +189,8 @@ class CrawlerTestSuite {
 
     // Test individual crawlers
     this.results.push(await this.testCrawler(OptimizedTestCrawler, 'Test Crawler', 2));
-    this.results.push(await this.testCrawler(OptimizedBbcAfricaCrawler, 'BBC Africa', 1));
-    this.results.push(await this.testCrawler(OptimizedAlJazeeraAfricaCrawler, 'Al Jazeera Africa', 1));
+    this.results.push(await this.testCrawler(OptimizedBbcEthiopiaCrawler, 'BBC Ethiopia News', 1));
+    this.results.push(await this.testCrawler(OptimizedAlJazeeraEthiopiaCrawler, 'Al Jazeera Africa', 1));
     this.results.push(await this.testCrawler(OptimizedUnOchaCrawler, 'UN OCHA Ethiopia', 1));
     
     // Test complete service

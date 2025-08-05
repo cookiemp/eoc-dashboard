@@ -147,6 +147,95 @@ export async function getCrawledNews(limit: number = 20): Promise<NewsServiceRes
 }
 
 /**
+ * Get archived news articles from Firebase with pagination
+ */
+export async function getArchivedNews(page: number = 1, pageSize: number = 10, startDate?: string, endDate?: string, search?: string): Promise<any> {
+  const firestoreInstance = await getFirestore();
+  if (!firestoreInstance) {
+    console.warn('⚠️ Firebase not available for getArchivedNews');
+    return { articles: [], totalArticles: 0, page, pageSize };
+  }
+
+  try {
+    console.log('🔍 Fetching archived articles from Firebase...');
+    
+    // Use a simple query to avoid index requirements
+    let query = firestoreInstance.collection(COLLECTIONS.ARTICLES)
+      .where('isActive', '==', true)
+      .limit(pageSize * 5); // Get more documents to allow for filtering
+
+    const snapshot = await query.get();
+    console.log(`📄 Retrieved ${snapshot.size} total documents from Firebase`);
+    
+    // Convert to articles and sort manually
+    let allArticles = snapshot.docs.map((doc: any) => {
+      const data = doc.data();
+      return {
+        id: data.id,
+        title: data.title,
+        source: data.source,
+        snippet: data.snippet,
+        url: data.url,
+        crawledAt: data.crawledAt
+      };
+    });
+
+    // Sort by crawledAt (newest first)
+    allArticles.sort((a, b) => {
+      const aTime = new Date(a.crawledAt).getTime();
+      const bTime = new Date(b.crawledAt).getTime();
+      return bTime - aTime;
+    });
+
+    // Apply search filter if provided
+    if (search && search.trim()) {
+      const searchLower = search.toLowerCase();
+      allArticles = allArticles.filter(article => 
+        article.title.toLowerCase().includes(searchLower) || 
+        article.snippet.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Apply date filtering if provided
+    if (startDate || endDate) {
+      const start = startDate ? new Date(startDate).getTime() : 0;
+      const end = endDate ? new Date(endDate).getTime() : Date.now();
+      
+      allArticles = allArticles.filter(article => {
+        const articleTime = new Date(article.crawledAt).getTime();
+        return articleTime >= start && articleTime <= end;
+      });
+    }
+
+    const totalArticles = allArticles.length;
+    
+    // Apply pagination
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const articles = allArticles.slice(startIndex, endIndex);
+
+    console.log(`✅ Returning ${articles.length} articles (page ${page}/${Math.ceil(totalArticles / pageSize)})`);
+
+    return {
+      articles,
+      totalArticles,
+      page,
+      pageSize
+    };
+    
+  } catch (error) {
+    console.error('❌ Error fetching archived news:', error);
+    return {
+      articles: [],
+      totalArticles: 0,
+      page,
+      pageSize,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
+/**
  * Get articles from a specific source
  */
 export async function getCrawledNewsBySource(source: string, limit: number = 10): Promise<NewsArticle[]> {

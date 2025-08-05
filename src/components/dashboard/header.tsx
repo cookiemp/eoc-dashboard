@@ -1,6 +1,7 @@
-import { Flame, RotateCw, Clock } from 'lucide-react';
+import { Flame, RotateCw, Clock, Archive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 interface HeaderProps {
   onRefresh: () => void;
@@ -49,7 +50,25 @@ const Header = ({ onRefresh, lastUpdated, isLoading }: HeaderProps) => {
           ERCS EOC Dashboard
         </h1>
       </div>
-      <div className="flex items-center gap-4">
+      <nav className="flex items-center gap-6">
+        <div className="flex items-center gap-3">
+          <Link href="/archive">
+            <Button variant="outline" size="sm" className="h-8">
+              <Archive className="h-4 w-4 mr-2" />
+              Archive
+            </Button>
+          </Link>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={onRefresh} 
+            disabled={isLoading}
+            aria-label="Refresh data"
+            className="h-8 w-8"
+          >
+            <RotateCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          </Button>
+        </div>
         <div className="text-sm text-muted-foreground flex flex-col items-end">
           <div>Last updated: {formatTimeAgo(lastUpdated)}</div>
           <div className="flex items-center gap-1 text-xs">
@@ -57,16 +76,7 @@ const Header = ({ onRefresh, lastUpdated, isLoading }: HeaderProps) => {
             {getNextRefreshCountdown()}
           </div>
         </div>
-        <Button 
-          variant="outline" 
-          size="icon" 
-          onClick={onRefresh} 
-          disabled={isLoading}
-          aria-label="Refresh data"
-        >
-          <RotateCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-        </Button>
-      </div>
+      </nav>
     </header>
   );
 };

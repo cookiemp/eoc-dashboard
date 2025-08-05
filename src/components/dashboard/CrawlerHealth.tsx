@@ -67,6 +67,10 @@ const CrawlerHealth: React.FC = () => {
         console.log('✅ Received crawler health data:', data);
         console.log('📊 Health status:', data.health);
         console.log('📈 Stats:', data.stats);
+        console.log('🔍 Debug: Health status type:', typeof data.health?.status, 'Value:', data.health?.status);
+        console.log('🔍 Debug: Success rate type:', typeof data.stats?.successRate, 'Value:', data.stats?.successRate);
+        console.log('🔍 Debug: Total runs type:', typeof data.stats?.totalRuns, 'Value:', data.stats?.totalRuns);
+        console.log('🔍 Debug: Full data structure:', JSON.stringify(data, null, 2));
         setHealthData(data);
       } catch (err) {
         console.error('❌ Failed to fetch crawler health:', err);
@@ -127,6 +131,10 @@ const CrawlerHealth: React.FC = () => {
       totalRuns: healthData.stats.totalRuns,
       totalArticles: healthData.stats.totalArticlesCrawled
     });
+    console.log('🔍 Render Debug: Status value check:', `"${healthData.health.status}"`); 
+    console.log('🔍 Render Debug: Success rate check:', `"${healthData.stats.successRate}"`); 
+    console.log('🔍 Render Debug: Total runs check:', `"${healthData.stats.totalRuns}"`); 
+    console.log('🔍 Render Debug: Articles crawled check:', `"${healthData.stats.totalArticlesCrawled}"`); 
   }
 
   const getStatusBadge = (isHealthy: boolean) => {
@@ -161,10 +169,18 @@ const CrawlerHealth: React.FC = () => {
             Last Run
           </div>
           <div className="text-sm">
-            {formatDate(healthData?.health.lastRunAt)}
+            {(() => {
+              const dateResult = formatDate(healthData?.health.lastRunAt);
+              console.log('🔍 Date format result:', dateResult);
+              return dateResult;
+            })()}
           </div>
           <div className="text-xs text-muted-foreground">
-            Status: {healthData?.health.status || 'Unknown'}
+            Status: {(() => {
+              const statusResult = healthData?.health.status || 'Unknown';
+              console.log('🔍 Status result:', statusResult);
+              return statusResult;
+            })()}
           </div>
         </div>
 
@@ -198,7 +214,7 @@ const CrawlerHealth: React.FC = () => {
       </div>
 
       {/* Additional Metrics */}
-      {healthData?.stats.averageRunTime && healthData.stats.averageRunTime > 0 && (
+      {healthData?.stats.averageRunTime != null && healthData.stats.averageRunTime > 0 && (
         <div className="mt-6 pt-4 border-t">
           <div className="text-sm text-muted-foreground">
             Average Run Time: <span className="font-medium">{healthData.stats.averageRunTime}ms</span>

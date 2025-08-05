@@ -14,6 +14,7 @@ import { OptimizedCrawlerService } from '../src/services/optimized-crawler-servi
 import { firestore } from '../src/lib/firebase-admin';
 import type { CrawlerResult } from '../src/services/optimized-crawler-service';
 import type { NewsArticle } from '../src/lib/types';
+import { createHash } from 'crypto';
 
 // Enhanced logging for GitHub Actions
 class GitHubActionsLogger {
@@ -67,12 +68,13 @@ async function saveArticlesToFirestore(articles: NewsArticle[]): Promise<void> {
   const timestamp = new Date().toISOString();
   
   for (const article of articles) {
-    // Use article ID as document ID for natural deduplication
-    const docRef = firestore.collection(COLLECTIONS.ARTICLES).doc(article.id);
+    // Use a hash of the article URL for consistent, unique ID
+    const articleId = createHash('md5').update(article.url).digest('hex');
+    const docRef = firestore.collection(COLLECTIONS.ARTICLES).doc(articleId);
     
-    // Add metadata
     const articleWithMetadata = {
       ...article,
+      id: articleId, // Overwrite with consistent ID
       crawledAt: timestamp,
       lastUpdated: timestamp,
       isActive: true
