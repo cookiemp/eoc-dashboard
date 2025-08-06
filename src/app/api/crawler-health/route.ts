@@ -18,7 +18,7 @@ export async function GET() {
         console.log('✅ Firebase connection successful, fetching real data...');
         
         // Get detailed run history for statistics
-        const runHistory = await getCrawlerRunHistory(50); // Get more runs for better stats
+        const runHistory = await getCrawlerRunHistory(100); // Increased to capture more runs
         console.log(`📊 Retrieved ${runHistory.length} crawler runs from Firebase`);
         
         // Calculate health status and statistics

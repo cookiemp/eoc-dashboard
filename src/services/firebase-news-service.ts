@@ -288,17 +288,35 @@ export async function getCrawlerRunHistory(limit: number = 10): Promise<any[]> {
   }
 
   try {
-    const runsQuery = await firestoreInstance
-      .collection(COLLECTIONS.CRAWLER_RUNS)
-      .orderBy('timestamp', 'desc')
-      .limit(limit)
-      .get();
+    // First try with orderBy - this might fail if index doesn't exist
+    let runsQuery;
+    try {
+      runsQuery = await firestoreInstance
+        .collection(COLLECTIONS.CRAWLER_RUNS)
+        .orderBy('timestamp', 'desc')
+        .limit(limit)
+        .get();
+    } catch (indexError) {
+      console.warn('⚠️ Index issue, falling back to simple query:', indexError);
+      // Fallback to simple query without orderBy
+      runsQuery = await firestoreInstance
+        .collection(COLLECTIONS.CRAWLER_RUNS)
+        .limit(limit * 2) // Get more docs to sort manually
+        .get();
+    }
 
-    const runs = runsQuery.docs.map((doc: any) => ({
+    let runs = runsQuery.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data()
     }));
 
+    // Sort manually if we used fallback query
+    if (runs.length > 0 && runs[0].timestamp) {
+      runs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      runs = runs.slice(0, limit); // Apply limit after sorting
+    }
+
+    console.log(`✅ Retrieved ${runs.length} crawler runs (requested: ${limit})`);
     return runs;
 
   } catch (error) {
