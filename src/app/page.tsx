@@ -122,9 +122,8 @@ export default function Home() {
           <div className="lg:col-span-4">
             <CrawlerHealth />
           </div>
-          <div className="lg:col-span-4">
-             <AiSummary articles={humanitarianNews} />
-          </div>
+          
+          {/* News Feeds - moved up */}
           <div className="lg:col-span-2">
             <NewsFeed 
               icon={<BookHeart className="h-5 w-5 text-primary" />} 
@@ -142,6 +141,11 @@ export default function Home() {
               isLoading={newsLoading}
               error={newsError}
             />
+          </div>
+          
+          {/* AI Summary - moved down */}
+          <div className="lg:col-span-4">
+             <AiSummary articles={humanitarianNews} isLoadingNews={newsLoading} />
           </div>
         </div>
       </main>

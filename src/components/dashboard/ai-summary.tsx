@@ -12,21 +12,31 @@ import { Skeleton } from '../ui/skeleton';
 
 interface AiSummaryProps {
   articles: NewsArticle[];
+  isLoadingNews?: boolean;
 }
 
-const AiSummary = ({ articles }: AiSummaryProps) => {
+const AiSummary = ({ articles, isLoadingNews = false }: AiSummaryProps) => {
   const [summary, setSummary] = useState<SummarizeIncidentDataOutput | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasArticles, setHasArticles] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     const generateSummary = async () => {
-      if (!articles || articles.length === 0) {
-        setIsLoading(false);
+      // If news is still loading, keep showing loading state
+      if (isLoadingNews) {
+        setIsLoading(true);
         return;
       }
       
-      setIsLoading(true);
+      if (!articles || articles.length === 0) {
+        // Only set loading to false if news has finished loading
+        setIsLoading(false);
+        setHasArticles(false);
+        return;
+      }
+      
+      setHasArticles(true);
       try {
         const result = await getSummary({ articles });
 
@@ -54,7 +64,7 @@ const AiSummary = ({ articles }: AiSummaryProps) => {
     };
 
     generateSummary();
-  }, [articles, toast]);
+  }, [articles, toast, isLoadingNews]);
 
   const renderSummary = () => {
     if (!summary) return null;
@@ -98,13 +108,26 @@ const AiSummary = ({ articles }: AiSummaryProps) => {
           {summaryPoints.map((point, index) => (
             <li key={index} className="flex items-start gap-3">
               <span className="text-primary mt-1">{point.isHealthAlert ? '⚕️' : '●'}</span>
-              <span
-                className="text-sm text-muted-foreground"
-                dangerouslySetInnerHTML={{
-                  __html: point.text
-                    .replace(/\[Source\]\((.*?)\)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-primary underline hover:text-primary/80">Source</a>')
-                }}
-              />
+              <span className="text-sm text-muted-foreground">
+                {point.text.split(/\[Source\]\((.*?)\)/g).map((part, i) => {
+                  // Even indices are text, odd indices are URLs
+                  if (i % 2 === 0) {
+                    return <span key={i}>{part}</span>;
+                  } else {
+                    return (
+                      <a
+                        key={i}
+                        href={part}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary underline hover:text-primary/80"
+                      >
+                        Source
+                      </a>
+                    );
+                  }
+                })}
+              </span>
             </li>
           ))}
         </ul>
@@ -133,7 +156,9 @@ const AiSummary = ({ articles }: AiSummaryProps) => {
             {renderSummary()}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">No summary available. Please check back later.</p>
+          <p className="text-sm text-muted-foreground">
+            {hasArticles ? 'Generating summary...' : 'No summary available. Please check back later.'}
+          </p>
         )}
       </CardContent>
     </Card>
