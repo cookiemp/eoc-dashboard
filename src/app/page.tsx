@@ -152,7 +152,7 @@ export default function Home() {
           loadingMessage.includes('✅') ? 'bg-green-500' : 'bg-blue-500'
         }`}>
           {loadingMessage}
-        </div
+        </div>
       )}
       {newsStats && !isRefreshing && (
         <div className="p-2 text-center text-sm bg-green-100 text-green-800 border-b border-green-200">
