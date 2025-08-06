@@ -1,4 +1,4 @@
-# **App Name**: Ethiopia EOC Dashboard
+# **App Name**: ERCS Intel Dashboard
 
 ## Core Features:
 

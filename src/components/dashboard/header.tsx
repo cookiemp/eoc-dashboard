@@ -47,7 +47,7 @@ const Header = ({ onRefresh, lastUpdated, isLoading }: HeaderProps) => {
       <div className="flex items-center gap-2">
         <Flame className="h-6 w-6 text-primary" />
         <h1 className="text-xl font-bold tracking-tight text-foreground">
-          ERCS EOC Dashboard
+          ERCS Intel Dashboard
         </h1>
       </div>
       <nav className="flex items-center gap-6">

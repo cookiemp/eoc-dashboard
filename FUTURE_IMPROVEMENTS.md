@@ -1,4 +1,4 @@
-# Ethiopia EOC Dashboard - Future Improvements Roadmap
+# ERCS Intel Dashboard - Future Improvements Roadmap
 
 ## Current Status
 The dashboard is **fully operational** and meets all Phase 2 requirements:

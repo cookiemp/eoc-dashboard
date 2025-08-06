@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'ERCS EOC Dashboard',
-  description: 'Emergency Operations Center Dashboard for Ethiopia',
+  title: 'ERCS Intel Dashboard',
+  description: 'Intelligence Dashboard for Ethiopian Red Cross Society',
 };
 
 export default function RootLayout({

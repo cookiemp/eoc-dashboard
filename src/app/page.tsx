@@ -7,6 +7,7 @@ import AiSummary from "@/components/dashboard/ai-summary";
 import NewsFeed from "@/components/dashboard/news-feed";
 import CrawlerHealth from "@/components/dashboard/CrawlerHealth";
 import { getLatestIncidents, processNewsIntoIncidents, getAllNewsWithCategorization, getCachedDashboardDataFast } from "@/app/actions";
+import { clearDashboardCache, setCachedDashboardData } from "@/services/dashboard-cache-service";
 import type { IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
 import type { CategorizedArticle } from '@/ai/flows/categorize-news-articles-flow';
@@ -33,6 +34,9 @@ export default function Home() {
     setNewsError(null);
     
     try {
+      // Clear cache first to ensure fresh data is used on next reload
+      setLoadingMessage('Clearing cache and fetching fresh data...');
+      await clearDashboardCache();
       // Step 1: Fetch and categorize all news with AI
       setLoadingMessage('Fetching news from all sources...');
       const newsResult = await getAllNewsWithCategorization();
@@ -68,6 +72,13 @@ export default function Home() {
       const latestIncidents = await getLatestIncidents();
       if (latestIncidents) {
         setIncidents(latestIncidents);
+      }
+
+      // Step 4: Cache the fresh data for future tab reloads
+      setLoadingMessage('Caching fresh data...');
+      if (humanitarian.length > 0 || general.length > 0) {
+        await setCachedDashboardData(humanitarian, general, latestIncidents || []);
+        console.log('💾 Fresh data from manual refresh cached for future requests');
       }
 
     } catch (error) {
