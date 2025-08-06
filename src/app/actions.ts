@@ -11,6 +11,7 @@ import type { NewsArticle } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import fs from 'fs/promises';
 import path from 'path';
+import { getCachedDashboardData, setCachedDashboardData } from '@/services/dashboard-cache-service';
 
 // Define the path to the summary cache file (fallback)
 const summaryCacheFilePath = path.resolve(process.cwd(), 'src/lib/summary-cache.json');
@@ -338,6 +339,79 @@ export async function getHumanitarianNews(): Promise<{ articles?: NewsArticle[],
   return { error: 'No humanitarian news articles could be retrieved at this time.' };
 }
 
+
+/**
+ * Fast dashboard data fetch with smart caching.
+ * Returns cached data if available and fresh, otherwise fetches and caches new data.
+ */
+export async function getCachedDashboardDataFast(): Promise<{ humanitarian?: CategorizedArticle[], general?: CategorizedArticle[], incidents?: IncidentWithId[], summary?: { humanitarianCount: number, generalCount: number }, isFromCache: boolean, error?: string }> {
+  console.log('getCachedDashboardDataFast called at:', new Date().toISOString());
+  
+  try {
+    // First, check for cached data
+    const cachedData = await getCachedDashboardData();
+    
+    if (cachedData) {
+      console.log('🚀 Returning cached dashboard data - instant load!');
+      return {
+        humanitarian: cachedData.humanitarian,
+        general: cachedData.general,
+        incidents: cachedData.incidents,
+        summary: cachedData.summary,
+        isFromCache: true
+      };
+    }
+    
+    console.log('📥 No valid cache found, fetching fresh data...');
+    
+    // Fetch fresh data using the existing comprehensive function
+    const [newsResult, incidentsResult] = await Promise.allSettled([
+      getAllNewsWithCategorization(),
+      getLatestIncidents()
+    ]);
+    
+    let humanitarian: CategorizedArticle[] = [];
+    let general: CategorizedArticle[] = [];
+    let summary = { humanitarianCount: 0, generalCount: 0 };
+    let incidents: IncidentWithId[] = [];
+    
+    // Process news results
+    if (newsResult.status === 'fulfilled' && !newsResult.value.error) {
+      humanitarian = newsResult.value.humanitarian || [];
+      general = newsResult.value.general || [];
+      summary = newsResult.value.summary || summary;
+    }
+    
+    // Process incidents results
+    if (incidentsResult.status === 'fulfilled') {
+      incidents = incidentsResult.value || [];
+    }
+    
+    // Cache the fresh data for future requests
+    if (humanitarian.length > 0 || general.length > 0) {
+      await setCachedDashboardData(humanitarian, general, incidents);
+      console.log('💾 Fresh data cached for future requests');
+    }
+    
+    return {
+      humanitarian,
+      general,
+      incidents,
+      summary,
+      isFromCache: false,
+      error: newsResult.status === 'fulfilled' ? newsResult.value.error : 'Failed to fetch news data'
+    };
+    
+  } catch (error) {
+    console.error('Error in getCachedDashboardDataFast:', error);
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    return { 
+      error: `Failed to fetch dashboard data: ${errorMessage}`,
+      isFromCache: false,
+      summary: { humanitarianCount: 0, generalCount: 0 }
+    };
+  }
+}
 
 /**
  * Fetches all news from multiple sources and uses AI to categorize them.

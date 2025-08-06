@@ -6,7 +6,7 @@ import IncidentMap from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
 import NewsFeed from "@/components/dashboard/news-feed";
 import CrawlerHealth from "@/components/dashboard/CrawlerHealth";
-import { getLatestIncidents, processNewsIntoIncidents, getAllNewsWithCategorization } from "@/app/actions";
+import { getLatestIncidents, processNewsIntoIncidents, getAllNewsWithCategorization, getCachedDashboardDataFast } from "@/app/actions";
 import type { IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
 import type { CategorizedArticle } from '@/ai/flows/categorize-news-articles-flow';
@@ -22,6 +22,7 @@ export default function Home() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [loadingMessage, setLoadingMessage] = useState('');
+  const [isFromCache, setIsFromCache] = useState(false);
 
   const [newsError, setNewsError] = useState<string | null>(null);
   const [newsStats, setNewsStats] = useState<{ humanitarianCount: number, generalCount: number } | null>(null);
@@ -86,11 +87,57 @@ export default function Home() {
     }
   };
 
+  // Fast initial load with caching
+  const fetchCachedDataFast = async () => {
+    setIsRefreshing(true); // ← FIX: Enable loading banner
+    setNewsLoading(true);
+    setNewsError(null);
+    setLoadingMessage('Loading dashboard...');
+    
+    try {
+      const result = await getCachedDashboardDataFast();
+      
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      
+      // If data is from cache, show different message
+      if (result.isFromCache) {
+        setLoadingMessage('✅ Loaded from cache - displaying data...');
+      } else {
+        // Show progress for fresh data
+        setLoadingMessage('Fetching fresh data with AI processing...');
+        // Brief delay to show the message for fresh data processing
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      
+      // Set all data from cache or fresh fetch
+      setHumanitarianNews(result.humanitarian || []);
+      setGeneralNews(result.general || []);
+      setIncidents(result.incidents || []);
+      setNewsStats(result.summary || { humanitarianCount: 0, generalCount: 0 });
+      setIsFromCache(result.isFromCache);
+      
+      console.log(result.isFromCache ? '🚀 Dashboard loaded from cache - instant!' : '📥 Dashboard loaded with fresh data');
+      
+    } catch (error) {
+      console.error('Error in fast cached data fetch:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+      setNewsError(errorMessage);
+    } finally {
+      setNewsLoading(false);
+      setIsRefreshing(false); // ← FIX: Reset refreshing state
+      setLastUpdated(new Date());
+      setLoadingMessage('');
+    }
+  };
+
   useEffect(() => {
-    // Initial data fetch
-    fetchAllData();
+    // Use fast cached loading for initial load
+    fetchCachedDataFast();
 
     // Set up auto-refresh every 30 minutes (1800000 milliseconds)
+    // This will use the full fetch function to ensure fresh data
     const intervalId = setInterval(fetchAllData, 1800000);
 
     // Cleanup function to clear interval when component unmounts
@@ -101,9 +148,11 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header onRefresh={() => {if (!isRefreshing) fetchAllData()}} lastUpdated={lastUpdated} isLoading={isRefreshing} />
       {isRefreshing && loadingMessage && (
-        <div className="p-2 text-center text-sm bg-blue-500 text-white animate-pulse">
+        <div className={`p-2 text-center text-sm text-white animate-pulse ${
+          loadingMessage.includes('✅') ? 'bg-green-500' : 'bg-blue-500'
+        }`}>
           {loadingMessage}
-        </div>
+        </div
       )}
       {newsStats && !isRefreshing && (
         <div className="p-2 text-center text-sm bg-green-100 text-green-800 border-b border-green-200">
