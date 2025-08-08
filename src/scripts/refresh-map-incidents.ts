@@ -69,7 +69,7 @@ async function refreshMapIncidents() {
           console.log(`   ${index + 1}. "${incident.title}"`);
           console.log(`      📍 Location: ${incident.latitude}, ${incident.longitude}`);
           console.log(`      🎨 Color: ${incident.color}`);
-          console.log(`      📝 Description: ${incident.description.substring(0, 80)}...`);
+          console.log(`      F4DD Description: ${(incident.description || '').substring(0, 80)}...`);
           console.log('');
         });
       }

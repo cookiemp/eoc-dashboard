@@ -151,7 +151,7 @@ async function cleanupOldArticles(): Promise<void> {
       .select('source')
       .get();
     
-    const sources = [...new Set(sourcesQuery.docs.map(doc => doc.data().source))];
+    const sources = [...new Set(sourcesQuery.docs.map((doc: FirebaseFirestore.QueryDocumentSnapshot) => (doc.data() as any).source as string))];
     
     for (const source of sources) {
       // Get articles for this source, ordered by crawledAt desc
@@ -165,7 +165,7 @@ async function cleanupOldArticles(): Promise<void> {
         const articlesToDelete = sourceArticles.docs.slice(100);
         const batch = firestore.batch();
         
-        articlesToDelete.forEach(doc => {
+        articlesToDelete.forEach((doc: FirebaseFirestore.QueryDocumentSnapshot) => {
           batch.delete(doc.ref);
         });
         

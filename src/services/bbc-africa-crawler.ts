@@ -28,7 +28,7 @@ export class BbcAfricaCrawler extends BaseCrawler {
 
     try {
       await page.goto(this.config.baseUrl, { waitUntil: 'networkidle2', timeout: 30000 });
-      const links = await page.$$eval(this.config.selectors.articleLinks, anchors => anchors.map(anchor => anchor.href).slice(0, this.config.maxArticles));
+      const links = await page.$$eval(this.config.selectors.articleLinks, (anchors: Element[]) => (anchors as HTMLAnchorElement[]).map(a => (a as HTMLAnchorElement).href).slice(0, this.config.maxArticles || 5));
 
       for (const link of links) {
         try {
@@ -36,7 +36,11 @@ export class BbcAfricaCrawler extends BaseCrawler {
 
           const title = await page.$eval(this.config.selectors.title, element => element.textContent?.trim() || '');
           const contentElems = await page.$$(this.config.selectors.content);
-          const snippet = await contentElems.reduce(async (acc, elem) => acc + (await elem.evaluate(e => e.textContent)).trim() + ' ', '');
+          let snippet = '';
+          for (const elem of contentElems) {
+            const text = (await elem.evaluate(e => (e.textContent || '').toString())).trim();
+            if (text) snippet += text + ' ';
+          }
           const id = this.generateArticleId(title, this.config.name);
 
           if (title && snippet) {

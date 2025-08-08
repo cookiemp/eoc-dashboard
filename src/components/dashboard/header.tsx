@@ -43,40 +43,42 @@ const Header = ({ onRefresh, lastUpdated, isLoading }: HeaderProps) => {
   };
 
   return (
-    <header className="flex items-center justify-between p-4 bg-card border-b shadow-sm">
-      <div className="flex items-center gap-2">
-        <Flame className="h-6 w-6 text-primary" />
-        <h1 className="text-xl font-bold tracking-tight text-foreground">
-          ERCS Intel Dashboard
-        </h1>
-      </div>
-      <nav className="flex items-center gap-6">
-        <div className="flex items-center gap-3">
-          <Link href="/archive">
-            <Button variant="outline" size="sm" className="h-8">
-              <Archive className="h-4 w-4 mr-2" />
-              Archive
+    <header className="p-3 sm:p-4 bg-card border-b shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Flame className="h-6 w-6 text-primary" />
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+            ERCS Intel Dashboard
+          </h1>
+        </div>
+        <nav className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6 w-full sm:w-auto">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link href="/archive">
+              <Button variant="outline" className="h-10 px-3 sm:h-8">
+                <Archive className="h-4 w-4 mr-2" />
+                Archive
+              </Button>
+            </Link>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={onRefresh} 
+              disabled={isLoading}
+              aria-label="Refresh data"
+              className="h-11 w-11 sm:h-8 sm:w-8"
+            >
+              <RotateCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             </Button>
-          </Link>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={onRefresh} 
-            disabled={isLoading}
-            aria-label="Refresh data"
-            className="h-8 w-8"
-          >
-            <RotateCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-          </Button>
-        </div>
-        <div className="text-sm text-muted-foreground flex flex-col items-end">
-          <div>Last updated: {formatTimeAgo(lastUpdated)}</div>
-          <div className="flex items-center gap-1 text-xs">
-            <Clock className="h-3 w-3" />
-            {getNextRefreshCountdown()}
           </div>
-        </div>
-      </nav>
+          <div className="text-xs sm:text-sm text-muted-foreground flex flex-col items-end">
+            <div>Last updated: {formatTimeAgo(lastUpdated)}</div>
+            <div className="flex items-center gap-1 text-[10px] sm:text-xs">
+              <Clock className="h-3 w-3" />
+              {getNextRefreshCountdown()}
+            </div>
+          </div>
+        </nav>
+      </div>
     </header>
   );
 };

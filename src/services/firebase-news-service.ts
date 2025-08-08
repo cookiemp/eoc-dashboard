@@ -181,7 +181,7 @@ export async function getArchivedNews(page: number = 1, pageSize: number = 10, s
     });
 
     // Sort by crawledAt (newest first)
-    allArticles.sort((a, b) => {
+    allArticles.sort((a: { crawledAt: string }, b: { crawledAt: string }) => {
       const aTime = new Date(a.crawledAt).getTime();
       const bTime = new Date(b.crawledAt).getTime();
       return bTime - aTime;
@@ -190,7 +190,7 @@ export async function getArchivedNews(page: number = 1, pageSize: number = 10, s
     // Apply search filter if provided
     if (search && search.trim()) {
       const searchLower = search.toLowerCase();
-      allArticles = allArticles.filter(article => 
+      allArticles = allArticles.filter((article: { title: string; snippet: string }) => 
         article.title.toLowerCase().includes(searchLower) || 
         article.snippet.toLowerCase().includes(searchLower)
       );
@@ -201,7 +201,7 @@ export async function getArchivedNews(page: number = 1, pageSize: number = 10, s
       const start = startDate ? new Date(startDate).getTime() : 0;
       const end = endDate ? new Date(endDate).getTime() : Date.now();
       
-      allArticles = allArticles.filter(article => {
+      allArticles = allArticles.filter((article: { crawledAt: string }) => {
         const articleTime = new Date(article.crawledAt).getTime();
         return articleTime >= start && articleTime <= end;
       });
@@ -312,7 +312,7 @@ export async function getCrawlerRunHistory(limit: number = 10): Promise<any[]> {
 
     // Sort manually if we used fallback query
     if (runs.length > 0 && runs[0].timestamp) {
-      runs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      runs.sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       runs = runs.slice(0, limit); // Apply limit after sorting
     }
 
@@ -382,8 +382,8 @@ export async function getAvailableSources(): Promise<string[]> {
       .select('source')
       .get();
 
-    const sources = [...new Set(sourcesQuery.docs.map((doc: any) => doc.data().source as string))];
-    return sources.sort();
+    const sources = [...new Set(sourcesQuery.docs.map((doc: any) => doc.data().source as string))] as string[];
+    return (sources as string[]).sort();
 
   } catch (error) {
     console.error('❌ Error fetching available sources:', error);

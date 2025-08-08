@@ -40,7 +40,7 @@ const IncidentMap = ({ incidents }: IncidentMapProps) => {
             Interactive Incident Map
           </CardTitle>
         </CardHeader>
-        <CardContent className="h-[400px]">
+        <CardContent className="h-[320px] sm:h-[360px] md:h-[400px]">
           <MapWithNoSSR 
             incidents={incidents} 
             onMarkerClick={handleMarkerClick}

@@ -54,8 +54,8 @@ async function cleanupDuplicateArticles(): Promise<void> {
     // Group articles by URL
     const articlesByUrl = new Map<string, ArticleData[]>();
     
-    articlesSnapshot.docs.forEach(doc => {
-      const data = doc.data();
+    articlesSnapshot.docs.forEach((doc: FirebaseFirestore.QueryDocumentSnapshot) => {
+      const data = doc.data() as any;
       const article: ArticleData = {
         id: data.id,
         url: data.url,

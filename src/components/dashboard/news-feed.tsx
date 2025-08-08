@@ -93,7 +93,7 @@ const NewsFeed = ({ title, items, icon, isLoading, error }: NewsFeedProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-72">
+        <ScrollArea className="h-64 sm:h-72">
           {renderContent()}
         </ScrollArea>
       </CardContent>

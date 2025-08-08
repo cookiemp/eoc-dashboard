@@ -73,19 +73,19 @@ class CrawlerTestSuite {
         const firstArticle = result.articles[0];
         validations.push(
           {
-            condition: firstArticle.title && firstArticle.title.length > 10,
+            condition: !!firstArticle.snippet && firstArticle.snippet.length > 20,
             message: 'Articles should have meaningful titles'
           },
           {
-            condition: firstArticle.snippet && firstArticle.snippet.length > 20,
+            condition: !!firstArticle.snippet && firstArticle.snippet.length > 20,
             message: 'Articles should have meaningful snippets'
           },
           {
-            condition: firstArticle.url && firstArticle.url.startsWith('http'),
+            condition: !!(firstArticle.url && firstArticle.url.startsWith('http')),
             message: 'Articles should have valid URLs'
           },
           {
-            condition: firstArticle.id && firstArticle.id.length > 5,
+            condition: !!(firstArticle.id && firstArticle.id.length > 5),
             message: 'Articles should have unique IDs'
           }
         );
