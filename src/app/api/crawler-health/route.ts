@@ -17,8 +17,8 @@ export async function GET() {
       if (healthCheck.isHealthy !== undefined) {
         console.log('✅ Firebase connection successful, fetching real data...');
         
-        // Get detailed run history for statistics
-        const runHistory = await getCrawlerRunHistory(100); // Increased to capture more runs
+        // Get detailed run history for statistics - get all runs for accurate stats
+        const runHistory = await getCrawlerRunHistory(1000); // Increased limit to capture all runs
         console.log(`📊 Retrieved ${runHistory.length} crawler runs from Firebase`);
         
         // Calculate health status and statistics
