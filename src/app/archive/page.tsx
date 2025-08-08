@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Calendar, ExternalLink, ChevronLeft, ChevronRight, Archive } from 'lucide-react';
+import Link from 'next/link';
 
 type Article = {
   id: string;
@@ -91,9 +92,9 @@ function ArchivePage() {
           <div className="flex items-center gap-3">
             <Archive className="h-6 w-6 text-primary" />
             <h1 className="text-2xl font-bold">Archived News</h1>
-            <a href="/" className="ml-auto text-sm text-muted-foreground hover:underline">
+            <Link href="/" className="ml-auto text-sm text-muted-foreground hover:underline">
               ← Back to Dashboard
-            </a>
+            </Link>
           </div>
         </div>
       </header>

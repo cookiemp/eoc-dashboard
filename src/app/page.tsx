@@ -11,7 +11,7 @@ import { clearDashboardCache, setCachedDashboardData } from "@/services/dashboar
 import type { IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
 import type { CategorizedArticle } from '@/ai/flows/categorize-news-articles-flow';
-import { Newspaper, BookHeart, Brain } from 'lucide-react';
+import { BookHeart, Brain } from 'lucide-react';
 
 
 export default function Home() {
@@ -23,8 +23,6 @@ export default function Home() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [loadingMessage, setLoadingMessage] = useState('');
-  const [isFromCache, setIsFromCache] = useState(false);
-
   const [newsError, setNewsError] = useState<string | null>(null);
   const [newsStats, setNewsStats] = useState<{ humanitarianCount: number, generalCount: number } | null>(null);
 
@@ -127,7 +125,7 @@ export default function Home() {
       setGeneralNews(result.general || []);
       setIncidents(result.incidents || []);
       setNewsStats(result.summary || { humanitarianCount: 0, generalCount: 0 });
-      setIsFromCache(result.isFromCache);
+      // Cache state is handled internally
       
       console.log(result.isFromCache ? '🚀 Dashboard loaded from cache - instant!' : '📥 Dashboard loaded with fresh data');
       
