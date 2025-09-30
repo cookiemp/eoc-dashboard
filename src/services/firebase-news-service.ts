@@ -278,8 +278,9 @@ export async function getCrawledNewsBySource(source: string, limit: number = 10)
 
 /**
  * Get crawler run history for monitoring
+ * Default limit increased to capture more historical data for accurate statistics
  */
-export async function getCrawlerRunHistory(limit: number = 500): Promise<any[]> {
+export async function getCrawlerRunHistory(limit: number = 5000): Promise<any[]> {
   // Use the async getFirestore function instead of checking isFirebaseAvailable
   const firestoreInstance = await getFirestore();
   if (!firestoreInstance) {
