@@ -1,7 +1,6 @@
 # ERCS Intel Dashboard - Complete Codebase Overview
 
 **Last Updated:** 2025-09-30  
-**Project Location:** `C:\Users\shime\OneDrive\Desktop\Code\ERCS_Dashboard\eoc-dashboard`  
 **Production:** Deployed on Vercel, linked to GitHub  
 **Latest Commit:** `371bd27 - fix: remove 100-run limit in crawler health monitor`
 
