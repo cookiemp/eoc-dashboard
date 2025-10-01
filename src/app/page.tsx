@@ -149,8 +149,18 @@ export default function Home() {
     // This will use the full fetch function to ensure fresh data
     const intervalId = setInterval(fetchAllData, 1800000);
 
-    // Cleanup function to clear interval when component unmounts
-    return () => clearInterval(intervalId);
+    // Refetch data when window regains focus (e.g., after approving incidents in admin panel)
+    const handleFocus = () => {
+      fetchCachedDataFast();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+
+    // Cleanup function to clear interval and event listener when component unmounts
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   return (

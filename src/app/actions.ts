@@ -7,6 +7,7 @@ import { categorizeNewsArticles } from '@/ai/flows/categorize-news-articles-flow
 import type { GenerateIncidentDossierInput, GenerateIncidentDossierOutput } from '@/ai/flows/generate-incident-dossier-flow';
 import type { CategorizedArticle } from '@/ai/flows/categorize-news-articles-flow';
 import { addIncidents, getIncidents, IncidentWithId } from '@/services/incident-service';
+import { getFieldIncidents, type FieldIncident } from '@/services/field-incidents-service';
 import type { NewsArticle } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import fs from 'fs/promises';
@@ -135,10 +136,6 @@ export async function getSummary(input: { articles: NewsArticle[] }) {
         .trim();
     }
     
-    // Add debugging for the generated summary
-    console.log('Generated summary length:', result.summary?.length || 0);
-    console.log('Generated summary preview:', result.summary?.substring(0, 200) + '...');
-    
     // Save the new summary to the cache with current timestamp
     await writeSummaryCache({ 
       summary: result, 
@@ -186,10 +183,36 @@ export async function processNewsIntoIncidents(input: { articles: NewsArticle[] 
 
 /**
  * Fetches the latest list of incidents from our persistent service.
+ * Merges news-based incidents with field report incidents.
  */
 export async function getLatestIncidents(): Promise<IncidentWithId[]> {
   try {
-    return await getIncidents();
+    // Fetch both news incidents and field incidents
+    const [newsIncidents, fieldIncidents] = await Promise.all([
+      getIncidents(),
+      getFieldIncidents()
+    ]);
+
+    // Filter field incidents to only include approved ones (not needing review)
+    const approvedFieldIncidents = fieldIncidents
+      .filter(incident => !incident.needsReview)
+      .map(incident => ({
+        id: incident.id,
+        title: incident.title,
+        description: incident.description || '',
+        latitude: incident.latitude,
+        longitude: incident.longitude,
+        color: incident.color,
+        addedAt: incident.reportedAt, // Map reportedAt to addedAt for type compatibility
+        sourceType: 'field_report' as const,
+      }));
+
+    // Merge both arrays - field incidents first so they appear prominently
+    const allIncidents = [...approvedFieldIncidents, ...newsIncidents];
+    
+    console.log(`📊 Serving ${allIncidents.length} total incidents (${approvedFieldIncidents.length} field + ${newsIncidents.length} news)`);
+    
+    return allIncidents;
   } catch (error) {
     console.error('Error fetching latest incidents:', error);
     return [];
