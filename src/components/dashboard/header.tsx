@@ -1,7 +1,8 @@
-import { Flame, RotateCw, Clock, Archive } from 'lucide-react';
+import { RotateCw, Clock, Archive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface HeaderProps {
   onRefresh: () => void;
@@ -46,7 +47,13 @@ const Header = ({ onRefresh, lastUpdated, isLoading }: HeaderProps) => {
     <header className="p-3 sm:p-4 bg-card border-b shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Flame className="h-6 w-6 text-primary" />
+          <Image 
+            src="/icon.png" 
+            alt="ERCS Logo" 
+            width={32} 
+            height={32} 
+            className="h-8 w-8 object-contain"
+          />
           <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
             ERCS Intel Dashboard
           </h1>
