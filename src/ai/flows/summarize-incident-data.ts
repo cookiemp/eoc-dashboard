@@ -58,11 +58,12 @@ const summarizeIncidentDataPrompt = ai.definePrompt({
   IMPORTANT: Field incidents are DIRECT GROUND REPORTS and should be listed FIRST in the summary, as they are the most critical and reliable information.
 
   FORMATTING REQUIREMENTS:
-  - Each bullet point must start with a markdown asterisk (*) followed by a space
+  - Each bullet point MUST start with either * or ⚕️* (never just ⚕️ alone)
   - Each bullet point must be on its own line (separated by \n)
   - For field incidents: Each bullet point must end with a markdown link: [More](#incident-id)
   - For news articles: Each bullet point must end with a markdown link: [Source](url)
-  - If an article or incident is about a public health issue (disease outbreak, health crisis, medical supplies), start that bullet point with ⚕️* (emoji + asterisk)
+  - If an article or incident is about a public health issue (disease outbreak, health crisis, medical supplies), start that bullet point with ⚕️* (emoji directly followed by asterisk, no space between)
+  - NEVER output just ⚕️ on a line by itself - always include the asterisk and summary text
 
   For each incident or article, create one bullet point that summarizes the key information.
 
