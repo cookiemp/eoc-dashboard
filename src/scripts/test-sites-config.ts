@@ -37,7 +37,7 @@ async function testSiteAccessibility(testUrl: string): Promise<{ accessible: boo
     const response = await fetch(testUrl, {
       method: 'HEAD',
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; EOC-Dashboard/1.0; +https://eoc-dashboard.vercel.app)'
+        'User-Agent': 'Mozilla/5.0 (compatible; EOC-Dashboard/1.0)'
       }
     });
     
