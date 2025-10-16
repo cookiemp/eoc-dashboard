@@ -66,7 +66,7 @@ export async function getCrawledNews(limit: number = 20): Promise<NewsServiceRes
 
     // Sort by crawledAt manually and limit
     const sortedDocs = articlesQuery.docs
-      .sort((a: any, b: any) => {
+      .sort((a, b) => {
         const aData = a.data();
         const bData = b.data();
         
@@ -98,7 +98,7 @@ export async function getCrawledNews(limit: number = 20): Promise<NewsServiceRes
       })
       .slice(0, limit);
 
-    const articles: NewsArticle[] = sortedDocs.map((doc: any) => {
+    const articles: NewsArticle[] = sortedDocs.map((doc) => {
       const data = doc.data();
       return {
         id: data.id,
@@ -149,7 +149,15 @@ export async function getCrawledNews(limit: number = 20): Promise<NewsServiceRes
 /**
  * Get archived news articles from Firebase with pagination
  */
-export async function getArchivedNews(page: number = 1, pageSize: number = 10, startDate?: string, endDate?: string, search?: string): Promise<any> {
+type ArchivedNewsResult = {
+  articles: Array<NewsArticle & { crawledAt: string }>;
+  totalArticles: number;
+  page: number;
+  pageSize: number;
+  error?: string;
+};
+
+export async function getArchivedNews(page: number = 1, pageSize: number = 10, startDate?: string, endDate?: string, search?: string): Promise<ArchivedNewsResult> {
   const firestoreInstance = await getFirestore();
   if (!firestoreInstance) {
     console.warn('⚠️ Firebase not available for getArchivedNews');
@@ -168,7 +176,7 @@ export async function getArchivedNews(page: number = 1, pageSize: number = 10, s
     console.log(`📄 Retrieved ${snapshot.size} total documents from Firebase`);
     
     // Convert to articles and sort manually
-    let allArticles = snapshot.docs.map((doc: any) => {
+    let allArticles = snapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         id: data.id,
@@ -256,7 +264,7 @@ export async function getCrawledNewsBySource(source: string, limit: number = 10)
       .limit(limit)
       .get();
 
-    const articles: NewsArticle[] = articlesQuery.docs.map((doc: any) => {
+    const articles: NewsArticle[] = articlesQuery.docs.map((doc) => {
       const data = doc.data();
       return {
         id: data.id,
@@ -280,7 +288,13 @@ export async function getCrawledNewsBySource(source: string, limit: number = 10)
  * Get crawler run history for monitoring
  * Default limit increased to capture more historical data for accurate statistics
  */
-export async function getCrawlerRunHistory(limit: number = 5000): Promise<any[]> {
+type CrawlerRun = {
+  id: string;
+  timestamp: string;
+  [key: string]: unknown;
+};
+
+export async function getCrawlerRunHistory(limit: number = 5000): Promise<CrawlerRun[]> {
   // Use the async getFirestore function instead of checking isFirebaseAvailable
   const firestoreInstance = await getFirestore();
   if (!firestoreInstance) {
@@ -306,14 +320,14 @@ export async function getCrawlerRunHistory(limit: number = 5000): Promise<any[]>
         .get();
     }
 
-    let runs = runsQuery.docs.map((doc: any) => ({
+    let runs: CrawlerRun[] = runsQuery.docs.map((doc) => ({
       id: doc.id,
       ...doc.data()
-    }));
+    } as CrawlerRun));
 
     // Sort manually if we used fallback query
     if (runs.length > 0 && runs[0].timestamp) {
-      runs.sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      runs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       runs = runs.slice(0, limit); // Apply limit after sorting
     }
 
@@ -383,8 +397,8 @@ export async function getAvailableSources(): Promise<string[]> {
       .select('source')
       .get();
 
-    const sources = [...new Set(sourcesQuery.docs.map((doc: any) => doc.data().source as string))] as string[];
-    return (sources as string[]).sort();
+    const sources = [...new Set(sourcesQuery.docs.map((doc) => doc.data().source as string))];
+    return sources.sort();
 
   } catch (error) {
     console.error('❌ Error fetching available sources:', error);

@@ -65,7 +65,7 @@ export async function getIncidents(): Promise<IncidentWithId[]> {
     try {
       const incidentsCol = firestore.collection('incidents');
       const snapshot = await incidentsCol.orderBy('addedAt', 'desc').limit(MAX_INCIDENTS).get();
-      return snapshot.docs.map((doc: any) => doc.data() as IncidentWithId);
+      return snapshot.docs.map((doc) => doc.data() as IncidentWithId);
     } catch (error) {
       console.error('Error fetching from Firestore, falling back to file cache', error);
       return await readIncidentCache(); // Fallback on error
@@ -108,7 +108,7 @@ export async function addIncidents(newIncidents: Incident[]): Promise<void> {
       const snapshot = await incidentsCol.orderBy('addedAt', 'desc').get();
       if (snapshot.size > MAX_INCIDENTS) {
         const deleteBatch = firestore.batch();
-        snapshot.docs.slice(MAX_INCIDENTS).forEach((doc: any) => {
+        snapshot.docs.slice(MAX_INCIDENTS).forEach((doc) => {
           deleteBatch.delete(doc.ref);
         });
         await deleteBatch.commit();

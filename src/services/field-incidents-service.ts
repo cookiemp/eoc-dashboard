@@ -45,7 +45,7 @@ export async function getFieldIncidents(): Promise<FieldIncident[]> {
       .limit(MAX_INCIDENTS)
       .get();
 
-    return snapshot.docs.map((doc: any) => ({
+    return snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data()
     } as FieldIncident));
@@ -73,7 +73,7 @@ export async function getIncidentsPendingReview(): Promise<FieldIncident[]> {
       .orderBy('reportedAt', 'desc')
       .get();
 
-    return snapshot.docs.map((doc: any) => ({
+    return snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data()
     } as FieldIncident));

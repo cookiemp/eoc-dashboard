@@ -1,4 +1,6 @@
-let firestore: any = null;
+import type { Firestore } from 'firebase-admin/firestore';
+
+let firestore: Firestore | null = null;
 let initPromise: Promise<void> | null = null;
 
 // Check if Firebase environment variables are available (lazy evaluation)

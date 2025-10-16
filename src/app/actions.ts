@@ -17,9 +17,12 @@ import { getCachedDashboardData, setCachedDashboardData } from '@/services/dashb
 // Define the path to the summary cache file (fallback)
 const summaryCacheFilePath = path.resolve(process.cwd(), 'src/lib/summary-cache.json');
 
+// Import summary output type from AI flow
+import type { SummarizeIncidentDataOutput } from '@/ai/flows/summarize-incident-data';
+
 // Define a type for our cache structure
 type SummaryCache = {
-  summary: any;
+  summary: SummarizeIncidentDataOutput | null;
   date: string | null;
 };
 
@@ -252,7 +255,13 @@ async function getIfrcNews(): Promise<{ articles?: NewsArticle[], error?: string
 
     const data = await response.json();
 
-    const articles: NewsArticle[] = (data.results || []).map((item: any) => ({
+    interface IFRCAppeal {
+      id: number;
+      name?: string;
+      summary?: string;
+    }
+
+    const articles: NewsArticle[] = (data.results || []).map((item: IFRCAppeal) => ({
       id: item.id.toString(),
       title: item.name || 'No Title Available',
       source: 'International Federation of Red Cross (IFRC)',
@@ -285,9 +294,20 @@ async function getReliefWebNews(): Promise<{ articles?: NewsArticle[], error?: s
 
     const data = await response.json();
 
+    interface ReliefWebItem {
+      id: number;
+      fields?: {
+        title?: string;
+        source?: { name: string }[];
+        body?: string;
+        summary?: string;
+        url?: string;
+      };
+    }
+
     // Filter and map articles, ensuring they're Ethiopia-focused
     const articles: NewsArticle[] = (data.data || [])
-      .filter((item: any) => {
+      .filter((item: ReliefWebItem) => {
         const title = item.fields?.title || '';
         // Only include articles that explicitly mention Ethiopia in the title
         // or are clearly about Ethiopia (not just refugees FROM other places TO Ethiopia)
@@ -297,11 +317,11 @@ async function getReliefWebNews(): Promise<{ articles?: NewsArticle[], error?: s
           !title.toLowerCase().includes('south sudan situation')
         );
       })
-      .map((item: any) => ({
+      .map((item: ReliefWebItem) => ({
         id: item.id.toString(),
         title: item.fields?.title || 'No Title Available',
         source: item.fields?.source?.[0]?.name || 'ReliefWeb',
-        snippet: item.fields?.body?.summary || item.fields?.body || item.fields?.summary || 'Ethiopian humanitarian situation update.',
+        snippet: (typeof item.fields?.body === 'object' ? '' : item.fields?.body) || item.fields?.summary || 'Ethiopian humanitarian situation update.',
         url: item.fields?.url || `https://reliefweb.int/node/${item.id}`,
       }));
 
@@ -637,7 +657,14 @@ async function getNewsAPIFallback(): Promise<{ articles?: NewsArticle[], error?:
       return { error: `NewsAPI Error: ${data?.message || 'Invalid response structure'}` };
     }
 
-    const articles: NewsArticle[] = (data.articles || []).map((item: any) => ({
+    interface NewsAPIArticle {
+      url: string;
+      title?: string;
+      description?: string;
+      source?: { name: string };
+    }
+
+    const articles: NewsArticle[] = (data.articles || []).map((item: NewsAPIArticle) => ({
       id: item.url, // Use URL as unique ID
       title: item.title || 'No Title Available',
       source: item.source?.name || 'Unknown Source',
