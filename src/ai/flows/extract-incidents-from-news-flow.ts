@@ -9,7 +9,6 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import type { Incident } from '@/lib/types';
 
 const NewsArticleSchema = z.object({
   id: z.string(),
