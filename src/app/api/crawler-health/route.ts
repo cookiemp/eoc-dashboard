@@ -126,10 +126,21 @@ export async function GET() {
   }
 }
 
+type CrawlerRunForStats = {
+  id: string;
+  timestamp: string;
+  summary?: {
+    isSuccessful?: boolean;
+    totalArticles?: number;
+    totalTime?: number;
+  };
+  [key: string]: unknown;
+};
+
 /**
  * Calculate health statistics from run history
  */
-function calculateHealthStats(runHistory: any[]) {
+function calculateHealthStats(runHistory: CrawlerRunForStats[]) {
   if (!runHistory || runHistory.length === 0) {
     return {
       totalRuns: 0,
@@ -148,7 +159,7 @@ function calculateHealthStats(runHistory: any[]) {
   // Calculate average run time (if available)
   const runsWithTime = runHistory.filter(run => run.summary?.totalTime);
   const averageRunTime = runsWithTime.length > 0 
-    ? runsWithTime.reduce((sum, run) => sum + run.summary.totalTime, 0) / runsWithTime.length
+    ? runsWithTime.reduce((sum, run) => sum + (run.summary?.totalTime || 0), 0) / runsWithTime.length
     : 0;
 
   return {

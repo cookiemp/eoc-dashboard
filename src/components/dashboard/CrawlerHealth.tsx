@@ -14,15 +14,21 @@ interface HealthMetrics {
   averageRunTime: number;
 }
 
+type CrawlerRunHistory = {
+  id: string;
+  timestamp: string;
+  [key: string]: unknown;
+};
+
 interface CrawlerHealthData {
   health: {
     isHealthy: boolean;
     status: string;
     lastRunAt?: string;
   };
-  metrics: any;
+  metrics: unknown;
   stats: HealthMetrics;
-  runHistory: any[];
+  runHistory: CrawlerRunHistory[];
   lastUpdated: string;
 }
 

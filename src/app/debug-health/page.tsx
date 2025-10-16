@@ -2,8 +2,23 @@
 
 import { useState, useEffect } from 'react';
 
+type HealthAPIResponse = {
+  health?: {
+    isHealthy?: boolean;
+    lastRunAt?: string;
+  };
+  stats?: {
+    successRate?: number;
+    totalRuns?: number;
+    totalArticlesCrawled?: number;
+  };
+  debug?: {
+    source?: string;
+  };
+};
+
 export default function DebugHealthPage() {
-  const [apiResponse, setApiResponse] = useState<any>(null);
+  const [apiResponse, setApiResponse] = useState<HealthAPIResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 

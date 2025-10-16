@@ -15,8 +15,22 @@ export async function POST(request: Request) {
 
     console.log(`📊 Publishing ${incidents.length} incidents (auto-approve: ${autoApprove})`);
 
+    interface IncidentInput {
+      title: string;
+      description: string;
+      latitude: number;
+      longitude: number;
+      color: string;
+      category: 'health' | 'food_security' | 'displacement' | 'wash' | 'security' | 'other';
+      severity: 'low' | 'medium' | 'high' | 'critical';
+      locationName: string;
+      confidence: number;
+      affectedPeople?: number;
+      needsReview?: boolean;
+    }
+
     // Add reportedBy field (in future, get from session)
-    const incidentsToSave = incidents.map((incident: any) => ({
+    const incidentsToSave = incidents.map((incident: IncidentInput) => ({
       ...incident,
       reportedBy: 'admin', // TODO: Get from session
     }));

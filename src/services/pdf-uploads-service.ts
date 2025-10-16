@@ -76,7 +76,7 @@ export async function getRecentPdfUploads(days: number = 7): Promise<PdfUpload[]
 
     // Filter to only include uploads within the date range
     const filteredUploads = snapshot.docs
-      .map((doc: any) => doc.data() as PdfUpload)
+      .map((doc) => doc.data() as PdfUpload)
       .filter((upload: PdfUpload) => {
         const uploadDate = new Date(upload.uploadedAt);
         return uploadDate >= cutoffDate;

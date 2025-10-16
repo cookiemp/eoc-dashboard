@@ -3,28 +3,30 @@
 import type { NewsArticle } from '../lib/types';
 import * as puppeteer from 'puppeteer';
 import { Browser, Page } from 'puppeteer';
+import * as crypto from 'crypto';
+import * as fs from 'fs';
 
 // Enhanced logging utilities
 class CrawlerLogger {
-  private static formatMessage(level: string, source: string, message: string, extra?: any): string {
+  private static formatMessage(level: string, source: string, message: string, extra?: Record<string, unknown>): string {
     const timestamp = new Date().toISOString();
     const extraStr = extra ? ` | ${JSON.stringify(extra)}` : '';
     return `[${timestamp}] ${level.toUpperCase()} [${source}] ${message}${extraStr}`;
   }
 
-  static info(source: string, message: string, extra?: any): void {
+  static info(source: string, message: string, extra?: Record<string, unknown>): void {
     console.log(this.formatMessage('info', source, message, extra));
   }
 
-  static warn(source: string, message: string, extra?: any): void {
+  static warn(source: string, message: string, extra?: Record<string, unknown>): void {
     console.warn(this.formatMessage('warn', source, message, extra));
   }
 
-  static error(source: string, message: string, extra?: any): void {
+  static error(source: string, message: string, extra?: Record<string, unknown>): void {
     console.error(this.formatMessage('error', source, message, extra));
   }
 
-  static success(source: string, message: string, extra?: any): void {
+  static success(source: string, message: string, extra?: Record<string, unknown>): void {
     console.log(this.formatMessage('success', source, `✅ ${message}`, extra));
   }
 }
@@ -124,7 +126,7 @@ export class OptimizedBaseCrawler {
       // Enhanced bot detection avoidance
       await this.page.evaluateOnNewDocument(() => {
         Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-        (window as any).chrome = { runtime: {} };
+        (window as typeof window & { chrome?: unknown }).chrome = { runtime: {} };
         Object.defineProperty(navigator, 'plugins', {
           get: () => [1, 2, 3, 4, 5]
         });
@@ -418,7 +420,6 @@ export class OptimizedBaseCrawler {
    * Generate a unique ID for an article
    */
 protected generateArticleId(title: string, source: string, url: string): string {
-    const crypto = require('crypto');
     const id = crypto.createHash('md5').update(url).digest('hex');
     return id;
   }
@@ -911,7 +912,7 @@ export class OptimizedUnOchaCrawler extends OptimizedBaseCrawler {
     let chromedriverPath = possiblePaths[0];
     for (const testPath of possiblePaths) {
       try {
-        if (testPath === 'chromedriver' || require('fs').existsSync(testPath)) {
+        if (testPath === 'chromedriver' || fs.existsSync(testPath)) {
           chromedriverPath = testPath;
           break;
         }
@@ -950,7 +951,8 @@ export class OptimizedUnOchaCrawler extends OptimizedBaseCrawler {
         'a[href*="/situation-report"]'
       ];
       
-      let links: any[] = [];
+      type SeleniumWebElement = Awaited<ReturnType<typeof driver.findElements>>[number];
+      let links: SeleniumWebElement[] = [];
       for (const selector of linkSelectors) {
         try {
           links = await driver.findElements(By.css(selector));
@@ -1226,7 +1228,7 @@ export class OptimizedCrawlerService {
       if (result.status === 'fulfilled') {
         return result.value;
       } else {
-        const crawlerName = this.crawlers[index] ? (this.crawlers[index] as any).config?.name : 'Unknown';
+        const crawlerName = this.crawlers[index]?.config?.name || 'Unknown';
         return {
           source: crawlerName,
           articles: [],

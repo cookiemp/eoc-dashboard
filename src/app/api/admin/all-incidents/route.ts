@@ -18,7 +18,7 @@ export async function GET() {
       .limit(100)
       .get();
 
-    const incidents = snapshot.docs.map((doc: any) => ({
+    const incidents = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data()
     }));
