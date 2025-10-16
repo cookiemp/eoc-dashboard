@@ -29,7 +29,7 @@ The Asset UID is in the form URL:
 https://kobo.ifrc.org/#/forms/[ASSET_UID]/summary
 ```
 
-For the ERCS Field Report form: `aby6sxp4DyEiohs4XMn7Mu`
+Example: `aby6sxp4DyEiohs4XMn7Mu` (replace with your actual form UID)
 
 ### 3. Set Environment Variables
 
@@ -38,7 +38,7 @@ Add to your `.env` file:
 ```bash
 KOBO_SERVER=https://kobo.ifrc.org
 KOBO_API_KEY=your_api_token_here
-KOBO_ASSET_UID=aby6sxp4DyEiohs4XMn7Mu
+KOBO_ASSET_UID=your-form-asset-uid
 ```
 
 ### 4. Configure GitHub Secrets (for automated sync)
@@ -142,7 +142,7 @@ Each synced KoBo submission becomes a field incident:
 
 ```bash
 curl -H "Authorization: Token YOUR_API_KEY" \
-  "https://kobo.ifrc.org/api/v2/assets/aby6sxp4DyEiohs4XMn7Mu/?format=json"
+  "https://kobo.ifrc.org/api/v2/assets/YOUR_ASSET_UID/?format=json"
 ```
 
 ### Verify Environment Variables

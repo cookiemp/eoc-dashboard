@@ -76,7 +76,7 @@ GOOGLE_API_KEY=your-gemini-api-key
 # KoBoToolbox (optional)
 KOBO_SERVER=https://kobo.ifrc.org
 KOBO_API_KEY=your-kobo-api-token
-KOBO_ASSET_UID=aby6sxp4DyEiohs4XMn7Mu
+KOBO_ASSET_UID=your-form-asset-uid
 
 # Admin Authentication
 ADMIN_USERNAME=admin
