@@ -43,3 +43,12 @@ next-env.d.ts
 # firebase
 firebase-debug.log
 firestore-debug.log
+
+# test and temporary files
+cookies.txt
+test-data/
+mock-*.txt
+test-*.txt
+test-*.js
+test-*.ps1
+*.log
