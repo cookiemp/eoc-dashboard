@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Header from "@/components/dashboard/header";
-import IncidentMap from "@/components/dashboard/incident-map";
+import IncidentMap, { type IncidentMapHandle } from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
 import NewsFeed from "@/components/dashboard/news-feed";
 import { getLatestIncidents, processNewsIntoIncidents, getAllNewsWithCategorization, getCachedDashboardDataFast } from "@/app/actions";
+import { getFieldIncidents, type FieldIncident } from '@/services/field-incidents-service';
 import { clearDashboardCache, setCachedDashboardData } from "@/services/dashboard-cache-service";
 import type { IncidentWithId } from '@/services/incident-service';
 import type { NewsArticle } from '@/lib/types';
@@ -14,9 +15,11 @@ import { BookHeart, Brain } from 'lucide-react';
 
 
 export default function Home() {
+  const mapRef = useRef<IncidentMapHandle>(null);
   const [incidents, setIncidents] = useState<IncidentWithId[]>([]);
   const [humanitarianNews, setHumanitarianNews] = useState<CategorizedArticle[]>([]);
   const [generalNews, setGeneralNews] = useState<CategorizedArticle[]>([]);
+  const [fieldIncidents, setFieldIncidents] = useState<FieldIncident[]>([]);
 
   const [newsLoading, setNewsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -64,12 +67,18 @@ export default function Home() {
         await processNewsIntoIncidents({ articles: articlesForIncidents });
       }
       
-      // Step 3: Fetch latest incidents from database
+      // Step 3: Fetch latest incidents and field incidents from database
       setLoadingMessage('Fetching latest incidents from database...');
-      const latestIncidents = await getLatestIncidents();
+      const [latestIncidents, latestFieldIncidents] = await Promise.all([
+        getLatestIncidents(),
+        getFieldIncidents()
+      ]);
       if (latestIncidents) {
         setIncidents(latestIncidents);
       }
+      // Filter for approved field incidents only (not needing review)
+      const approvedFieldIncidents = latestFieldIncidents.filter(inc => !inc.needsReview);
+      setFieldIncidents(approvedFieldIncidents);
 
       // Step 4: Cache the fresh data for future tab reloads
       setLoadingMessage('Caching fresh data...');
@@ -111,7 +120,7 @@ export default function Home() {
       
       // If data is from cache, show different message
       if (result.isFromCache) {
-        setLoadingMessage('✅ Loaded from cache - displaying data...');
+        setLoadingMessage('Loaded from cache - displaying data...');
       } else {
         // Show progress for fresh data
         setLoadingMessage('Fetching fresh data with AI processing...');
@@ -124,6 +133,11 @@ export default function Home() {
       setGeneralNews(result.general || []);
       setIncidents(result.incidents || []);
       setNewsStats(result.summary || { humanitarianCount: 0, generalCount: 0 });
+      
+      // Also fetch field incidents for summary
+      const latestFieldIncidents = await getFieldIncidents();
+      const approvedFieldIncidents = latestFieldIncidents.filter(inc => !inc.needsReview);
+      setFieldIncidents(approvedFieldIncidents);
       // Cache state is handled internally
       
       console.log(result.isFromCache ? '🚀 Dashboard loaded from cache - instant!' : '📥 Dashboard loaded with fresh data');
@@ -167,7 +181,7 @@ export default function Home() {
       <Header onRefresh={() => {if (!isRefreshing) fetchAllData()}} lastUpdated={lastUpdated} isLoading={isRefreshing} />
       {isRefreshing && loadingMessage && (
         <div className={`p-2 text-center text-sm text-white animate-pulse ${
-          loadingMessage.includes('✅') ? 'bg-green-500' : 'bg-blue-500'
+          loadingMessage.includes('cache') ? 'bg-green-500' : 'bg-blue-500'
         }`}>
           {loadingMessage}
         </div>
@@ -182,7 +196,7 @@ export default function Home() {
       <main className="flex-1 p-4 sm:p-6 md:p-8">
         <div className="grid gap-6 md:gap-8 grid-cols-1 lg:grid-cols-4">
           <div className="lg:col-span-4">
-            <IncidentMap incidents={incidents} />
+            <IncidentMap ref={mapRef} incidents={incidents} />
           </div>
           
           {/* News Feeds */}
@@ -207,7 +221,12 @@ export default function Home() {
           
           {/* AI Summary - moved down */}
           <div className="lg:col-span-4">
-             <AiSummary articles={humanitarianNews} isLoadingNews={newsLoading} />
+             <AiSummary 
+               articles={humanitarianNews} 
+               fieldIncidents={fieldIncidents} 
+               isLoadingNews={newsLoading}
+               onIncidentFocus={(id) => mapRef.current?.focusIncident(id)}
+             />
           </div>
         </div>
       </main>

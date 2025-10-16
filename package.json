@@ -17,6 +17,7 @@
     "generate:test-pdfs": "node ./scripts/generate-test-pdf.js",
     "analyze:sites": "tsx ./scripts/analyze-sites.ts",
     "crawl:github-actions": "tsx ./scripts/github-actions-crawler.ts",
+    "sync:kobo": "tsx ./scripts/kobo-sync.ts",
     "cleanup:duplicates": "tsx ./scripts/cleanup-duplicates.ts",
     "cleanup:test-data": "tsx ./scripts/cleanup-test-data.ts"
   },

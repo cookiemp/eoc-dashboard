@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -18,8 +18,21 @@ interface IncidentMapProps {
   incidents: IncidentWithId[];
 }
 
-const IncidentMap = ({ incidents }: IncidentMapProps) => {
+export interface IncidentMapHandle {
+  focusIncident: (incidentId: string) => void;
+}
+
+const IncidentMap = forwardRef<IncidentMapHandle, IncidentMapProps>(({ incidents }, ref) => {
   const [selectedIncident, setSelectedIncident] = useState<IncidentWithId | null>(null);
+  const mapRef = useRef<{ focusIncident: (incidentId: string) => void } | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    focusIncident: (incidentId: string) => {
+      if (mapRef.current) {
+        mapRef.current.focusIncident(incidentId);
+      }
+    }
+  }));
 
   const handleMarkerClick = useCallback((incident: IncidentWithId, map: L.Map) => {
     setSelectedIncident(incident);
@@ -42,6 +55,7 @@ const IncidentMap = ({ incidents }: IncidentMapProps) => {
         </CardHeader>
         <CardContent className="h-[320px] sm:h-[360px] md:h-[400px]">
           <MapWithNoSSR 
+            ref={mapRef}
             incidents={incidents} 
             onMarkerClick={handleMarkerClick}
           />
@@ -56,6 +70,8 @@ const IncidentMap = ({ incidents }: IncidentMapProps) => {
       )}
     </>
   );
-};
+});
+
+IncidentMap.displayName = 'IncidentMap';
 
 export default IncidentMap;

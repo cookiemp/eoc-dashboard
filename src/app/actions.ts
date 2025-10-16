@@ -94,15 +94,15 @@ export async function clearSummaryCache(): Promise<void> {
   }
 }
 
-export async function getSummary(input: { articles: NewsArticle[] }) {
+export async function getSummary(input: { articles: NewsArticle[]; fieldIncidents?: FieldIncident[] }) {
   const now = new Date();
   const today = now.toISOString().split('T')[0];
   const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000); // 30 minutes ago
   
   try {
-    // Don't generate a summary if there are no articles
-    if (!input.articles || input.articles.length === 0) {
-      return { summary: "No articles available to summarize." };
+    // Don't generate a summary if there are no articles and no field incidents
+    if ((!input.articles || input.articles.length === 0) && (!input.fieldIncidents || input.fieldIncidents.length === 0)) {
+      return { summary: "No articles or incidents available to summarize." };
     }
 
     // Check if we have a valid cached summary

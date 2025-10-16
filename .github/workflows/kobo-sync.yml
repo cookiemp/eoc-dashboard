@@ -1,0 +1,73 @@
+# KoBo Sync Workflow
+# Syncs emergency field reports from IFRC KoBoToolbox every 30 minutes
+name: KoBo Sync
+
+on:
+  schedule:
+    # Run every 30 minutes
+    - cron: '*/30 * * * *'
+  workflow_dispatch: # Allow manual triggering
+    inputs:
+      force_sync:
+        description: 'Force sync all submissions'
+        required: false
+        default: 'false'
+
+jobs:
+  sync-kobo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25 # Leave 5 minutes buffer before 30-minute limit
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run KoBo sync
+        env:
+          # Firebase credentials
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+          
+          # KoBo credentials
+          KOBO_SERVER: ${{ secrets.KOBO_SERVER || 'https://kobo.ifrc.org' }}
+          KOBO_API_KEY: ${{ secrets.KOBO_API_KEY }}
+          KOBO_ASSET_UID: ${{ secrets.KOBO_ASSET_UID }}
+          
+          # Google AI for geocoding
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          
+        run: |
+          echo "🚀 Starting KoBo sync workflow..."
+          echo "📅 Current time: $(date)"
+          echo "🔄 Force sync: ${{ github.event.inputs.force_sync }}"
+          
+          # Run the KoBo sync service
+          npm run sync:kobo
+
+      - name: Upload sync logs (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kobo-sync-logs-${{ github.run_number }}
+          path: |
+            kobo-sync-logs.txt
+            error-logs.txt
+          retention-days: 7
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ KoBo sync workflow failed at $(date)"
+          echo "Check the logs for details"
+          # You can add Slack/Discord webhook notifications here if needed

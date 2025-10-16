@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import type { IncidentWithId } from '@/services/incident-service';
 import L from 'leaflet';
 
@@ -32,10 +32,29 @@ const createIncidentIcon = (color: string, isFieldReport: boolean = false) => {
   });
 };
 
-const MapWrapper = ({ incidents, onMarkerClick }: MapWrapperProps) => {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<L.Marker[]>([]);
+const MapWrapper = forwardRef<{ focusIncident: (incidentId: string) => void }, MapWrapperProps>(
+  ({ incidents, onMarkerClick }, ref) => {
+    const mapContainerRef = useRef<HTMLDivElement>(null);
+    const mapInstanceRef = useRef<L.Map | null>(null);
+    const markersRef = useRef<Map<string, L.Marker>>(new Map());
+
+    useImperativeHandle(ref, () => ({
+      focusIncident: (incidentId: string) => {
+        const marker = markersRef.current.get(incidentId);
+        const incident = incidents.find(inc => inc.id === incidentId);
+        if (marker && incident && mapInstanceRef.current) {
+          const map = mapInstanceRef.current;
+          // Zoom and pan to the marker
+          map.setView(marker.getLatLng(), 10, { animate: true });
+          // Open tooltip
+          marker.openTooltip();
+          // Trigger click after a brief delay
+          setTimeout(() => {
+            onMarkerClick(incident, map);
+          }, 500);
+        }
+      }
+    }));
 
   // Effect for initializing and cleaning up the map
   useEffect(() => {
@@ -66,7 +85,7 @@ const MapWrapper = ({ incidents, onMarkerClick }: MapWrapperProps) => {
 
     // Clear existing markers
     markersRef.current.forEach(marker => marker.remove());
-    markersRef.current = [];
+    markersRef.current.clear();
 
     // Add new markers
     let validMarkers = 0;
@@ -132,16 +151,19 @@ const MapWrapper = ({ incidents, onMarkerClick }: MapWrapperProps) => {
         onMarkerClick(incident, map);
       });
       
-      markersRef.current.push(marker);
+      markersRef.current.set(incident.id, marker);
     });
     
     // Log if any markers were skipped due to invalid coordinates
     if (invalidMarkers > 0) {
       console.warn(`⚠️ ${invalidMarkers} incident(s) skipped due to invalid coordinates`);
     }
-  }, [incidents, onMarkerClick]);
+    }, [incidents, onMarkerClick]);
 
-  return <div ref={mapContainerRef} style={{ height: '100%', width: '100%', zIndex: 1 }} />;
-};
+    return <div ref={mapContainerRef} style={{ height: '100%', width: '100%', zIndex: 1 }} />;
+  }
+);
+
+MapWrapper.displayName = 'MapWrapper';
 
 export default MapWrapper;

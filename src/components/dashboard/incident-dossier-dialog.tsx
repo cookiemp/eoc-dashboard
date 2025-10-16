@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from '@/components/ui/skeleton';
 import { generateIncidentDossier } from '@/app/actions';
 import type { GenerateIncidentDossierOutput } from '@/ai/flows/generate-incident-dossier-flow';
@@ -66,14 +67,14 @@ const IncidentDossierDialog = ({ incident, open, onClose }: IncidentDossierDialo
   }, [open, incident, dossier, onClose, toast]);
 
   return (
-    <AlertDialog open={open} onOpenChange={onClose}>
-      <AlertDialogContent className="max-w-2xl">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="text-2xl">{incident.title}</AlertDialogTitle>
-          <AlertDialogDescription>
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-2xl">{incident.title}</DialogTitle>
+          <DialogDescription>
             {incident.description}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
+          </DialogDescription>
+        </DialogHeader>
         
         <div className="space-y-6 py-4">
           {isLoading ? (
@@ -98,11 +99,11 @@ const IncidentDossierDialog = ({ incident, open, onClose }: IncidentDossierDialo
           ) : null}
         </div>
         
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={onClose}>Close</AlertDialogCancel>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Close</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

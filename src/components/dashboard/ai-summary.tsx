@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getSummary } from '@/app/actions';
 import type { SummarizeIncidentDataOutput } from '@/ai/flows/summarize-incident-data';
 import type { NewsArticle } from '@/lib/types';
+import type { FieldIncident } from '@/services/field-incidents-service';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Sparkles, AlertTriangle } from 'lucide-react';
@@ -12,10 +13,12 @@ import { Skeleton } from '../ui/skeleton';
 
 interface AiSummaryProps {
   articles: NewsArticle[];
+  fieldIncidents?: FieldIncident[];
   isLoadingNews?: boolean;
+  onIncidentFocus?: (incidentId: string) => void;
 }
 
-const AiSummary = ({ articles, isLoadingNews = false }: AiSummaryProps) => {
+const AiSummary = ({ articles, fieldIncidents, isLoadingNews = false, onIncidentFocus }: AiSummaryProps) => {
   const [summary, setSummary] = useState<SummarizeIncidentDataOutput | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasArticles, setHasArticles] = useState(false);
@@ -29,7 +32,7 @@ const AiSummary = ({ articles, isLoadingNews = false }: AiSummaryProps) => {
         return;
       }
       
-      if (!articles || articles.length === 0) {
+      if ((!articles || articles.length === 0) && (!fieldIncidents || fieldIncidents.length === 0)) {
         // Only set loading to false if news has finished loading
         setIsLoading(false);
         setHasArticles(false);
@@ -38,7 +41,7 @@ const AiSummary = ({ articles, isLoadingNews = false }: AiSummaryProps) => {
       
       setHasArticles(true);
       try {
-        const result = await getSummary({ articles });
+        const result = await getSummary({ articles, fieldIncidents });
 
         if (result.error) {
           toast({
@@ -64,7 +67,7 @@ const AiSummary = ({ articles, isLoadingNews = false }: AiSummaryProps) => {
     };
 
     generateSummary();
-  }, [articles, toast, isLoadingNews]);
+  }, [articles, fieldIncidents, toast, isLoadingNews]);
 
   const renderSummary = () => {
     if (!summary) return null;
@@ -109,15 +112,16 @@ const AiSummary = ({ articles, isLoadingNews = false }: AiSummaryProps) => {
             <li key={index} className="flex items-start gap-3">
               <span className="text-primary mt-1">{point.isHealthAlert ? '⚕️' : '●'}</span>
               <span className="text-sm text-muted-foreground">
-                {point.text.split(/\[Source\]\((.*?)\)/g).map((part, i) => {
-                  // Even indices are text, odd indices are URLs
-                  if (i % 2 === 0) {
-                    return <span key={i}>{part}</span>;
-                  } else {
+                {point.text.split(/(\[(?:Source|More)\]\(.*?\))/g).map((part, i) => {
+                  // Match [Source](url) or [More](#id)
+                  const sourceMatch = part.match(/\[Source\]\((.*?)\)/);
+                  const moreMatch = part.match(/\[More\]\((#.*?)\)/);
+                  
+                  if (sourceMatch) {
                     return (
                       <a
                         key={i}
-                        href={part}
+                        href={sourceMatch[1]}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary underline hover:text-primary/80"
@@ -125,6 +129,27 @@ const AiSummary = ({ articles, isLoadingNews = false }: AiSummaryProps) => {
                         Source
                       </a>
                     );
+                  } else if (moreMatch) {
+                    const incidentId = moreMatch[1].substring(1); // Remove the # prefix
+                    return (
+                      <a
+                        key={i}
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (onIncidentFocus) {
+                            onIncidentFocus(incidentId);
+                            // Scroll to map
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }
+                        }}
+                        className="text-primary underline hover:text-primary/80 cursor-pointer"
+                      >
+                        More
+                      </a>
+                    );
+                  } else {
+                    return <span key={i}>{part}</span>;
                   }
                 })}
               </span>
