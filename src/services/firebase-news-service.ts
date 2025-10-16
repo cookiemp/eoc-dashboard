@@ -160,7 +160,7 @@ export async function getArchivedNews(page: number = 1, pageSize: number = 10, s
     console.log('🔍 Fetching archived articles from Firebase...');
     
     // Use a simple query to avoid index requirements
-    let query = firestoreInstance.collection(COLLECTIONS.ARTICLES)
+    const query = firestoreInstance.collection(COLLECTIONS.ARTICLES)
       .where('isActive', '==', true)
       .limit(pageSize * 5); // Get more documents to allow for filtering
 

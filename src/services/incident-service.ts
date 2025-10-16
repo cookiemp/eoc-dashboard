@@ -124,7 +124,7 @@ export async function addIncidents(newIncidents: Incident[]): Promise<void> {
 
 // Extracted file-based logic to its own function for clarity
 async function addIncidentsToFile(newIncidents: Incident[]): Promise<void> {
-  let currentIncidents = await readIncidentCache();
+  const currentIncidents = await readIncidentCache();
 
   const incidentsToAdd: IncidentWithId[] = newIncidents.map((incident) => ({
     ...incident,
@@ -132,7 +132,7 @@ async function addIncidentsToFile(newIncidents: Incident[]): Promise<void> {
     addedAt: new Date().toISOString(),
   }));
 
-  let allIncidents = [...currentIncidents, ...incidentsToAdd];
+  const allIncidents = [...currentIncidents, ...incidentsToAdd];
 
   const uniqueIncidents = allIncidents.filter((incident, index, self) =>
     index === self.findIndex((t) => t.title === incident.title)
