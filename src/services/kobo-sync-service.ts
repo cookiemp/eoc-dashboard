@@ -64,7 +64,7 @@ function mapEmergencyToCategory(emergency: string): FieldIncident['category'] {
 /**
  * Determine severity based on people affected and emergency type
  */
-function determineSeverity(peopleAffected?: number, emergency?: string): FieldIncident['severity'] {
+function determineSeverity(peopleAffected?: number): FieldIncident['severity'] {
   if (!peopleAffected || peopleAffected === 0) return 'medium';
   
   if (peopleAffected > 10000) return 'critical';
@@ -152,7 +152,7 @@ async function convertToFieldIncident(submission: KoBoSubmission): Promise<Omit<
     const emergencyName = submission['context/emergency-selection'] || 'Unknown Emergency';
     const category = mapEmergencyToCategory(emergencyName);
     const peopleReached = submission['branch_sitrep/reached_population/g_reach'];
-    const severity = determineSeverity(peopleReached, emergencyName);
+    const severity = determineSeverity(peopleReached);
     
     // Build description
     const primaryInfo = submission['latest_info/info_primary-source'] || '';

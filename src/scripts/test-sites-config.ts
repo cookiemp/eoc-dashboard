@@ -18,7 +18,6 @@ async function checkRobotsTxt(robotsTxtUrl: string): Promise<{ allowed: boolean;
     // Basic check for disallow patterns
     const hasUserAgent = content.toLowerCase().includes('user-agent:');
     const hasDisallowAll = content.toLowerCase().includes('disallow: /');
-    const hasCrawlDelay = content.toLowerCase().includes('crawl-delay:');
     
     return {
       allowed: hasUserAgent && !hasDisallowAll,

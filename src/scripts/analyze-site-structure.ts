@@ -38,7 +38,7 @@ async function analyzeSiteStructure(site: NewsSiteConfig) {
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     // Analyze the page structure
-    const analysis = await page.evaluate((siteConfig) => {
+    const analysis = await page.evaluate(() => {
       const results = {
         title: document.title,
         articleLinks: [] as string[],
@@ -82,7 +82,7 @@ async function analyzeSiteStructure(site: NewsSiteConfig) {
           if (elements.length > 0 && elements.length < 50) {
             results.possibleSelectors.articles.push(`${selector} (${elements.length} found)`);
           }
-        } catch (e) {
+        } catch {
           // Ignore selector errors
         }
       });
@@ -100,7 +100,7 @@ async function analyzeSiteStructure(site: NewsSiteConfig) {
             const sampleText = elements[0]?.textContent?.trim().substring(0, 50) || '';
             results.possibleSelectors.titles.push(`${selector} (${elements.length} found) - "${sampleText}"`);
           }
-        } catch (e) {
+        } catch {
           // Ignore selector errors
         }
       });
@@ -117,13 +117,13 @@ async function analyzeSiteStructure(site: NewsSiteConfig) {
           if (elements.length > 0) {
             results.possibleSelectors.links.push(`${selector} (${elements.length} found)`);
           }
-        } catch (e) {
+        } catch {
           // Ignore selector errors
         }
       });
       
       return results;
-    }, site);
+    });
     
     // Display results
     console.log(`✅ Successfully analyzed ${site.name}`);

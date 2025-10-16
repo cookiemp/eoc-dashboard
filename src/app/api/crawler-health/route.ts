@@ -6,7 +6,6 @@ export async function GET() {
     console.log('🔍 Fetching crawler health data...');
     
     // Use the centralized Firebase service
-    let useFirebase = true;
     let firebaseError = null;
     
     try {
@@ -70,13 +69,11 @@ export async function GET() {
         return NextResponse.json(response);
         
       } else {
-        useFirebase = false;
         firebaseError = 'Health check returned undefined status';
       }
       
     } catch (firebaseErr) {
       console.error('❌ Firebase service error:', firebaseErr);
-      useFirebase = false;
       firebaseError = firebaseErr instanceof Error ? firebaseErr.message : 'Firebase service unavailable';
     }
     
@@ -127,27 +124,6 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
-
-/**
- * Calculate health status from metadata
- */
-function calculateHealthStatus(metadata: any) {
-  if (!metadata) {
-    return { isHealthy: false, status: 'No crawler runs found' };
-  }
-  
-  const lastRun = metadata.lastRunAt ? new Date(metadata.lastRunAt) : null;
-  const now = new Date();
-  
-  // Consider healthy if last run was within 45 minutes (30 min schedule + 15 min buffer)
-  const isRecent = lastRun ? (now.getTime() - lastRun.getTime()) < 45 * 60 * 1000 : false;
-  
-  return {
-    isHealthy: (metadata.isHealthy || false) && isRecent,
-    lastRunAt: metadata.lastRunAt,
-    status: metadata.lastRunStatus || 'unknown'
-  };
 }
 
 /**

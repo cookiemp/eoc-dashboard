@@ -269,13 +269,12 @@ export class OptimizedBaseCrawler {
       // Get article links with error handling
       const links = await this.page.$$eval(
         this.config.selectors.articleLinks,
-        (anchors, baseUrl) => {
+        (anchors) => {
           return anchors
             .map(anchor => (anchor as HTMLAnchorElement).href)
             .filter(href => href && href.startsWith('http'))
             .slice(0, 10); // Get more links initially for filtering
-        },
-        this.config.baseUrl
+        }
       ).catch(() => []);
       
       if (links.length === 0) {
@@ -330,7 +329,7 @@ export class OptimizedBaseCrawler {
           try {
             const title = await this.page!.$eval(selector, el => el.textContent?.trim() || '');
             if (title) return title;
-          } catch (e) {
+          } catch {
             // Continue to next selector
           }
         }
@@ -363,7 +362,7 @@ export class OptimizedBaseCrawler {
           if (text && text.length > 20) { // Only add substantial text
             snippet += text + ' ';
           }
-        } catch (e) {
+        } catch {
           // Skip this element
         }
       }
@@ -611,7 +610,7 @@ export class OptimizedBbcEthiopiaCrawler extends OptimizedBaseCrawler {
           console.log(`📄 Found ${foundLinks.length} links with selector: ${selector}`);
           if (links.length >= 5) break;
         }
-      } catch (e) {
+      } catch {
         console.warn(`Selector ${selector} failed`);
       }
     }
@@ -916,7 +915,7 @@ export class OptimizedUnOchaCrawler extends OptimizedBaseCrawler {
           chromedriverPath = testPath;
           break;
         }
-      } catch (e) {
+      } catch {
         continue;
       }
     }
@@ -959,7 +958,7 @@ export class OptimizedUnOchaCrawler extends OptimizedBaseCrawler {
             console.log(`📄 Found ${links.length} links with selector: ${selector}`);
             break;
           }
-        } catch (e) {
+        } catch {
           continue;
         }
       }
@@ -975,7 +974,7 @@ export class OptimizedUnOchaCrawler extends OptimizedBaseCrawler {
           try {
             const href = await link.getAttribute('href');
             return href || '';
-          } catch (e) {
+          } catch {
             return '';
           }
         })
@@ -1012,7 +1011,7 @@ export class OptimizedUnOchaCrawler extends OptimizedBaseCrawler {
               const titleElement = await driver.findElement(By.css(selector));
               title = await titleElement.getText();
               if (title && title.trim().length > 0) break;
-            } catch (e) {
+            } catch {
               continue;
             }
           }
@@ -1039,7 +1038,7 @@ export class OptimizedUnOchaCrawler extends OptimizedBaseCrawler {
                   contentElements.slice(0, 3).map(async elem => {
                     try {
                       return await elem.getText();
-                    } catch (e) {
+                    } catch {
                       return '';
                     }
                   })
@@ -1047,7 +1046,7 @@ export class OptimizedUnOchaCrawler extends OptimizedBaseCrawler {
                 content = texts.filter(text => text && text.length > 20).join(' ');
                 if (content.length > 50) break;
               }
-            } catch (e) {
+            } catch {
               continue;
             }
           }
@@ -1085,8 +1084,8 @@ export class OptimizedUnOchaCrawler extends OptimizedBaseCrawler {
     } finally {
       try {
         await driver.quit();
-      } catch (e) {
-        console.warn('Error closing Selenium driver:', e);
+      } catch {
+        console.warn('Error closing Selenium driver');
       }
     }
   }
