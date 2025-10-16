@@ -196,7 +196,7 @@ export default function UploadPage() {
         const data = await response.json();
         alert(`Failed to publish: ${data.error}`);
       }
-    } catch (error) {
+    } catch {
       alert('Failed to publish incidents');
     }
   };

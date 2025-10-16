@@ -88,7 +88,6 @@ const MapWrapper = forwardRef<{ focusIncident: (incidentId: string) => void }, M
     markersRef.current.clear();
 
     // Add new markers
-    let validMarkers = 0;
     let invalidMarkers = 0;
     
     // Track markers by location to offset overlapping ones
@@ -123,7 +122,6 @@ const MapWrapper = forwardRef<{ focusIncident: (incidentId: string) => void }, M
       
       // Check if this is a field report incident
       const isFieldReport = 'sourceType' in incident && incident.sourceType === 'field_report';
-      validMarkers++;
         
       const icon = createIncidentIcon(incident.color, isFieldReport);
       

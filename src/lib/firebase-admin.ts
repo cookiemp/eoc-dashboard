@@ -1,15 +1,17 @@
 let firestore: any = null;
 let initPromise: Promise<void> | null = null;
 
-// Check if Firebase environment variables are available
-const hasFirebaseConfig = Boolean(
-  process.env.FIREBASE_PROJECT_ID &&
-  process.env.FIREBASE_CLIENT_EMAIL &&
-  process.env.FIREBASE_PRIVATE_KEY
-);
+// Check if Firebase environment variables are available (lazy evaluation)
+function hasFirebaseConfig() {
+  return Boolean(
+    process.env.FIREBASE_PROJECT_ID &&
+    process.env.FIREBASE_CLIENT_EMAIL &&
+    process.env.FIREBASE_PRIVATE_KEY
+  );
+}
 
 async function initializeFirebase(): Promise<void> {
-  if (!hasFirebaseConfig) {
+  if (!hasFirebaseConfig()) {
     console.warn('⚠️ Firebase environment variables not configured');
     console.warn('   Required: FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY');
     return;
@@ -50,12 +52,17 @@ async function initializeFirebase(): Promise<void> {
 }
 
 // Initialize Firebase on import if config is available
-if (hasFirebaseConfig) {
+if (hasFirebaseConfig()) {
   initPromise = initializeFirebase();
 }
 
 // Export a function to get firestore (ensuring initialization is complete)
 export async function getFirestore() {
+  // If no init promise exists and config is available, start initialization
+  if (!initPromise && hasFirebaseConfig()) {
+    initPromise = initializeFirebase();
+  }
+  
   if (initPromise) {
     await initPromise;
   }

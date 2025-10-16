@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { extractIncidentsFromPDF } from '@/ai/flows/extract-incidents-from-pdf-flow';
-// @ts-ignore - pdf-parse doesn't have TypeScript definitions
+// @ts-expect-error - pdf-parse doesn't have TypeScript definitions
 import pdf from 'pdf-parse/lib/pdf-parse';
 
 /**

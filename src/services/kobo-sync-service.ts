@@ -8,9 +8,14 @@ import { addFieldIncidents, type FieldIncident } from './field-incidents-service
  * into field incidents with AI-geocoded coordinates.
  */
 
-const KOBO_SERVER = process.env.KOBO_SERVER || 'https://kobo.ifrc.org';
-const KOBO_API_KEY = process.env.KOBO_API_KEY;
-const KOBO_ASSET_UID = process.env.KOBO_ASSET_UID;
+// Lazy load env vars (allows dotenv to be configured first)
+function getKoboConfig() {
+  return {
+    KOBO_SERVER: process.env.KOBO_SERVER || 'https://kobo.ifrc.org',
+    KOBO_API_KEY: process.env.KOBO_API_KEY,
+    KOBO_ASSET_UID: process.env.KOBO_ASSET_UID,
+  };
+}
 
 export type KoBoSubmission = {
   _id: number;
@@ -89,6 +94,8 @@ function getCategoryColor(category: FieldIncident['category']): string {
  * Fetch submissions from KoBoToolbox API
  */
 async function fetchKoBoSubmissions(limit: number = 50): Promise<KoBoSubmission[]> {
+  const { KOBO_SERVER, KOBO_API_KEY, KOBO_ASSET_UID } = getKoboConfig();
+  
   if (!KOBO_API_KEY || !KOBO_ASSET_UID) {
     throw new Error('KoBo API credentials not configured. Set KOBO_API_KEY and KOBO_ASSET_UID in environment variables.');
   }
@@ -254,6 +261,8 @@ export async function getKoBoSyncHealth(): Promise<{
   submissionCount?: number;
   error?: string;
 }> {
+  const { KOBO_SERVER, KOBO_API_KEY, KOBO_ASSET_UID } = getKoboConfig();
+  
   if (!KOBO_API_KEY || !KOBO_ASSET_UID) {
     return {
       configured: false,

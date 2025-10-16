@@ -39,10 +39,10 @@ async function readSummaryCache(): Promise<SummaryCache> {
       } else {
         return { summary: null, date: null };
       }
-    } catch (error) {
-      console.error('Error reading from Firestore, falling back to file cache', error);
-      return await readSummaryCacheFromFile(); // Fallback on error
-    }
+  } catch {
+    console.error('Error reading from Firestore, falling back to file cache');
+    return await readSummaryCacheFromFile(); // Fallback on error
+  }
   } else {
     return await readSummaryCacheFromFile();
   }
@@ -54,10 +54,10 @@ async function writeSummaryCache(data: SummaryCache): Promise<void> {
   if (firestore) {
     try {
       await firestore.collection('cache').doc('daily-summary').set(data);
-    } catch (error) {
-      console.error('Error writing to Firestore, falling back to file cache', error);
-      await writeSummaryCacheToFile(data); // Fallback on error
-    }
+  } catch {
+    console.error('Error writing to Firestore, falling back to file cache');
+    await writeSummaryCacheToFile(data); // Fallback on error
+  }
   } else {
     await writeSummaryCacheToFile(data);
   }
@@ -68,8 +68,8 @@ async function readSummaryCacheFromFile(): Promise<SummaryCache> {
   try {
     const data = await fs.readFile(summaryCacheFilePath, 'utf-8');
     return JSON.parse(data);
-  } catch (error) {
-    console.error('Error reading summary cache from file:', error);
+  } catch {
+    console.error('Error reading summary cache from file');
     return { summary: null, date: null };
   }
 }
@@ -77,8 +77,8 @@ async function readSummaryCacheFromFile(): Promise<SummaryCache> {
 async function writeSummaryCacheToFile(data: SummaryCache): Promise<void> {
   try {
     await fs.writeFile(summaryCacheFilePath, JSON.stringify(data, null, 2), 'utf-8');
-  } catch (error) {
-    console.error('Error writing to summary cache file:', error);
+  } catch {
+    console.error('Error writing to summary cache file');
   }
 }
 
@@ -89,14 +89,13 @@ export async function clearSummaryCache(): Promise<void> {
   try {
     await writeSummaryCache({ summary: null, date: null });
     console.log('Summary cache cleared');
-  } catch (error) {
-    console.error('Error clearing summary cache:', error);
+  } catch {
+    console.error('Error clearing summary cache');
   }
 }
 
 export async function getSummary(input: { articles: NewsArticle[]; fieldIncidents?: FieldIncident[] }) {
   const now = new Date();
-  const today = now.toISOString().split('T')[0];
   const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000); // 30 minutes ago
   
   try {

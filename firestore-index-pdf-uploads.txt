@@ -1,0 +1,26 @@
+FIRESTORE INDEX FOR PDF_UPLOADS COLLECTION
+==========================================
+
+Collection: pdf_uploads
+Fields to index:
+  - uploadedAt (Ascending)
+  
+Query pattern: 
+  - where('uploadedAt', '>=', <date>)
+  - orderBy('uploadedAt', 'desc')
+
+To create this index:
+
+1. Go to Firebase Console: https://console.firebase.google.com/
+2. Select your project
+3. Navigate to Firestore Database > Indexes
+4. Click "Create Index"
+5. Configure:
+   - Collection ID: pdf_uploads
+   - Fields to index:
+     * uploadedAt: Ascending
+   - Query scope: Collection
+
+OR if you get an error when querying, Firebase will provide a direct link to create the index automatically.
+
+The first query to getRecentPdfUploads() will fail with an error containing a URL to create the index automatically. Click that URL to create it instantly.

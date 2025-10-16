@@ -12,7 +12,6 @@ import {
   TrendingUp,
   Search,
   Archive,
-  CheckCircle,
   AlertCircle
 } from 'lucide-react';
 
@@ -78,7 +77,7 @@ export default function AllIncidentsPage() {
       } else {
         alert('Failed to archive incident');
       }
-    } catch (error) {
+    } catch {
       alert('Error archiving incident');
     } finally {
       setProcessing(null);

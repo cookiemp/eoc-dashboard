@@ -5,9 +5,18 @@
  * Runs automatically every 30 minutes via GitHub Actions
  */
 
+import { config } from 'dotenv';
 import { syncKoBoToFieldIncidents, getKoBoSyncHealth } from '../src/services/kobo-sync-service';
+import { getFirestore } from '../src/lib/firebase-admin';
+
+// Load environment variables from .env.local
+config({ path: '.env.local' });
 
 async function main() {
+  // Initialize Firebase
+  const firestore = await getFirestore();
+  console.log(`🔥 Firebase status: ${firestore ? 'Connected' : 'Not available'}`);
+  console.log('');
   console.log('='.repeat(60));
   console.log('🚀 KoBo Sync Job Started');
   console.log('='.repeat(60));
@@ -35,7 +44,7 @@ async function main() {
   // Sync recent submissions
   console.log('🔄 Starting sync...');
   const result = await syncKoBoToFieldIncidents({
-    limit: 20, // Sync last 20 submissions
+    limit: 5, // Sync last 5 submissions (avoid rate limits during testing)
     autoApprove: false, // Require admin review for low-confidence geocoding
   });
 

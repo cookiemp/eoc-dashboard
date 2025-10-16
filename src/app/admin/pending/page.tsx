@@ -73,7 +73,7 @@ export default function PendingReviewPage() {
       } else {
         alert('Failed to approve incident');
       }
-    } catch (error) {
+    } catch {
       alert('Error approving incident');
     } finally {
       setProcessing(null);
@@ -98,7 +98,7 @@ export default function PendingReviewPage() {
       } else {
         alert('Failed to delete incident');
       }
-    } catch (error) {
+    } catch {
       alert('Error deleting incident');
     } finally {
       setProcessing(null);
