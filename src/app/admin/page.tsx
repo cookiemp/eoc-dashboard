@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Upload, AlertCircle, CheckCircle, FileText, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
+import CrawlerHealth from '@/components/dashboard/CrawlerHealth';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -151,6 +152,9 @@ export default function AdminDashboard() {
           </Link>
         </CardContent>
       </Card>
+
+      {/* Crawler Health Monitor */}
+      <CrawlerHealth />
 
       {/* Getting Started */}
       <Card>

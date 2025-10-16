@@ -5,7 +5,6 @@ import Header from "@/components/dashboard/header";
 import IncidentMap from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
 import NewsFeed from "@/components/dashboard/news-feed";
-import CrawlerHealth from "@/components/dashboard/CrawlerHealth";
 import { getLatestIncidents, processNewsIntoIncidents, getAllNewsWithCategorization, getCachedDashboardDataFast } from "@/app/actions";
 import { clearDashboardCache, setCachedDashboardData } from "@/services/dashboard-cache-service";
 import type { IncidentWithId } from '@/services/incident-service';
@@ -185,13 +184,8 @@ export default function Home() {
           <div className="lg:col-span-4">
             <IncidentMap incidents={incidents} />
           </div>
-
-          {/* Crawler Health Section */}
-          <div className="lg:col-span-4">
-            <CrawlerHealth />
-          </div>
           
-          {/* News Feeds - moved up */}
+          {/* News Feeds */}
           <div className="lg:col-span-2">
             <NewsFeed 
               icon={<BookHeart className="h-5 w-5 text-primary" />} 
