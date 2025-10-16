@@ -87,12 +87,12 @@ const AiSummary = ({ articles, fieldIncidents, isLoadingNews = false, onIncident
         // Regular bullet point
         const text = trimmedLine.replace(/^\*\s*/, '').trim();
         if (text) summaryPoints.push({ text, isHealthAlert: false });
-      } else if (trimmedLine.startsWith('⚕️')) {
-        // Health alert without asterisk
+      } else if (trimmedLine.startsWith('⚕️') && trimmedLine.length > 2) {
+        // Health alert without asterisk (only if there's text after emoji)
         const text = trimmedLine.replace(/^⚕️\s*/, '').trim();
         if (text) summaryPoints.push({ text, isHealthAlert: true });
-      } else if (trimmedLine && !trimmedLine.includes(':')) {
-        // Any other non-empty line that doesn't look like a header
+      } else if (trimmedLine && !trimmedLine.includes(':') && trimmedLine !== '⚕️') {
+        // Any other non-empty line that doesn't look like a header or standalone emoji
         summaryPoints.push({ text: trimmedLine, isHealthAlert: false });
       }
     }
