@@ -176,6 +176,7 @@ async function convertToFieldIncident(submission: KoBoSubmission): Promise<Omit<
       reportedBy: submission['context/prepared_by'] || submission._submitted_by || 'KoBo System',
       needsReview: geocodeResult.confidence === 'low', // Low confidence requires review
       confidence: geocodeResult.confidence === 'high' ? 0.9 : geocodeResult.confidence === 'medium' ? 0.7 : 0.5,
+      koboSubmissionId: submission._id, // For duplicate detection
     };
   } catch (error) {
     console.error(`❌ Error converting submission ${submission._id}:`, error);

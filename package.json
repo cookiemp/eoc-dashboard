@@ -23,7 +23,9 @@
     "crawl:github-actions": "tsx ./scripts/github-actions-crawler.ts",
     "sync:kobo": "tsx ./scripts/kobo-sync.ts",
     "cleanup:duplicates": "tsx ./scripts/cleanup-duplicates.ts",
-    "cleanup:test-data": "tsx ./scripts/cleanup-test-data.ts"
+    "cleanup:test-data": "tsx ./scripts/cleanup-test-data.ts",
+    "cleanup:kobo-duplicates": "tsx ./scripts/cleanup-kobo-duplicates.ts",
+    "cleanup:all-duplicates": "tsx ./scripts/cleanup-all-duplicates.ts"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.13.0",

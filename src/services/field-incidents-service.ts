@@ -22,6 +22,7 @@ export type FieldIncident = Incident & {
   status: 'active' | 'resolved' | 'archived';
   needsReview: boolean;
   confidence: number;
+  koboSubmissionId?: number; // Optional: KoBo submission ID for duplicate detection
 };
 
 const COLLECTION_NAME = 'field_incidents';
@@ -98,8 +99,25 @@ export async function addFieldIncidents(
   try {
     const batch = firestore.batch();
     const timestamp = new Date().toISOString();
+    let addedCount = 0;
+    let skippedCount = 0;
 
     for (const incident of incidents) {
+      // Check for duplicates if this is from KoBo (has koboSubmissionId)
+      if (incident.koboSubmissionId) {
+        const existingQuery = await firestore
+          .collection(COLLECTION_NAME)
+          .where('koboSubmissionId', '==', incident.koboSubmissionId)
+          .limit(1)
+          .get();
+
+        if (!existingQuery.empty) {
+          console.log(`⏭️  Skipping duplicate KoBo submission: ${incident.koboSubmissionId}`);
+          skippedCount++;
+          continue;
+        }
+      }
+
       const docRef = firestore.collection(COLLECTION_NAME).doc();
       batch.set(docRef, {
         ...incident,
@@ -109,12 +127,17 @@ export async function addFieldIncidents(
         status: 'active',
         needsReview: !autoApprove
       });
+      addedCount++;
     }
 
-    await batch.commit();
-    console.log(`✅ Added ${incidents.length} field incidents (auto-approve: ${autoApprove})`);
+    if (addedCount > 0) {
+      await batch.commit();
+      console.log(`✅ Added ${addedCount} field incidents (auto-approve: ${autoApprove}, skipped: ${skippedCount})`);
+    } else {
+      console.log(`⏭️  No new incidents to add (all ${skippedCount} were duplicates)`);
+    }
     
-    return { success: true, count: incidents.length };
+    return { success: true, count: addedCount };
   } catch (error) {
     console.error('❌ Error adding field incidents:', error);
     return { 
