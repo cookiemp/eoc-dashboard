@@ -62,6 +62,10 @@ async function saveArticlesToFirestore(articles: NewsArticle[]): Promise<void> {
     return;
   }
 
+  if (!firestore) {
+    throw new Error('Firestore not initialized');
+  }
+
   GitHubActionsLogger.info(`Saving ${articles.length} articles to Firestore...`);
   
   const batch = firestore.batch();
@@ -96,6 +100,10 @@ async function saveArticlesToFirestore(articles: NewsArticle[]): Promise<void> {
  * Save crawler run metadata
  */
 async function saveCrawlerRunMetadata(results: CrawlerResult[]): Promise<void> {
+  if (!firestore) {
+    throw new Error('Firestore not initialized');
+  }
+
   const runId = `run_${Date.now()}`;
   const timestamp = new Date().toISOString();
   
@@ -143,6 +151,10 @@ async function saveCrawlerRunMetadata(results: CrawlerResult[]): Promise<void> {
  * Clean up old articles (keep only last 100 per source)
  */
 async function cleanupOldArticles(): Promise<void> {
+  if (!firestore) {
+    throw new Error('Firestore not initialized');
+  }
+
   GitHubActionsLogger.info('Cleaning up old articles...');
   
   try {
@@ -185,6 +197,10 @@ async function cleanupOldArticles(): Promise<void> {
  * Update crawler metadata (last run time, status, etc.)
  */
 async function updateCrawlerMetadata(isSuccessful: boolean, totalArticles: number): Promise<void> {
+  if (!firestore) {
+    throw new Error('Firestore not initialized');
+  }
+
   const metadata = {
     lastRunAt: new Date().toISOString(),
     lastRunStatus: isSuccessful ? 'success' : 'partial_failure',

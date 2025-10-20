@@ -43,7 +43,7 @@ const AiSummary = ({ articles, fieldIncidents, isLoadingNews = false, onIncident
       try {
         const result = await getSummary({ articles, fieldIncidents });
 
-        if (result.error) {
+        if ('error' in result) {
           toast({
             variant: 'destructive',
             title: 'Error Generating Summary',

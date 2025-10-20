@@ -95,6 +95,13 @@ export class OptimizedBaseCrawler {
   }
 
   /**
+   * Get crawler name (public accessor for protected config)
+   */
+  public getName(): string {
+    return this.config.name;
+  }
+
+  /**
    * Initialize browser with optimized settings and enhanced bot detection avoidance
    */
   private async initBrowser(): Promise<void> {
@@ -1228,7 +1235,7 @@ export class OptimizedCrawlerService {
       if (result.status === 'fulfilled') {
         return result.value;
       } else {
-        const crawlerName = this.crawlers[index]?.config?.name || 'Unknown';
+        const crawlerName = this.crawlers[index]?.getName() || 'Unknown';
         return {
           source: crawlerName,
           articles: [],

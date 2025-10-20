@@ -1,4 +1,6 @@
 {
-  "summary": null,
-  "date": null
+  "summary": {
+    "summary": "* Test summary point"
+  },
+  "date": "2025-10-20T07:46:23.519Z"
 }

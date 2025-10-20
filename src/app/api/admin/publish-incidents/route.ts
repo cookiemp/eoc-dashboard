@@ -33,6 +33,7 @@ export async function POST(request: Request) {
     const incidentsToSave = incidents.map((incident: IncidentInput) => ({
       ...incident,
       reportedBy: 'admin', // TODO: Get from session
+      needsReview: incident.needsReview ?? false, // Ensure boolean type
     }));
 
     const result = await addFieldIncidents(incidentsToSave, autoApprove);
