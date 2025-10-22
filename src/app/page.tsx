@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Header from "@/components/dashboard/header";
 import IncidentMap, { type IncidentMapHandle } from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
 import NewsFeed from "@/components/dashboard/news-feed";
+import { DateRangeFilterCompact, type DateFilterPreset } from "@/components/dashboard/date-range-filter-compact";
 import { getLatestIncidents, processNewsIntoIncidents, getAllNewsWithCategorization, getCachedDashboardDataFast } from "@/app/actions";
 import { getFieldIncidents, type FieldIncident } from '@/services/field-incidents-service';
 import { clearDashboardCache, setCachedDashboardData } from "@/services/dashboard-cache-service";
@@ -20,6 +21,10 @@ export default function Home() {
   const [humanitarianNews, setHumanitarianNews] = useState<CategorizedArticle[]>([]);
   const [generalNews, setGeneralNews] = useState<CategorizedArticle[]>([]);
   const [fieldIncidents, setFieldIncidents] = useState<FieldIncident[]>([]);
+  
+  // Date filter state
+  const [dateFilterStart, setDateFilterStart] = useState<Date | null>(null);
+  const [dateFilterEnd, setDateFilterEnd] = useState<Date | null>(null);
 
   const [newsLoading, setNewsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -27,6 +32,37 @@ export default function Home() {
   const [loadingMessage, setLoadingMessage] = useState('');
   const [newsError, setNewsError] = useState<string | null>(null);
   const [newsStats, setNewsStats] = useState<{ humanitarianCount: number, generalCount: number } | null>(null);
+
+  // Filter field incidents by date range (news incidents not shown on map)
+  const filteredFieldIncidents = useMemo(() => {
+    if (!dateFilterStart || !dateFilterEnd) {
+      return fieldIncidents;
+    }
+    
+    return fieldIncidents.filter(incident => {
+      const incidentDate = new Date(incident.reportedAt);
+      return incidentDate >= dateFilterStart && incidentDate <= dateFilterEnd;
+    });
+  }, [fieldIncidents, dateFilterStart, dateFilterEnd]);
+
+  // Convert field incidents to IncidentWithId format for the map
+  const mapIncidents = useMemo(() => {
+    return filteredFieldIncidents.map(incident => ({
+      id: incident.id,
+      title: incident.title,
+      description: incident.description,
+      latitude: incident.latitude,
+      longitude: incident.longitude,
+      color: incident.color,
+      addedAt: incident.reportedAt, // Use reportedAt as addedAt for compatibility
+    }));
+  }, [filteredFieldIncidents]);
+
+  // Handle date range change
+  const handleDateRangeChange = (startDate: Date | null, endDate: Date | null, preset?: DateFilterPreset) => {
+    setDateFilterStart(startDate);
+    setDateFilterEnd(endDate);
+  };
 
   const fetchAllData = async () => {
     setIsRefreshing(true);
@@ -195,8 +231,15 @@ export default function Home() {
       )}
       <main className="flex-1 p-4 sm:p-6 md:p-8">
         <div className="grid gap-6 md:gap-8 grid-cols-1 lg:grid-cols-4">
+          {/* Map with integrated date filter in header */}
           <div className="lg:col-span-4">
-            <IncidentMap ref={mapRef} incidents={incidents} />
+            <IncidentMap 
+              ref={mapRef} 
+              incidents={mapIncidents}
+              headerActions={
+                <DateRangeFilterCompact onDateRangeChange={handleDateRangeChange} />
+              }
+            />
           </div>
           
           {/* News Feeds */}
@@ -223,7 +266,7 @@ export default function Home() {
           <div className="lg:col-span-4">
              <AiSummary 
                articles={humanitarianNews} 
-               fieldIncidents={fieldIncidents} 
+               fieldIncidents={filteredFieldIncidents} 
                isLoadingNews={newsLoading}
                onIncidentFocus={(id) => mapRef.current?.focusIncident(id)}
              />

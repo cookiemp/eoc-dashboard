@@ -16,13 +16,14 @@ const MapWithNoSSR = dynamic(() => import('@/components/dashboard/map-wrapper'),
 
 interface IncidentMapProps {
   incidents: IncidentWithId[];
+  headerActions?: React.ReactNode;
 }
 
 export interface IncidentMapHandle {
   focusIncident: (incidentId: string) => void;
 }
 
-const IncidentMap = forwardRef<IncidentMapHandle, IncidentMapProps>(({ incidents }, ref) => {
+const IncidentMap = forwardRef<IncidentMapHandle, IncidentMapProps>(({ incidents, headerActions }, ref) => {
   const [selectedIncident, setSelectedIncident] = useState<IncidentWithId | null>(null);
   const mapRef = useRef<{ focusIncident: (incidentId: string) => void } | null>(null);
 
@@ -48,10 +49,17 @@ const IncidentMap = forwardRef<IncidentMapHandle, IncidentMapProps>(({ incidents
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Globe className="h-5 w-5" />
-            Interactive Incident Map
-          </CardTitle>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5" />
+              Interactive Incident Map
+            </CardTitle>
+            {headerActions && (
+              <div className="flex-shrink-0">
+                {headerActions}
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="h-[320px] sm:h-[360px] md:h-[400px]">
           <MapWithNoSSR 

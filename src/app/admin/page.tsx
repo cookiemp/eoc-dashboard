@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Upload, AlertCircle, CheckCircle, FileText, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import CrawlerHealth from '@/components/dashboard/CrawlerHealth';
+import { FieldIncidentsBreakdownModal } from '@/components/admin/field-incidents-breakdown-modal';
+import { getFieldIncidents, type FieldIncident } from '@/services/field-incidents-service';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -14,6 +16,8 @@ export default function AdminDashboard() {
     recentUploads: 0,
     loading: true,
   });
+  const [showBreakdown, setShowBreakdown] = useState(false);
+  const [fieldIncidents, setFieldIncidents] = useState<FieldIncident[]>([]);
 
   useEffect(() => {
     async function fetchStats() {
@@ -37,7 +41,17 @@ export default function AdminDashboard() {
       }
     }
     
+    async function fetchFieldIncidents() {
+      try {
+        const incidents = await getFieldIncidents();
+        setFieldIncidents(incidents);
+      } catch (error) {
+        console.error('Error fetching field incidents:', error);
+      }
+    }
+    
     fetchStats();
+    fetchFieldIncidents();
   }, []);
 
   if (stats.loading) {
@@ -72,7 +86,10 @@ export default function AdminDashboard() {
 
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-3">
-        <Card>
+        <Card 
+          className="cursor-pointer hover:bg-muted/50 transition-colors"
+          onClick={() => setShowBreakdown(true)}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Total Field Incidents
@@ -84,6 +101,9 @@ export default function AdminDashboard() {
             <p className="text-xs text-muted-foreground">
               Active incidents from field reports
             </p>
+            <Button variant="link" className="p-0 h-auto text-xs mt-2">
+              View Breakdown →
+            </Button>
           </CardContent>
         </Card>
 
@@ -222,6 +242,13 @@ export default function AdminDashboard() {
           </Button>
         </Link>
       </div>
+
+      {/* Breakdown Modal */}
+      <FieldIncidentsBreakdownModal
+        open={showBreakdown}
+        onClose={() => setShowBreakdown(false)}
+        incidents={fieldIncidents}
+      />
     </div>
   );
 }
