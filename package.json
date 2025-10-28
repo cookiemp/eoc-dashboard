@@ -26,7 +26,8 @@
     "cleanup:duplicates": "tsx ./scripts/cleanup-duplicates.ts",
     "cleanup:test-data": "tsx ./scripts/cleanup-test-data.ts",
     "cleanup:kobo-duplicates": "tsx ./scripts/cleanup-kobo-duplicates.ts",
-    "cleanup:all-duplicates": "tsx ./scripts/cleanup-all-duplicates.ts"
+    "cleanup:all-duplicates": "tsx ./scripts/cleanup-all-duplicates.ts",
+    "fix:coordinates": "tsx ./scripts/fix-field-incident-coordinates.ts"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.13.0",

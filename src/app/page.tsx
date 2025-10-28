@@ -5,6 +5,7 @@ import Header from "@/components/dashboard/header";
 import IncidentMap, { type IncidentMapHandle } from "@/components/dashboard/incident-map";
 import AiSummary from "@/components/dashboard/ai-summary";
 import NewsFeed from "@/components/dashboard/news-feed";
+import MapLegend from "@/components/dashboard/map-legend";
 import { DateRangeFilterCompact, type DateFilterPreset } from "@/components/dashboard/date-range-filter-compact";
 import { getLatestIncidents, processNewsIntoIncidents, getAllNewsWithCategorization, getCachedDashboardDataFast } from "@/app/actions";
 import { getFieldIncidents, type FieldIncident } from '@/services/field-incidents-service';
@@ -54,6 +55,8 @@ export default function Home() {
       latitude: incident.latitude,
       longitude: incident.longitude,
       color: incident.color,
+      severity: incident.severity, // Pass severity for color coding
+      sourceType: incident.sourceType, // Pass source type for marker style
       addedAt: incident.reportedAt, // Use reportedAt as addedAt for compatibility
     }));
   }, [filteredFieldIncidents]);
@@ -232,7 +235,7 @@ export default function Home() {
       <main className="flex-1 p-4 sm:p-6 md:p-8">
         <div className="grid gap-6 md:gap-8 grid-cols-1 lg:grid-cols-4">
           {/* Map with integrated date filter in header */}
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-3">
             <IncidentMap 
               ref={mapRef} 
               incidents={mapIncidents}
@@ -240,6 +243,11 @@ export default function Home() {
                 <DateRangeFilterCompact onDateRangeChange={handleDateRangeChange} />
               }
             />
+          </div>
+          
+          {/* Map Legend */}
+          <div className="lg:col-span-1">
+            <MapLegend />
           </div>
           
           {/* News Feeds */}

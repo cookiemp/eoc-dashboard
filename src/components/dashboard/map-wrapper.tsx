@@ -4,10 +4,28 @@ import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import type { IncidentWithId } from '@/services/incident-service';
 import L from 'leaflet';
 
+// Severity color mapping
+const SEVERITY_COLORS = {
+  critical: '#DC2626', // red-600
+  high: '#EA580C',     // orange-600
+  medium: '#F59E0B',   // amber-500
+  low: '#3B82F6',      // blue-500
+  unknown: '#6B7280',  // gray-500 (fallback for news incidents)
+} as const;
+
 interface MapWrapperProps {
   incidents: IncidentWithId[];
   onMarkerClick: (incident: IncidentWithId, map: L.Map) => void;
 }
+
+const getSeverityColor = (incident: IncidentWithId): string => {
+  // Field reports have severity field
+  if ('severity' in incident && incident.severity) {
+    return SEVERITY_COLORS[incident.severity as keyof typeof SEVERITY_COLORS] || SEVERITY_COLORS.unknown;
+  }
+  // News incidents fall back to category color or gray
+  return incident.color || SEVERITY_COLORS.unknown;
+};
 
 const createIncidentIcon = (color: string, isFieldReport: boolean = false) => {
   const iconHtml = isFieldReport 
@@ -122,16 +140,25 @@ const MapWrapper = forwardRef<{ focusIncident: (incidentId: string) => void }, M
       
       // Check if this is a field report incident
       const isFieldReport = 'sourceType' in incident && incident.sourceType === 'field_report';
+      
+      // Get severity-based color
+      const markerColor = getSeverityColor(incident);
         
-      const icon = createIncidentIcon(incident.color, isFieldReport);
+      const icon = createIncidentIcon(markerColor, isFieldReport);
       
       const sourceLabel = isFieldReport ? '📋 Field Report' : '📰 News';
+      
+      // Get severity label for field reports
+      const severityLabel = 'severity' in incident && incident.severity
+        ? `<span class="inline-block px-2 py-0.5 text-xs font-semibold rounded" style="background-color: ${markerColor}; color: white;">${String(incident.severity).toUpperCase()}</span>`
+        : '';
       
       const tooltipContent = `
         <div class="font-sans max-w-xs whitespace-normal">
           <strong class="text-base">${incident.title}</strong>
           <br>
           <span class="text-xs text-gray-600">${sourceLabel}</span>
+          ${severityLabel ? `<br>${severityLabel}` : ''}
           <br>
           <p class="text-sm mt-1">Click for details</p>
         </div>
