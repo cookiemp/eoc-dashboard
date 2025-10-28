@@ -224,6 +224,13 @@ export async function syncKoBoToFieldIncidents(options: {
       return result;
     }
 
+    // Show submission IDs and dates for debugging
+    console.log(`📋 Processing submissions:`);
+    submissions.forEach((sub, idx) => {
+      console.log(`   ${idx + 1}. ID: ${sub._id} | Date: ${sub._submission_time}`);
+    });
+    console.log('');
+
     // Convert submissions to incidents
     const incidents: Omit<FieldIncident, 'id' | 'sourceType' | 'reportedAt' | 'status'>[] = [];
     

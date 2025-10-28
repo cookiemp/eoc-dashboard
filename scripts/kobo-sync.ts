@@ -44,7 +44,7 @@ async function main() {
   // Sync recent submissions
   console.log('🔄 Starting sync...');
   const result = await syncKoBoToFieldIncidents({
-    limit: 5, // Sync last 5 submissions (avoid rate limits during testing)
+    limit: 20, // Sync last 20 submissions (optimized geocoding uses minimal API quota)
     autoApprove: false, // Require admin review for low-confidence geocoding
   });
 
