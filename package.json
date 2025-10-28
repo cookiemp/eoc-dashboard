@@ -18,6 +18,7 @@
     "test:un-ocha": "tsx ./tests/un-ocha-crawler-test.ts",
     "test:pdf-extraction": "tsx ./tests/test-pdf-extraction.ts",
     "test:field-report-pipeline": "node ./scripts/test-field-report-pipeline.js",
+    "test:geocoding": "tsx ./tests/test-geocoding-optimization.ts",
     "generate:test-pdfs": "node ./scripts/generate-test-pdf.js",
     "analyze:sites": "tsx ./scripts/analyze-sites.ts",
     "crawl:github-actions": "tsx ./scripts/github-actions-crawler.ts",

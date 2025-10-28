@@ -137,16 +137,27 @@ async function convertToFieldIncident(submission: KoBoSubmission): Promise<Omit<
       return null;
     }
 
-    // Geocode the location using AI
+    // Geocode the location (now uses static database first, AI as fallback)
     console.log(`🗺️ Geocoding: ${region} > ${zone || ''} > ${woreda || ''} > ${kebele || ''}`);
     
-    const geocodeResult = await geocodeEthiopianLocation({
-      region,
-      zone,
-      woreda,
-      kebele,
-      locationScope,
-    });
+    let geocodeResult;
+    try {
+      geocodeResult = await geocodeEthiopianLocation({
+        region,
+        zone,
+        woreda,
+        kebele,
+        locationScope,
+      });
+    } catch (error: any) {
+      // Handle quota exceeded gracefully
+      if (error?.status === 429 || error?.message?.includes('quota')) {
+        console.error(`⚠️ API quota exceeded for submission ${submission._id}. Skipping for now.`);
+        console.error(`   This submission will be processed in the next sync cycle.`);
+        return null;
+      }
+      throw error; // Re-throw other errors
+    }
 
     // Extract emergency details
     const emergencyName = submission['context/emergency-selection'] || 'Unknown Emergency';

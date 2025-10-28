@@ -1,5 +1,7 @@
 import { ai } from '../genkit';
 import { z } from 'zod';
+import { getEthiopianCoordinates } from '@/lib/ethiopian-locations';
+import { getFirestore } from '@/lib/firebase-admin';
 
 /**
  * Geocode Ethiopian Location Flow
@@ -27,6 +29,47 @@ const GeocodeLocationOutputSchema = z.object({
 export type GeocodeLocationInput = z.infer<typeof GeocodeLocationInputSchema>;
 export type GeocodeLocationOutput = z.infer<typeof GeocodeLocationOutputSchema>;
 
+/**
+ * Cache geocoding results in Firestore to avoid duplicate AI calls
+ */
+async function getCachedGeocode(cacheKey: string): Promise<GeocodeLocationOutput | null> {
+  try {
+    const db = await getFirestore();
+    if (!db) return null;
+    
+    const cacheDoc = await db.collection('geocode_cache').doc(cacheKey).get();
+    
+    if (cacheDoc.exists) {
+      const data = cacheDoc.data();
+      if (data && data.cachedAt) {
+        // Cache valid for 90 days
+        const cacheAge = Date.now() - data.cachedAt;
+        if (cacheAge < 90 * 24 * 60 * 60 * 1000) {
+          console.log(`✅ Using cached geocode for: ${cacheKey}`);
+          return data.result as GeocodeLocationOutput;
+        }
+      }
+    }
+  } catch (error) {
+    console.warn('Cache read error:', error);
+  }
+  return null;
+}
+
+async function setCachedGeocode(cacheKey: string, result: GeocodeLocationOutput): Promise<void> {
+  try {
+    const db = await getFirestore();
+    if (!db) return;
+    
+    await db.collection('geocode_cache').doc(cacheKey).set({
+      result,
+      cachedAt: Date.now(),
+    });
+  } catch (error) {
+    console.warn('Cache write error:', error);
+  }
+}
+
 export const geocodeEthiopianLocation = ai.defineFlow(
   {
     name: 'geocodeEthiopianLocation',
@@ -34,6 +77,46 @@ export const geocodeEthiopianLocation = ai.defineFlow(
     outputSchema: GeocodeLocationOutputSchema,
   },
   async (input) => {
+    // Create cache key from input
+    const cacheKey = [
+      input.region || '',
+      input.zone || '',
+      input.woreda || '',
+      input.kebele || '',
+    ].filter(Boolean).join('_').toLowerCase().replace(/\s+/g, '_');
+
+    // 1. Check cache first
+    const cached = await getCachedGeocode(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    // 2. Try static database lookup (FAST, NO API CALLS)
+    const staticResult = getEthiopianCoordinates({
+      region: input.region,
+      zone: input.zone,
+      woreda: input.woreda,
+      kebele: input.kebele,
+    });
+
+    if (staticResult) {
+      console.log(`📍 Static geocode found: ${staticResult.locationName}`);
+      const result: GeocodeLocationOutput = {
+        latitude: staticResult.latitude,
+        longitude: staticResult.longitude,
+        locationName: staticResult.locationName,
+        confidence: staticResult.confidence,
+        reasoning: 'Coordinates retrieved from authoritative Ethiopian location database',
+      };
+      
+      // Cache the static result
+      await setCachedGeocode(cacheKey, result);
+      return result;
+    }
+
+    // 3. Fallback to AI only if static lookup fails (USES API QUOTA)
+    console.log(`🤖 Using AI geocoding for unknown location: ${cacheKey}`);
+    
     const response = await ai.generate({
       model: 'googleai/gemini-2.0-flash-exp',
       prompt: `You are a geographic expert specializing in Ethiopian administrative divisions.
@@ -63,6 +146,11 @@ Return the coordinates and metadata in the specified format.`,
       },
     });
 
-    return response.output!;
+    const result = response.output!;
+    
+    // Cache AI result
+    await setCachedGeocode(cacheKey, result);
+    
+    return result;
   }
 );
