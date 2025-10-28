@@ -13,7 +13,9 @@ import {
   MapPin,
   Users,
   Calendar,
-  TrendingUp
+  TrendingUp,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 type PendingIncident = {
@@ -33,11 +35,14 @@ type PendingIncident = {
   needsReview: boolean;
 };
 
+const ITEMS_PER_PAGE = 10;
+
 export default function PendingReviewPage() {
   const router = useRouter();
   const [incidents, setIncidents] = useState<PendingIncident[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     fetchPendingIncidents();
@@ -105,6 +110,19 @@ export default function PendingReviewPage() {
     }
   };
 
+  // Pagination calculations
+  const totalPages = Math.ceil(incidents.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentIncidents = incidents.slice(startIndex, endIndex);
+
+  // Reset to page 1 when incidents change
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [incidents.length, currentPage, totalPages]);
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -141,11 +159,12 @@ export default function PendingReviewPage() {
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               {incidents.length} incident{incidents.length !== 1 ? 's' : ''} pending approval
+              {totalPages > 1 && ` • Page ${currentPage} of ${totalPages}`}
             </AlertDescription>
           </Alert>
 
           <div className="space-y-4">
-            {incidents.map((incident) => (
+            {currentIncidents.map((incident) => (
               <Card key={incident.id}>
                 <CardHeader>
                   <div className="flex items-start justify-between">
@@ -232,6 +251,48 @@ export default function PendingReviewPage() {
               </Card>
             ))}
           </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4">
+              <div className="text-sm text-gray-600">
+                Showing {startIndex + 1}-{Math.min(endIndex, incidents.length)} of {incidents.length} incidents
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                      className="min-w-[40px]"
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
