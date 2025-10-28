@@ -135,10 +135,10 @@ export default function PendingReviewPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h2 className="text-3xl font-bold">Pending Review</h2>
-        <p className="text-gray-600 mt-2">
+        <h2 className="text-2xl sm:text-3xl font-bold">Pending Review</h2>
+        <p className="text-sm sm:text-base text-gray-600 mt-2">
           Review and approve incidents before they appear on the dashboard
         </p>
       </div>
@@ -188,23 +188,23 @@ export default function PendingReviewPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* Metadata */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-sm">
                     <div className="flex items-center gap-2 text-gray-600">
-                      <MapPin className="h-4 w-4" />
-                      <span>{incident.locationName}</span>
+                      <MapPin className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">{incident.locationName}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
-                      <TrendingUp className="h-4 w-4" />
+                      <TrendingUp className="h-4 w-4 flex-shrink-0" />
                       <span className="capitalize">{incident.category}</span>
                     </div>
                     {incident.affectedPeople && (
                       <div className="flex items-center gap-2 text-gray-600">
-                        <Users className="h-4 w-4" />
+                        <Users className="h-4 w-4 flex-shrink-0" />
                         <span>{incident.affectedPeople.toLocaleString()} affected</span>
                       </div>
                     )}
                     <div className="flex items-center gap-2 text-gray-600">
-                      <Calendar className="h-4 w-4" />
+                      <Calendar className="h-4 w-4 flex-shrink-0" />
                       <span>{new Date(incident.reportedAt).toLocaleDateString()}</span>
                     </div>
                   </div>
@@ -217,11 +217,11 @@ export default function PendingReviewPage() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex gap-3 pt-4">
+                  <div className="flex flex-col sm:flex-row gap-3 pt-4">
                     <Button
                       onClick={() => handleApprove(incident.id)}
                       disabled={processing === incident.id}
-                      className="flex-1"
+                      className="flex-1 w-full"
                       size="lg"
                     >
                       {processing === incident.id ? (
@@ -240,7 +240,7 @@ export default function PendingReviewPage() {
                       onClick={() => handleReject(incident.id)}
                       disabled={processing === incident.id}
                       variant="outline"
-                      className="flex-1"
+                      className="flex-1 w-full"
                       size="lg"
                     >
                       <XCircle className="mr-2 h-4 w-4" />
@@ -254,19 +254,19 @@ export default function PendingReviewPage() {
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between pt-4">
-              <div className="text-sm text-gray-600">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+              <div className="text-sm text-gray-600 order-2 sm:order-1">
                 Showing {startIndex + 1}-{Math.min(endIndex, incidents.length)} of {incidents.length} incidents
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 order-1 sm:order-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                 >
-                  <ChevronLeft className="h-4 w-4 mr-1" />
-                  Previous
+                  <ChevronLeft className="h-4 w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">Previous</span>
                 </Button>
                 <div className="flex items-center gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
@@ -275,7 +275,7 @@ export default function PendingReviewPage() {
                       variant={currentPage === page ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => setCurrentPage(page)}
-                      className="min-w-[40px]"
+                      className="min-w-[36px] sm:min-w-[40px]"
                     >
                       {page}
                     </Button>
@@ -287,8 +287,8 @@ export default function PendingReviewPage() {
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
                 >
-                  Next
-                  <ChevronRight className="h-4 w-4 ml-1" />
+                  <span className="hidden sm:inline">Next</span>
+                  <ChevronRight className="h-4 w-4 sm:ml-1" />
                 </Button>
               </div>
             </div>
