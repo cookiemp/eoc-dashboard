@@ -18,7 +18,7 @@ An AI-powered intelligence dashboard for the Ethiopian Red Cross Society (ERCS) 
 
 ###  Interactive Incident Map
 - **Real-time Visualization**: Displays incidents from news and field reports on an interactive map
-- **Smart Markers**: Distinguishes between news-based incidents (📰) and field reports (📋)
+- **Smart Markers**: Distinguishes between news-based incidents and field reports
 - **Incident Details**: Click any marker to view AI-generated incident dossiers
 - **Navigation**: Click "More" links in the AI summary to jump directly to incidents on the map
 
