@@ -7,34 +7,34 @@ An AI-powered intelligence dashboard for the Ethiopian Red Cross Society (ERCS) 
 ![Firebase](https://img.shields.io/badge/Firebase-Firestore-orange)
 ![AI](https://img.shields.io/badge/AI-Google%20Gemini-purple)
 
-## 🌟 Features
+##  Features
 
-### 📰 News Intelligence
+###  News Intelligence
 - **Multi-source Aggregation**: Fetches humanitarian and general news from multiple Ethiopian sources
 - **AI Categorization**: Automatically categorizes news as humanitarian or general using Gemini AI
 - **Incident Extraction**: Extracts geographic incidents from humanitarian news articles
 - **Daily AI Briefing**: Generates concise summaries of news and field reports
 - **Health Alerts**: Automatically identifies and highlights public health emergencies
 
-### 🗺️ Interactive Incident Map
+###  Interactive Incident Map
 - **Real-time Visualization**: Displays incidents from news and field reports on an interactive map
 - **Smart Markers**: Distinguishes between news-based incidents (📰) and field reports (📋)
 - **Incident Details**: Click any marker to view AI-generated incident dossiers
 - **Navigation**: Click "More" links in the AI summary to jump directly to incidents on the map
 
-### 📋 Field Incident Integration
+###  Field Incident Integration
 - **KoBoToolbox Sync**: Automatically syncs field reports from IFRC KoBoToolbox every 30 minutes
 - **AI Geocoding**: Converts Ethiopian administrative locations to GPS coordinates
 - **Priority Display**: Field incidents appear first in the AI summary (as ground truth)
 - **Admin Review**: Low-confidence geocoding flagged for manual verification
 
-### 👨‍💼 Admin Dashboard
+###  Admin Dashboard
 - **Incident Management**: Review, approve, and manage field incidents
 - **PDF Upload**: Extract incidents from PDF field reports
 - **Crawler Health**: Monitor news source status
 - **User Authentication**: Secure access control
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 - Node.js 18+
@@ -83,13 +83,13 @@ ADMIN_USERNAME=admin
 ADMIN_PASSWORD=your-secure-password
 ```
 
-## 📚 Documentation
+##  Documentation
 
 - **[KoBo Integration Guide](./KOBO_INTEGRATION.md)**: Complete guide for field report sync
 - **Architecture**: Next.js 15 with App Router, Server Actions, and Genkit AI flows
 - **Deployment**: Vercel (recommended) or any Node.js hosting platform
 
-## 🛠️ Development
+##  Development
 
 ```bash
 # Run development server
@@ -111,7 +111,7 @@ npm run lint
 npm run sync:kobo
 ```
 
-## 📦 Project Structure
+##  Project Structure
 
 ```
 eoc-dashboard/
@@ -143,7 +143,7 @@ eoc-dashboard/
 └── public/                 # Static assets
 ```
 
-## 🔄 Automated Workflows
+##  Automated Workflows
 
 ### KoBo Sync (GitHub Actions)
 - **Frequency**: Every 30 minutes
@@ -151,7 +151,7 @@ eoc-dashboard/
 - **Location**: `.github/workflows/kobo-sync.yml`
 - **Manual Trigger**: Available in GitHub Actions tab
 
-## 🎨 Tech Stack
+##  Tech Stack
 
 - **Framework**: Next.js 15.3.3 with Turbopack
 - **Language**: TypeScript
@@ -162,14 +162,14 @@ eoc-dashboard/
 - **Deployment**: Vercel
 - **CI/CD**: GitHub Actions
 
-## 🔐 Security
+##  Security
 
 - Server-side authentication for admin dashboard
 - Environment variables for sensitive credentials
 - Firebase security rules for Firestore access
 - CORS protection on API routes
 
-## 🤝 Contributing
+##  Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -177,11 +177,11 @@ eoc-dashboard/
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 License
+##  License
 
 This project is developed for the Ethiopian Red Cross Society.
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - Ethiopian Red Cross Society (ERCS)
 - International Federation of Red Cross and Red Crescent Societies (IFRC)
